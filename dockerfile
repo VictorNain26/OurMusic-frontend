@@ -1,19 +1,36 @@
-FROM node:18-alpine
+# -------------------------------
+# 1) Étape de build avec Bun
+# -------------------------------
+FROM oven/bun:latest as builder
 
+# Définir le répertoire de travail
 WORKDIR /app
 
-# Installer curl (ainsi que pnpm globalement)
-RUN apk add --no-cache curl && npm install -g pnpm
+# Copier uniquement les fichiers indispensables pour l'installation
+COPY package.json ./
+# Copier le fichier de lock Bun (si vous l'avez déjà)
+COPY bun.lockb ./
 
-# Copier les fichiers de dépendances pour profiter du cache
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+# Installer les dépendances via Bun
+RUN bun install
 
 # Copier le reste du code source
 COPY . .
 
-# Exposer le port utilisé par Vite (par défaut 5173)
-EXPOSE 5173
+# Construire le projet en mode production
+RUN bun run build
 
-# Lancer le serveur de développement Vite (qui gère le HMR)
-CMD ["pnpm", "run", "dev"]
+# -------------------------------
+# 2) Étape finale : servir les fichiers avec Nginx
+# -------------------------------
+FROM nginx:alpine
+
+# Copier les fichiers buildés depuis l'étape "builder" vers le dossier
+# par défaut de Nginx : /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Ouvrir le port 80 (Nginx par défaut)
+EXPOSE 80
+
+# Lancer Nginx en premier plan
+CMD ["nginx", "-g", "daemon off;"]
