@@ -6,14 +6,15 @@ FROM oven/bun:latest as builder
 # Définir le répertoire de travail
 WORKDIR /app
 
+# Ajouter Bun au PATH
+ENV PATH="/root/.bun/bin:$PATH"
+
 # Copier uniquement les fichiers indispensables pour l'installation
 COPY package.json ./
 COPY bun.lock ./
 
 # Installer les dépendances via Bun
 RUN bun install
-
-ENV PATH="/root/.bun/bin:$PATH"
 
 # Copier le reste du code source
 COPY . .
