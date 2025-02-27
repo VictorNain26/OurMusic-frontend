@@ -44,7 +44,7 @@ const HomePage = () => {
             cursor: 'pointer'
           }}
         >
-          Connecter au Receiver
+          Caster
         </button>
       </div>
     </div>
