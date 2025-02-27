@@ -29,6 +29,9 @@ FROM nginx:alpine
 # par défaut de Nginx : /usr/share/nginx/html
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Copier la configuration Nginx personnalisée
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
 # Ouvrir le port 80 (Nginx par défaut)
 EXPOSE 80
 
