@@ -6,7 +6,11 @@ FROM oven/bun:latest as builder
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Ajouter Bun au PATH
+# Installer Bun manuellement au cas où
+RUN curl -fsSL https://bun.sh/install | bash && \
+    export PATH="/root/.bun/bin:$PATH"
+
+# Ajouter Bun au PATH dans le Dockerfile
 ENV PATH="/root/.bun/bin:$PATH"
 
 # Copier uniquement les fichiers indispensables pour l'installation
