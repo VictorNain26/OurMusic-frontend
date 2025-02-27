@@ -13,6 +13,8 @@ COPY bun.lock ./
 # Installer les dépendances via Bun
 RUN bun install
 
+ENV PATH="/root/.bun/bin:$PATH"
+
 # Copier le reste du code source
 COPY . .
 
@@ -32,9 +34,6 @@ RUN mkdir -p /usr/share/nginx/html
 
 # Copier les fichiers buildés vers le dossier de Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copier la configuration Nginx
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Ouvrir le port 80 (Nginx par défaut)
 EXPOSE 80
