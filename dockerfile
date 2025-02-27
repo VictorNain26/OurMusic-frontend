@@ -27,19 +27,8 @@ COPY . .
 # Construire le projet en mode production
 RUN bun run build
 
-# -------------------------------
-# 2) Étape finale : servir les fichiers avec Nginx
-# -------------------------------
-FROM nginx:alpine
+# Exposer le port de Bun (3000, par défaut)
+EXPOSE 3000
 
-# Vérifier que le dossier dist existe bien avant de le copier
-RUN mkdir -p /usr/share/nginx/html
-
-# Copier les fichiers buildés vers le dossier de Nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Ouvrir le port 80 (Nginx par défaut)
-EXPOSE 80
-
-# Lancer Nginx en premier plan
-CMD ["nginx", "-g", "daemon off;"]
+# Démarrer l'application Bun (index.js)
+CMD ["bun", "/app/dist/index.html"]
