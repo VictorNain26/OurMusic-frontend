@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const interestingPhrases = [
   "Début de la synchronisation",
@@ -41,7 +41,7 @@ const ButtonRefreshSpotify = () => {
       try {
         data = JSON.parse(e.data);
       } catch (error) {
-        data = { message: e.data };
+        data = { message: `${error}: ${e.data}` };
       }
 
       // Extraction du message : s'il provient de "pub", on l'utilise

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const AzuracastPlayer = () => {
   const sseBaseUri = "https://ourmusic-azuracast.ovh/api/live/nowplaying/sse";
