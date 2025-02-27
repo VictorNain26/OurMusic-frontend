@@ -8,7 +8,6 @@ WORKDIR /app
 
 # Copier uniquement les fichiers indispensables pour l'installation
 COPY package.json ./
-# Copier le fichier de lock Bun (si vous l'avez déjà)
 COPY bun.lock ./
 
 # Installer les dépendances via Bun
@@ -20,16 +19,21 @@ COPY . .
 # Construire le projet en mode production
 RUN bun run build
 
+# Vérifier que le build a bien généré des fichiers
+RUN ls -l /app/dist
+
 # -------------------------------
 # 2) Étape finale : servir les fichiers avec Nginx
 # -------------------------------
 FROM nginx:alpine
 
-# Copier les fichiers buildés depuis l'étape "builder" vers le dossier
-# par défaut de Nginx : /usr/share/nginx/html
+# Vérifier que le dossier dist existe bien avant de le copier
+RUN mkdir -p /usr/share/nginx/html
+
+# Copier les fichiers buildés vers le dossier de Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copier la configuration Nginx personnalisée
+# Copier la configuration Nginx
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Ouvrir le port 80 (Nginx par défaut)
