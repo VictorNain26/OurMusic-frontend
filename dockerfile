@@ -32,5 +32,5 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Ouvrir le port 80 (Nginx par défaut)
 EXPOSE 80
 
-# Lancer Nginx en premier plan
+# Lancer Nginx
 CMD ["nginx", "-g", "daemon off;"]
