@@ -1,10 +1,20 @@
 # -------------------------------
-# 1) Étape de build avec Bun
+# 1) Étape de build avec Node.js + Bun
 # -------------------------------
-FROM oven/bun:latest
+FROM node:18-alpine as builder
 
 # Définir le répertoire de travail
 WORKDIR /app
+
+# Installer Bun manuellement
+RUN curl -fsSL https://bun.sh/install | bash && \
+    mv /root/.bun/bin/bun /usr/local/bin/bun
+
+# Vérifier que Bun est bien installé
+RUN bun --version
+
+# Ajouter Bun au PATH
+ENV PATH="/root/.bun/bin:$PATH"
 
 # Copier uniquement les fichiers indispensables pour l'installation
 COPY package.json ./
