@@ -26,7 +26,7 @@ const ButtonRefreshSpotify = () => {
   const [loading, setLoading] = useState(false);
   const [scraping, setScraping] = useState(false);
   const [singleSyncLoading, setSingleSyncLoading] = useState(false); // Pour la synchronisation d'une seule playlist
-  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]); // Pour stocker plusieurs messages
   const [inputPlaylistId, setInputPlaylistId] = useState(''); // Pour stocker l'ID de la playlist
   const eventSourceRef = useRef(null);
 
@@ -51,7 +51,7 @@ const ButtonRefreshSpotify = () => {
     } else {
       setLoading(true);
     }
-    setMessage('');
+    setMessages([]); // Réinitialiser les messages au début de chaque synchronisation
 
     const sseUrl = getSseUrl(isScraping, isSingleSync, playlistId);
 
@@ -88,7 +88,7 @@ const ButtonRefreshSpotify = () => {
 
       // Afficher uniquement les messages pertinents
       if (isInteresting(displayedMessage)) {
-        setMessage(displayedMessage);
+        setMessages((prevMessages) => [...prevMessages, displayedMessage]);
       }
     };
 
@@ -132,53 +132,68 @@ const ButtonRefreshSpotify = () => {
   }, []);
 
   return (
-    <div className="text-center" style={{ marginTop: '2rem' }}>
-      <h1 className="text-xl mb-3">Gestion des playlists Spotify</h1>
+    <div className="text-center max-w-lg mx-auto" style={{ marginTop: '2rem' }}>
+      <h1 className="text-2xl font-bold mb-6">Gestion des playlists Spotify</h1>
 
       {/* Champ pour entrer l'ID de la playlist */}
-      <div className="mb-4">
+      <div className="mb-6">
         <input
           type="text"
           placeholder="Entrer l'ID de la playlist"
           value={inputPlaylistId}
           onChange={(e) => setInputPlaylistId(e.target.value)}
           className="border border-gray-300 p-2 rounded w-full"
-          style={{ maxWidth: '300px', margin: '0 auto' }}
+          style={{ maxWidth: '400px', margin: '0 auto' }}
         />
       </div>
 
       {/* Bouton pour synchroniser une seule playlist */}
       <button
-        className="bg-blue-600 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded mb-4"
+        className={`bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-full ${
+          singleSyncLoading || loading || scraping ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
         onClick={handleSingleSync}
         disabled={singleSyncLoading || loading || scraping}
-        style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}
       >
         {singleSyncLoading ? 'Synchronisation de la playlist...' : 'Synchroniser une playlist'}
       </button>
 
       {/* Bouton pour synchroniser toutes les playlists */}
       <button
-        className="bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded mb-4"
+        className={`bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded mb-4 w-full ${
+          loading || scraping || singleSyncLoading ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
         onClick={handleGlobalSync}
         disabled={loading || scraping || singleSyncLoading}
-        style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer', marginRight: '10px' }}
       >
-        {loading ? 'Synchronisation globale...' : 'Synchronisation globale'}
+        {loading ? 'Synchronisation globale en cours...' : 'Synchronisation globale'}
       </button>
 
       {/* Bouton pour le scrap */}
       <button
-        className="bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded"
+        className={`bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded mb-4 w-full ${
+          scraping || loading || singleSyncLoading ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
         onClick={handleScrape}
-        disabled={loading || scraping || singleSyncLoading}
-        style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}
+        disabled={scraping || loading || singleSyncLoading}
       >
         {scraping ? 'Scraping en cours...' : 'Scraper les playlists'}
       </button>
 
-      <div className="mt-3 text-lg">
-        {message && <span>{message}</span>}
+      {/* Section des messages de progression */}
+      <div className="mt-6 bg-gray-100 p-4 rounded shadow-sm text-left">
+        <h2 className="text-lg font-semibold mb-3">Progression :</h2>
+        {messages.length === 0 ? (
+          <p className="text-gray-500">Aucun message pour le moment.</p>
+        ) : (
+          <ul className="list-disc pl-5 space-y-2">
+            {messages.map((msg, index) => (
+              <li key={index} className="text-gray-700">
+                {msg}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
