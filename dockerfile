@@ -1,35 +1,31 @@
-# -------------------------------
-# 1) Étape de build avec Bun
-# -------------------------------
-FROM oven/bun:latest as builder
+# Étape 1 : Build de l'application avec npm
+FROM node:18-alpine AS builder
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier uniquement les fichiers indispensables pour l'installation
-COPY package.json ./
-# Copier le fichier de lock Bun (si vous l'avez déjà)
-COPY bun.lock ./
+# Copier package.json et package-lock.json (si présent)
+COPY package*.json ./
 
-# Installer les dépendances via Bun
-RUN bun install
+# Installer les dépendances
+RUN npm install
 
-# Copier le reste du code source
+# Copier l'intégralité du code source
 COPY . .
 
-# Construire le projet en mode production
-RUN bun run build
+# Construire l'application (pour Vite, le dossier de sortie par défaut est "dist")
+RUN npm run build
 
-# -------------------------------
-# 2) Étape finale : servir les fichiers avec Nginx
-# -------------------------------
+# Étape 2 : Serve les fichiers buildés avec Nginx
 FROM nginx:alpine
 
-# Copier les fichiers buildés depuis l'étape "builder" vers le dossier
-# par défaut de Nginx : /usr/share/nginx/html
+# Copier le fichier de configuration Nginx personnalisé
+COPY default.conf /etc/nginx/conf.d/default.conf
+
+# Copier les fichiers buildés depuis l'étape "builder" vers le dossier racine de Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Ouvrir le port 80 (Nginx par défaut)
+# Exposer le port 80
 EXPOSE 80
 
 # Lancer Nginx
