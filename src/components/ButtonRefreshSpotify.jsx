@@ -5,7 +5,9 @@ const interestingPhrases = [
   "Début de la synchronisation",
   "Synchronisation réussie pour",
   "Traitement de la playlist",
-  "Toutes les playlists ont été synchronisées"
+  "Toutes les playlists ont été synchronisées",
+  "Début du scrap",
+  "Scrap terminé",
 ];
 
 function isInteresting(message) {
@@ -20,22 +22,38 @@ function isInteresting(message) {
   return interestingPhrases.some(phrase => message.includes(phrase));
 }
 
-const ButtonRefreshSpotify = ({ playlistId }) => {
+const ButtonRefreshSpotify = () => {
   const [loading, setLoading] = useState(false);
+  const [scraping, setScraping] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false); // Pour la synchronisation d'une seule playlist
   const [message, setMessage] = useState('');
+  const [inputPlaylistId, setInputPlaylistId] = useState(''); // Pour stocker l'ID de la playlist
   const eventSourceRef = useRef(null);
 
   // Détermine l'URL de l'endpoint SSE selon la présence d'un playlistId
-  const getSseUrl = () => {
-    const baseUrl = 'https://ourmusic-api.ovh/api/live/spotify/sync';
-    return playlistId ? `${baseUrl}/${playlistId}` : baseUrl;
+  const getSseUrl = (isScraping = false, isSingleSync = false, playlistId = '') => {
+    const baseUrl = isScraping
+      ? 'https://ourmusic-api.ovh/api/live/spotify/scrape'
+      : 'https://ourmusic-api.ovh/api/live/spotify/sync';
+
+    if (isSingleSync && playlistId) {
+      return `${baseUrl}/${playlistId}`;
+    }
+
+    return baseUrl;
   };
 
-  const handleRefresh = () => {
-    setLoading(true);
+  const handleSseConnection = (isScraping = false, isSingleSync = false, playlistId = '') => {
+    if (isScraping) {
+      setScraping(true);
+    } else if (isSingleSync) {
+      setSingleSyncLoading(true);
+    } else {
+      setLoading(true);
+    }
     setMessage('');
 
-    const sseUrl = getSseUrl();
+    const sseUrl = getSseUrl(isScraping, isSingleSync, playlistId);
 
     // Si une connexion SSE existe déjà, la fermer
     if (eventSourceRef.current) {
@@ -81,13 +99,27 @@ const ButtonRefreshSpotify = ({ playlistId }) => {
         console.error("Erreur SSE réelle :", err);
       }
       setLoading(false);
+      setScraping(false);
+      setSingleSyncLoading(false);
       eventSource.close();
     };
 
     eventSource.onclose = () => {
       console.log("Connexion SSE fermée.");
       setLoading(false);
+      setScraping(false);
+      setSingleSyncLoading(false);
     };
+  };
+
+  const handleGlobalSync = () => handleSseConnection(false); // Synchronisation globale
+  const handleScrape = () => handleSseConnection(true); // Scrap
+  const handleSingleSync = () => {
+    if (inputPlaylistId.trim()) {
+      handleSseConnection(false, true, inputPlaylistId.trim()); // Synchronisation d'une seule playlist
+    } else {
+      alert('Veuillez entrer un ID de playlist valide.');
+    }
   };
 
   // Nettoyage de l'EventSource lors du démontage du composant
@@ -101,15 +133,50 @@ const ButtonRefreshSpotify = ({ playlistId }) => {
 
   return (
     <div className="text-center" style={{ marginTop: '2rem' }}>
-      <h1 className="text-xl mb-3">Rafraîchir les playlists Spotify</h1>
+      <h1 className="text-xl mb-3">Gestion des playlists Spotify</h1>
+
+      {/* Champ pour entrer l'ID de la playlist */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Entrer l'ID de la playlist"
+          value={inputPlaylistId}
+          onChange={(e) => setInputPlaylistId(e.target.value)}
+          className="border border-gray-300 p-2 rounded w-full"
+          style={{ maxWidth: '300px', margin: '0 auto' }}
+        />
+      </div>
+
+      {/* Bouton pour synchroniser une seule playlist */}
       <button
-        className="bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded"
-        onClick={handleRefresh}
-        disabled={loading}
+        className="bg-blue-600 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded mb-4"
+        onClick={handleSingleSync}
+        disabled={singleSyncLoading || loading || scraping}
         style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}
       >
-        {loading ? 'Synchronisation en cours...' : 'Rafraîchir les playlists'}
+        {singleSyncLoading ? 'Synchronisation de la playlist...' : 'Synchroniser une playlist'}
       </button>
+
+      {/* Bouton pour synchroniser toutes les playlists */}
+      <button
+        className="bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded mb-4"
+        onClick={handleGlobalSync}
+        disabled={loading || scraping || singleSyncLoading}
+        style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer', marginRight: '10px' }}
+      >
+        {loading ? 'Synchronisation globale...' : 'Synchronisation globale'}
+      </button>
+
+      {/* Bouton pour le scrap */}
+      <button
+        className="bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded"
+        onClick={handleScrape}
+        disabled={loading || scraping || singleSyncLoading}
+        style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' }}
+      >
+        {scraping ? 'Scraping en cours...' : 'Scraper les playlists'}
+      </button>
+
       <div className="mt-3 text-lg">
         {message && <span>{message}</span>}
       </div>
