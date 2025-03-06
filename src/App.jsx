@@ -8,9 +8,6 @@ function App() {
       {/* Page d'accueil publique */}
       <Route path="/" element={<HomePage />} />
 
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-
       {/* Route protégée pour accéder à spotify-refresh */}
         <Route path="/spotify-refresh" element={<ButtonRefreshSpotify />} />
 
