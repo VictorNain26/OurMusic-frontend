@@ -1,7 +1,10 @@
 /* global cast */
 import AzuracastPlayer from './../components/AzuracastPlayer';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
   const handleCast = async () => {
     try {
       const context = cast.framework.CastContext.getInstance();
@@ -31,6 +34,37 @@ const HomePage = () => {
         >
           Caster
         </button>
+        <div style={{ marginTop: '1rem' }}>
+          <button
+            onClick={() => navigate('/login')}
+            style={{
+              padding: '0.5rem 1rem',
+              fontSize: '1rem',
+              backgroundColor: '#34A853',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              marginRight: '1rem'
+            }}
+          >
+            Se connecter
+          </button>
+          <button
+            onClick={() => navigate('/register')}
+            style={{
+              padding: '0.5rem 1rem',
+              fontSize: '1rem',
+              backgroundColor: '#EA4335',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Créer un compte
+          </button>
+        </div>
       </div>
     </div>
   );
