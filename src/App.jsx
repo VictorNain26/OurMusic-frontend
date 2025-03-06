@@ -3,8 +3,8 @@ import HomePage from './pages/HomePage';
 import ButtonRefreshSpotify from './components/ButtonRefreshSpotify';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import LoginPage from './components/LoginModal';
+import RegisterPage from './components/RegisterModal';
 
 function App() {
   return (
