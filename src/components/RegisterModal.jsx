@@ -1,4 +1,3 @@
-// src/components/RegisterModal.jsx
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
@@ -13,7 +12,10 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
     try {
       const response = await fetch('https://ourmusic-api.ovh/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
         body: JSON.stringify({ username, email, password }),
       });
 
@@ -21,6 +23,8 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
         throw new Error('Erreur lors de l\'inscription');
       }
 
+      const data = await response.json();
+      console.log('Inscription réussie:', data);
       onRequestClose();
     } catch (error) {
       setError(error.message);
@@ -71,17 +75,11 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
           >
             S'inscrire
           </button>
         </form>
-        <button
-          onClick={onRequestClose}
-          className="mt-4 w-full py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-        >
-          Fermer
-        </button>
       </div>
     </Modal>
   );

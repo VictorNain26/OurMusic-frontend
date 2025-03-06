@@ -1,9 +1,8 @@
-// src/pages/HomePage.jsx
-import { useAuth0 } from '@auth0/auth0-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import AzuracastPlayer from './../components/AzuracastPlayer';
 import LoginModal from './../components/LoginModal';
 import RegisterModal from './../components/RegisterModal';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const HomePage = () => {
   const { isAuthenticated, user, logout } = useAuth0();
@@ -69,6 +68,7 @@ const HomePage = () => {
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
+                marginRight: '1rem'
               }}
             >
               S'inscrire
@@ -76,27 +76,15 @@ const HomePage = () => {
           </>
         )}
       </div>
-
       <AzuracastPlayer />
-      <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-        <button
-          onClick={handleCast}
-          style={{
-            padding: '0.5rem 1rem',
-            fontSize: '1rem',
-            backgroundColor: '#4285F4',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Lancer le cast
-        </button>
-      </div>
-
-      <LoginModal isOpen={isLoginModalOpen} onRequestClose={() => setLoginModalOpen(false)} />
-      <RegisterModal isOpen={isRegisterModalOpen} onRequestClose={() => setRegisterModalOpen(false)} />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onRequestClose={() => setLoginModalOpen(false)}
+      />
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onRequestClose={() => setRegisterModalOpen(false)}
+      />
     </div>
   );
 };

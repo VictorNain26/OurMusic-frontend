@@ -1,4 +1,3 @@
-// src/components/LoginModal.jsx
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
@@ -12,7 +11,10 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     try {
       const response = await fetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
         body: JSON.stringify({ email, password }),
       });
 
@@ -20,6 +22,8 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
         throw new Error('Erreur lors de la connexion');
       }
 
+      const data = await response.json();
+      console.log('Connexion réussie:', data);
       onRequestClose();
     } catch (error) {
       setError(error.message);
@@ -60,17 +64,11 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
           >
             Se connecter
           </button>
         </form>
-        <button
-          onClick={onRequestClose}
-          className="mt-4 w-full py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-        >
-          Fermer
-        </button>
       </div>
     </Modal>
   );

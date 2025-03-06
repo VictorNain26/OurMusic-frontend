@@ -1,9 +1,8 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
-
+  const AdminRoute = ({ isAdmin }) => isAdmin ? <Outlet /> : <Navigate to="/login" />;
+  
   if (isLoading) {
     return <div>Loading...</div>;
   }
