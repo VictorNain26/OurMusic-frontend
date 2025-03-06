@@ -1,18 +1,16 @@
-import { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Outlet } from 'react-router';
+import { Outlet } from 'react-router-dom';
 
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      loginWithRedirect();
-    }
-  }, [isLoading, isAuthenticated, loginWithRedirect]);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  if (isLoading || !isAuthenticated) {
-    return <div>Chargement...</div>;
+  if (!isAuthenticated) {
+    loginWithRedirect();
+    return null;
   }
 
   return <Outlet />;
