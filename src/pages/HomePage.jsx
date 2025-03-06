@@ -1,11 +1,14 @@
-/* global cast */
+// src/pages/HomePage.jsx
 import { useAuth0 } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import AzuracastPlayer from './../components/AzuracastPlayer';
+import LoginModal from './../components/LoginModal';
+import RegisterModal from './../components/RegisterModal';
 
 const HomePage = () => {
   const { isAuthenticated, user, logout } = useAuth0();
-  const navigate = useNavigate();
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
 
   const handleCast = async () => {
     try {
@@ -42,7 +45,7 @@ const HomePage = () => {
         ) : (
           <>
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => setLoginModalOpen(true)}
               style={{
                 padding: '0.5rem 1rem',
                 fontSize: '1rem',
@@ -57,7 +60,7 @@ const HomePage = () => {
               Se connecter
             </button>
             <button
-              onClick={() => navigate('/register')}
+              onClick={() => setRegisterModalOpen(true)}
               style={{
                 padding: '0.5rem 1rem',
                 fontSize: '1rem',
@@ -65,10 +68,10 @@ const HomePage = () => {
                 color: '#fff',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
-              Inscription
+              S'inscrire
             </button>
           </>
         )}
@@ -85,12 +88,15 @@ const HomePage = () => {
             color: '#fff',
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
-          Caster
+          Lancer le cast
         </button>
       </div>
+
+      <LoginModal isOpen={isLoginModalOpen} onRequestClose={() => setLoginModalOpen(false)} />
+      <RegisterModal isOpen={isRegisterModalOpen} onRequestClose={() => setRegisterModalOpen(false)} />
     </div>
   );
 };
