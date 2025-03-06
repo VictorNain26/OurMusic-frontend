@@ -20,7 +20,8 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'inscription');
+        const responseData = await response.json();
+        throw new Error(responseData.error || 'Erreur lors de l\'inscription');
       }
 
       const data = await response.json();

@@ -19,11 +19,13 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la connexion');
+        const responseData = await response.json();
+        throw new Error(responseData.error || 'Erreur lors de la connexion');
       }
 
       const data = await response.json();
       console.log('Connexion réussie:', data);
+      localStorage.setItem('token', data.token); // Stocker le token JWT
       onRequestClose();
     } catch (error) {
       setError(error.message);

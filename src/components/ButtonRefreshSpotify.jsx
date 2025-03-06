@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types'; // Import PropTypes
 
 const interestingPhrases = [
   "Début de la synchronisation",
@@ -197,11 +196,6 @@ const ButtonRefreshSpotify = () => {
       </div>
     </div>
   );
-};
-
-// Validation des props avec PropTypes
-ButtonRefreshSpotify.propTypes = {
-  playlistId: PropTypes.string, // playlistId est optionnel, mais doit être une string s'il est présent
 };
 
 export default ButtonRefreshSpotify;

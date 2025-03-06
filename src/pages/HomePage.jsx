@@ -2,89 +2,42 @@ import React, { useState } from 'react';
 import AzuracastPlayer from './../components/AzuracastPlayer';
 import LoginModal from './../components/LoginModal';
 import RegisterModal from './../components/RegisterModal';
-import { useAuth0 } from '@auth0/auth0-react';
 
 const HomePage = () => {
-  const { isAuthenticated, user, logout } = useAuth0();
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
-  const handleCast = async () => {
-    try {
-      const context = cast.framework.CastContext.getInstance();
-      await context.requestSession();
-      console.log("Session de cast établie.");
-    } catch (error) {
-      console.error("Erreur lors du lancement du cast :", error);
-    }
+  const handleLoginSuccess = (token) => {
+    // Optionally decode token to get user info or fetch user info from the backend
+    // Here we simply set the token for demonstration
+    setUser({ token });
+  };
+
+  const handleRegisterSuccess = (user) => {
+    setUser(user);
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '1rem' }}>
-        {isAuthenticated ? (
-          <>
-            <span style={{ marginRight: '1rem' }}>Bonjour, {user.name}</span>
-            <button
-              onClick={() => logout({ returnTo: window.location.origin })}
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '1rem',
-                backgroundColor: '#EA4335',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                marginRight: '1rem'
-              }}
-            >
-              Se déconnecter
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setLoginModalOpen(true)}
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '1rem',
-                backgroundColor: '#34A853',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                marginRight: '1rem'
-              }}
-            >
-              Se connecter
-            </button>
-            <button
-              onClick={() => setRegisterModalOpen(true)}
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '1rem',
-                backgroundColor: '#4285F4',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                marginRight: '1rem'
-              }}
-            >
-              S'inscrire
-            </button>
-          </>
-        )}
-      </div>
+      <button onClick={() => setLoginModalOpen(true)}>Login</button>
+      <button onClick={() => setRegisterModalOpen(true)}>Register</button>
+      {isLoginModalOpen && (
+        <LoginModal
+          isOpen={isLoginModalOpen}
+          onRequestClose={() => setLoginModalOpen(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
+      {isRegisterModalOpen && (
+        <RegisterModal
+          isOpen={isRegisterModalOpen}
+          onRequestClose={() => setRegisterModalOpen(false)}
+          onRegisterSuccess={handleRegisterSuccess}
+        />
+      )}
+      {user && <p>Welcome, {user.username || 'User'}!</p>}
       <AzuracastPlayer />
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onRequestClose={() => setLoginModalOpen(false)}
-      />
-      <RegisterModal
-        isOpen={isRegisterModalOpen}
-        onRequestClose={() => setRegisterModalOpen(false)}
-      />
     </div>
   );
 };
