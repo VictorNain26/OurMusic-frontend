@@ -32,7 +32,8 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       className="fixed inset-0 flex items-center justify-center"
-      overlayClassName="fixed inset-0"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      shouldCloseOnOverlayClick={true}
     >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <h2 className="text-2xl font-semibold mb-4">S'inscrire</h2>
