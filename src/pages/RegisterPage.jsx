@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
-  const [email, setEmail]     = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -55,9 +55,25 @@ const RegisterPage = () => {
           className="border p-2 rounded"
         />
         <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-          Inscription
+          Créer un compte
         </button>
       </form>
+      <div style={{ marginTop: "1rem" }}>
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor: "#4285F4",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
+          Homepage
+        </button>
+      </div>
     </div>
   );
 };

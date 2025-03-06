@@ -52,6 +52,22 @@ const LoginPage = () => {
           Se connecter
         </button>
       </form>
+      <div style={{ marginTop: '1rem' }}>
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            padding: '0.5rem 1rem',
+            fontSize: '1rem',
+            backgroundColor: '#4285F4',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Homepage
+        </button>
+      </div>
     </div>
   );
 };
