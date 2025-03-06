@@ -30,8 +30,8 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75"
-      overlayClassName="fixed inset-0 bg-gray-800 bg-opacity-75"
+      className="fixed inset-0 flex items-center justify-center"
+      overlayClassName="fixed inset-0"
     >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <h2 className="text-2xl font-semibold mb-4">Se connecter</h2>
