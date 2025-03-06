@@ -3,22 +3,22 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 
 const RegisterModal = ({ isOpen, onRequestClose }) => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://ourmusic-api.ovh/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('https://ourmusic-api.ovh/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password }),
       });
 
       if (!response.ok) {
-        throw new Error("Erreur lors de l'inscription");
+        throw new Error('Erreur lors de l\'inscription');
       }
 
       onRequestClose();
@@ -28,40 +28,60 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onRequestClose={onRequestClose} contentLabel="Register Modal">
-      <h2>S'inscrire</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nom d'utilisateur:
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Email:
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Mot de passe:
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-        <button type="submit">S'inscrire</button>
-      </form>
-      <button onClick={onRequestClose}>Fermer</button>
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75"
+      overlayClassName="fixed inset-0 bg-gray-800 bg-opacity-75"
+    >
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h2 className="text-2xl font-semibold mb-4">S'inscrire</h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Nom d'utilisateur</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Mot de passe</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          >
+            S'inscrire
+          </button>
+        </form>
+        <button
+          onClick={onRequestClose}
+          className="mt-4 w-full py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+        >
+          Fermer
+        </button>
+      </div>
     </Modal>
   );
 };
