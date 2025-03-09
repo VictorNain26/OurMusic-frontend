@@ -25,7 +25,7 @@ const HomePage = () => {
   const handleLogout = () => {
     // Pour une déconnexion, vous pouvez appeler un endpoint logout côté backend
     // ou simplement supprimer les cookies via une redirection sur une route de déconnexion.
-    // Ici, on redirige simplement vers la page d'accueil et on force le rechargement.
+    // Ici, on supprime le cookie et recharge la page.
     document.cookie = "token=; Max-Age=0; path=/";
     setUserInfo(null);
     window.location.reload();
@@ -71,6 +71,7 @@ const HomePage = () => {
             </>
           )}
         </div>
+        
         <ChromecastButton />
       </header>
 

@@ -12,9 +12,8 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
     try {
       const response = await fetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // transmission des cookies
         body: JSON.stringify({ email, password }),
       });
 
@@ -25,8 +24,7 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
 
       const data = await response.json();
       console.log('Connexion réussie:', data);
-      // Sauvegarder le token dans le localStorage (ou dans un contexte global)
-      localStorage.setItem('token', data.token);
+      // Note : si le token est transmis par cookie côté backend, vous pouvez adapter ici
       if (onLoginSuccess) onLoginSuccess(data.token);
       onRequestClose();
     } catch (error) {

@@ -13,9 +13,8 @@ const RegisterModal = ({ isOpen, onRequestClose, onRegisterSuccess }) => {
     try {
       const response = await fetch('https://ourmusic-api.ovh/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include', // transmission des cookies
         body: JSON.stringify({ username, email, password }),
       });
 
