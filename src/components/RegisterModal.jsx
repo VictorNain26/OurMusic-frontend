@@ -1,35 +1,26 @@
 // src/components/RegisterModal.jsx
 import React, { useState } from 'react';
 import Modal from 'react-modal';
+import { apiFetch } from '../utils/api';
 
 const RegisterModal = ({ isOpen, onRequestClose, onRegisterSuccess }) => {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError]       = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://ourmusic-api.ovh/api/auth/register', {
+      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/register', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include', // transmission des cookies
         body: JSON.stringify({ username, email, password }),
       });
-
-      if (!response.ok) {
-        const responseData = await response.json();
-        throw new Error(responseData.error || 'Erreur lors de l\'inscription');
-      }
-
-      const data = await response.json();
-      console.log('Inscription réussie:', data);
-      // On peut sauvegarder le token si retourné ou simplement remonter l'utilisateur
+      console.log('Inscription réussie :', data);
       if (onRegisterSuccess) onRegisterSuccess(data.user);
       onRequestClose();
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.message);
     }
   };
 

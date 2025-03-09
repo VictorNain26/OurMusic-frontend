@@ -1,31 +1,32 @@
 // src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import AzuracastPlayer from './../components/AzuracastPlayer';
-import LoginModal from './../components/LoginModal';
-import RegisterModal from './../components/RegisterModal';
-import ChromecastButton from './../components/ChromecastButton';
+import AzuracastPlayer from '../components/AzuracastPlayer';
+import LoginModal from '../components/LoginModal';
+import RegisterModal from '../components/RegisterModal';
+import ChromecastButton from '../components/ChromecastButton';
+import { apiFetch } from '../utils/api';
+import { getCookie } from '../utils/auth';
 
 const HomePage = () => {
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
 
-  // Au chargement, récupérer les infos de l'utilisateur depuis /api/auth/me
   useEffect(() => {
-    fetch('https://ourmusic-api.ovh/api/auth/me', { credentials: 'include' })
-      .then((res) => res.ok ? res.json() : Promise.reject('Non authentifié'))
-      .then((data) => setUserInfo(data))
-      .catch((err) => {
-        console.log("Utilisateur non authentifié", err);
-        setUserInfo(null);
-      });
+    // Si le cookie d'authentification est présent, on appelle /api/auth/me
+    if (getCookie('token')) {
+      apiFetch('https://ourmusic-api.ovh/api/auth/me')
+        .then((data) => setUserInfo(data))
+        .catch((err) => {
+          console.log("Utilisateur non authentifié", err);
+          setUserInfo(null);
+        });
+    }
   }, []);
 
   const handleLogout = () => {
-    // Pour une déconnexion, vous pouvez appeler un endpoint logout côté backend
-    // ou simplement supprimer les cookies via une redirection sur une route de déconnexion.
-    // Ici, on supprime le cookie et recharge la page.
+    // Pour la déconnexion, on peut appeler un endpoint dédié ou simplement supprimer le cookie
     document.cookie = "token=; Max-Age=0; path=/";
     setUserInfo(null);
     window.location.reload();
@@ -44,7 +45,6 @@ const HomePage = () => {
               >
                 Déconnexion
               </button>
-              {/* Lien réservé aux administrateurs */}
               {userInfo.role === 'admin' && (
                 <Link
                   to="/spotify-refresh"
@@ -71,7 +71,6 @@ const HomePage = () => {
             </>
           )}
         </div>
-        
         <ChromecastButton />
       </header>
 

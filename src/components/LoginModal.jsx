@@ -1,34 +1,26 @@
 // src/components/LoginModal.jsx
 import React, { useState } from 'react';
 import Modal from 'react-modal';
+import { apiFetch } from '../utils/api';
 
 const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError]       = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://ourmusic-api.ovh/api/auth/login', {
+      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',  // pour inclure les cookies
-        mode: 'cors',            // explicite cross-origin
         body: JSON.stringify({ email, password }),
       });
-
-      if (!response.ok) {
-        const responseData = await response.json();
-        throw new Error(responseData.error || 'Erreur lors de la connexion');
-      }
-
-      const data = await response.json();
-      console.log('Connexion réussie:', data);
-      if (onLoginSuccess) onLoginSuccess(data.token);
+      console.log('Connexion réussie :', data);
+      // Le cookie est déjà stocké côté navigateur, et on peut utiliser les données utilisateur retournées
+      if (onLoginSuccess) onLoginSuccess(data);
       onRequestClose();
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
