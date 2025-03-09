@@ -1,7 +1,8 @@
+// src/components/RegisterModal.jsx
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
-const RegisterModal = ({ isOpen, onRequestClose }) => {
+const RegisterModal = ({ isOpen, onRequestClose, onRegisterSuccess }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,8 +14,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       const response = await fetch('https://ourmusic-api.ovh/api/auth/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ username, email, password }),
       });
@@ -26,6 +26,8 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
 
       const data = await response.json();
       console.log('Inscription réussie:', data);
+      // On peut sauvegarder le token si retourné ou simplement remonter l'utilisateur
+      if (onRegisterSuccess) onRegisterSuccess(data.user);
       onRequestClose();
     } catch (error) {
       setError(error.message);

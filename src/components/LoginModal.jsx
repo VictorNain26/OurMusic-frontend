@@ -1,7 +1,8 @@
+// src/components/LoginModal.jsx
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
-const LoginModal = ({ isOpen, onRequestClose }) => {
+const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,8 +13,7 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
       const response = await fetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email, password }),
       });
@@ -25,7 +25,9 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
 
       const data = await response.json();
       console.log('Connexion réussie:', data);
-      localStorage.setItem('token', data.token); // Stocker le token JWT
+      // Sauvegarder le token dans le localStorage (ou dans un contexte global)
+      localStorage.setItem('token', data.token);
+      if (onLoginSuccess) onLoginSuccess(data.token);
       onRequestClose();
     } catch (error) {
       setError(error.message);
