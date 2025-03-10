@@ -93,6 +93,7 @@ const HomePage = () => {
             setUserInfo(data.user || data);
             setLoginModalOpen(false);
           }}
+          shouldCloseOnOverlayClick={true}
         />
       )}
 
@@ -100,6 +101,7 @@ const HomePage = () => {
         <RegisterModal
           isOpen={isRegisterModalOpen}
           onRequestClose={() => setRegisterModalOpen(false)}
+          shouldCloseOnOverlayClick={true}
         />
       )}
 
