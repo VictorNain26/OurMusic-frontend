@@ -14,7 +14,6 @@ const HomePage = () => {
   const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
-    // Si le cookie d'authentification est présent, on appelle /api/auth/me
     if (getCookie('token')) {
       apiFetch('https://ourmusic-api.ovh/api/auth/me', {
         method: 'POST',
@@ -31,7 +30,6 @@ const HomePage = () => {
   }, []);
 
   const handleLogout = () => {
-    // Pour la déconnexion, on peut supprimer le cookie
     document.cookie = "token=; Max-Age=0; path=/";
     setUserInfo(null);
     window.location.reload();
@@ -40,11 +38,6 @@ const HomePage = () => {
   return (
     <div>
       <header className="flex justify-between items-center p-4">
-        {/* 
-          Si userInfo existe, afficher le nom d'utilisateur 
-          + le bouton de déconnexion et le lien SpotifyRefresh (si admin).
-          Sinon, afficher Login / Register. 
-        */}
         <div>
           {userInfo ? (
             <div className="flex items-center gap-3">
