@@ -16,17 +16,18 @@ const HomePage = () => {
   useEffect(() => {
     // Si le cookie d'authentification est présent, on appelle /api/auth/me
     if (getCookie('token')) {
-      apiFetch('https://ourmusic-api.ovh/api/auth/me')
-        .then((data) => setUserInfo(data))
-        .catch((err) => {
-          console.log("Utilisateur non authentifié", err);
-          setUserInfo(null);
-        }
-      );
-    }
-  }, []);
+      apiFetch('https://ourmusic-api.ovh/api/auth/me')  
+      .then((data) => setUserInfo(data))
+      .catch((err) => {
+        console.log("Utilisateur non authentifié", err);
+        setUserInfo(null);
+      }
+    );
+  }
+}, []);
 
-  const handleLogout = () => {
+const handleLogout = () => {
+    console.log(getCookie('token'));
     // Pour la déconnexion, on peut supprimer le cookie
     document.cookie = "token=; Max-Age=0; path=/";
     setUserInfo(null);
