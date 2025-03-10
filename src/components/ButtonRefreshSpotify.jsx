@@ -88,7 +88,6 @@ const ButtonRefreshSpotify = () => {
         if (res.ok && res.status === 200) {
           console.log("Connexion SSE établie (fetch-event-source).");
         } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-          // Erreur client
           throw new Error(`Erreur client SSE: ${res.statusText}`);
         }
       },

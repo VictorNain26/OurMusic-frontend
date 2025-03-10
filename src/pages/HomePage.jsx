@@ -47,7 +47,7 @@ const HomePage = () => {
             <div className="flex items-center gap-3">
               {/* Nom d'utilisateur à la place des boutons */}
               <span className="font-semibold">
-                {userInfo.username || userInfo.email}
+                {userInfo.username}
               </span>
 
               <button
