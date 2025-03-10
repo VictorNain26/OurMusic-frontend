@@ -26,7 +26,7 @@ const HomePage = () => {
   }, []);
 
   const handleLogout = () => {
-    // Pour la déconnexion, on peut appeler un endpoint dédié ou simplement supprimer le cookie
+    // Pour la déconnexion, on peut supprimer le cookie
     document.cookie = "token=; Max-Age=0; path=/";
     setUserInfo(null);
     window.location.reload();
@@ -35,30 +35,40 @@ const HomePage = () => {
   return (
     <div>
       <header className="flex justify-between items-center p-4">
+        {/* 
+          Si userInfo existe, afficher le nom d'utilisateur 
+          + le bouton de déconnexion et le lien SpotifyRefresh (si admin).
+          Sinon, afficher Login / Register. 
+        */}
         <div>
           {userInfo ? (
-            <>
-              <p>Bienvenue, {userInfo.username || userInfo.email} !</p>
+            <div className="flex items-center gap-3">
+              {/* Nom d'utilisateur à la place des boutons */}
+              <span className="font-semibold">
+                {userInfo.username || userInfo.email}
+              </span>
+
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded ml-2"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
               >
                 Déconnexion
               </button>
+
               {userInfo.role === 'admin' && (
                 <Link
                   to="/spotify-refresh"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded ml-2"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
                 >
                   Refresh Spotify
                 </Link>
               )}
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setLoginModalOpen(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
               >
                 Login
               </button>
@@ -68,9 +78,10 @@ const HomePage = () => {
               >
                 Register
               </button>
-            </>
+            </div>
           )}
         </div>
+
         <ChromecastButton />
       </header>
 
@@ -80,6 +91,7 @@ const HomePage = () => {
           onRequestClose={() => setLoginModalOpen(false)}
         />
       )}
+
       {isRegisterModalOpen && (
         <RegisterModal
           isOpen={isRegisterModalOpen}

@@ -16,7 +16,6 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
         body: JSON.stringify({ email, password }),
       });
       console.log('Connexion réussie :', data);
-      // Le cookie est déjà stocké côté navigateur, et on peut utiliser les données utilisateur retournées
       if (onLoginSuccess) onLoginSuccess(data);
       onRequestClose();
     } catch (err) {
@@ -28,42 +27,42 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      className="fixed inset-0 flex items-center justify-center"
-      overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      // On réduit l'opacité et on ajoute un flou
+      overlayClassName="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center"
+      // On peut laisser 'className' gérer le contenu du modal
+      className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 mx-4"
       shouldCloseOnOverlayClick={true}
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h2 className="text-2xl font-semibold mb-4">Se connecter</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block mb-1 font-medium">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block mb-1 font-medium">Mot de passe</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
-          >
-            Se connecter
-          </button>
-        </form>
-      </div>
+      <h2 className="text-2xl font-semibold mb-4">Se connecter</h2>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block mb-1 font-medium">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1 font-medium">Mot de passe</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
+        >
+          Se connecter
+        </button>
+      </form>
     </Modal>
   );
 };
