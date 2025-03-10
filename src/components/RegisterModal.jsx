@@ -14,6 +14,7 @@ const RegisterModal = ({ isOpen, onRequestClose, onRegisterSuccess }) => {
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/register', {
         method: 'POST',
+        credentials: "include",
         body: JSON.stringify({ username, email, password }),
       });
       console.log('Inscription réussie :', data);

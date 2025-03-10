@@ -13,6 +13,7 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
       console.log('Connexion réussie :', data);

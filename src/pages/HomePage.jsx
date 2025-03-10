@@ -16,12 +16,17 @@ const HomePage = () => {
   useEffect(() => {
     // Si le cookie d'authentification est présent, on appelle /api/auth/me
     if (getCookie('token')) {
-      apiFetch('https://ourmusic-api.ovh/api/auth/me')
+      apiFetch('https://ourmusic-api.ovh/api/auth/me', {
+        method: 'POST',
+        credentials: "include",
+        body: JSON.stringify({ username, email, password }),
+      })
         .then((data) => setUserInfo(data))
         .catch((err) => {
           console.log("Utilisateur non authentifié", err);
           setUserInfo(null);
-        });
+        }
+      );
     }
   }, []);
 
