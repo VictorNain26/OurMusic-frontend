@@ -89,6 +89,10 @@ const HomePage = () => {
         <LoginModal
           isOpen={isLoginModalOpen}
           onRequestClose={() => setLoginModalOpen(false)}
+          onLoginSuccess={(data) => {
+            setUserInfo(data.user || data);
+            setLoginModalOpen(false);
+          }}
         />
       )}
 
