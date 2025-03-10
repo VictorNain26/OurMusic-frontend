@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { getAccessToken } from '../utils/api';  // Pour récupérer le token stocké localement
 
 const interestingPhrases = [
   "Début de la synchronisation",
@@ -10,7 +12,6 @@ const interestingPhrases = [
 ];
 
 function isInteresting(message) {
-  // Filtrer certains messages non pertinents
   if (
     message.includes("Skipping") ||
     message.includes("Processing query") ||
@@ -24,12 +25,11 @@ function isInteresting(message) {
 const ButtonRefreshSpotify = () => {
   const [loading, setLoading] = useState(false);
   const [scraping, setScraping] = useState(false);
-  const [singleSyncLoading, setSingleSyncLoading] = useState(false); // Pour la synchronisation d'une seule playlist
-  const [messages, setMessages] = useState([]); // Pour stocker plusieurs messages
-  const [inputPlaylistId, setInputPlaylistId] = useState(''); // Pour stocker l'ID de la playlist
-  const eventSourceRef = useRef(null);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false); // synchro playlist unique
+  const [messages, setMessages] = useState([]);
+  const [inputPlaylistId, setInputPlaylistId] = useState('');
+  const eventSourceAbortController = useRef(null);
 
-  // Détermine l'URL de l'endpoint SSE selon la présence d'un playlistId
   const getSseUrl = (isScraping = false, isSingleSync = false, playlistId = '') => {
     const baseUrl = isScraping
       ? 'https://ourmusic-api.ovh/api/live/spotify/scrape'
@@ -38,9 +38,15 @@ const ButtonRefreshSpotify = () => {
     if (isSingleSync && playlistId) {
       return `${baseUrl}/${playlistId}`;
     }
-
     return baseUrl;
   };
+
+  function closeSSE() {
+    // fetch-event-source s'abandonne via un AbortController
+    if (eventSourceAbortController.current) {
+      eventSourceAbortController.current.abort();
+    }
+  }
 
   const handleSseConnection = (isScraping = false, isSingleSync = false, playlistId = '') => {
     if (isScraping) {
@@ -50,83 +56,87 @@ const ButtonRefreshSpotify = () => {
     } else {
       setLoading(true);
     }
-    setMessages([]); // Réinitialiser les messages au début de chaque synchronisation
+    setMessages([]);
 
     const sseUrl = getSseUrl(isScraping, isSingleSync, playlistId);
 
-    // Si une connexion SSE existe déjà, la fermer
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
+    // Fermer l'ancienne connexion SSE si existante
+    closeSSE();
 
-    const eventSource = new EventSource(sseUrl, { withCredentials: true });
-    eventSourceRef.current = eventSource;
+    // Créer un AbortController pour stopper le flux si besoin
+    const controller = new AbortController();
+    eventSourceAbortController.current = controller;
 
-    eventSource.onopen = () => {
-      console.log("Connexion SSE établie.");
-    };
+    // Récupérer notre accessToken
+    const token = getAccessToken();
 
-    eventSource.onmessage = (e) => {
-      // Ignore les keep-alive ou messages de remplissage
-      if (e.data.trim() === '.') return;
+    // Lancement du flux SSE via fetchEventSource
+    fetchEventSource(sseUrl, {
+      signal: controller.signal,            // pour pouvoir stopper
+      headers: {
+        // On ajoute Authorization si on a un token
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      // Indique qu'on veut envoyer aussi les cookies
+      fetch: (url, init) => {
+        return fetch(url, {
+          ...init,
+          credentials: 'include',
+        });
+      },
+      onopen(res) {
+        if (res.ok && res.status === 200) {
+          console.log("Connexion SSE établie (fetch-event-source).");
+        } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          // Erreur client
+          throw new Error(`Erreur client SSE: ${res.statusText}`);
+        }
+      },
+      onmessage(evt) {
+        if (!evt.data || evt.data.trim() === '.') return;
+        let data;
+        try {
+          data = JSON.parse(evt.data);
+        } catch {
+          data = { message: `Erreur de parsing JSON: ${evt.data}` };
+        }
+        const displayedMessage =
+          data.pub && data.pub.message ? data.pub.message : (data.message || '');
 
-      let data;
-      try {
-        data = JSON.parse(e.data);
-      } catch {
-        data = { message: `Erreur de parsing JSON: ${e.data}` };
-      }
-
-      // On extrait le message à afficher
-      const displayedMessage =
-        data.pub && data.pub.message ? data.pub.message : (data.message || '');
-
-      if (data.pub && data.pub.message && !data.pub.message.toLowerCase().includes("timer")) {
-        console.log("Message SSE reçu (pub message):", data.pub.message);
-      }
-
-      // Afficher uniquement les messages pertinents
-      if (isInteresting(displayedMessage)) {
-        setMessages((prevMessages) => [...prevMessages, displayedMessage]);
-      }
-    };
-
-    eventSource.onerror = (err) => {
-      if (eventSource.readyState === EventSource.CLOSED) {
-        console.log("Connexion SSE fermée normalement.");
-      } else {
+        if (isInteresting(displayedMessage)) {
+          setMessages((prev) => [...prev, displayedMessage]);
+        }
+      },
+      onerror(err) {
         console.error("Erreur SSE réelle :", err);
-      }
-      setLoading(false);
-      setScraping(false);
-      setSingleSyncLoading(false);
-      eventSource.close();
-    };
-
-    eventSource.onclose = () => {
-      console.log("Connexion SSE fermée.");
-      setLoading(false);
-      setScraping(false);
-      setSingleSyncLoading(false);
-    };
+        setLoading(false);
+        setScraping(false);
+        setSingleSyncLoading(false);
+        controller.abort();
+      },
+      onclose() {
+        console.log("Flux SSE fermé.");
+        setLoading(false);
+        setScraping(false);
+        setSingleSyncLoading(false);
+      },
+    });
   };
 
-  const handleGlobalSync = () => handleSseConnection(false); // Synchronisation globale
-  const handleScrape = () => handleSseConnection(true); // Scrap
+  const handleGlobalSync = () => handleSseConnection(false);
+  const handleScrape = () => handleSseConnection(true);
   const handleSingleSync = () => {
     if (inputPlaylistId.trim()) {
-      handleSseConnection(false, true, inputPlaylistId.trim()); // Synchronisation d'une seule playlist
+      handleSseConnection(false, true, inputPlaylistId.trim());
     } else {
       alert('Veuillez entrer un ID de playlist valide.');
     }
   };
 
-  // Nettoyage de l'EventSource lors du démontage du composant
+  // Nettoyage : fermer SSE quand le composant se démonte
   useEffect(() => {
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
+      closeSSE();
     };
   }, []);
 
@@ -134,7 +144,6 @@ const ButtonRefreshSpotify = () => {
     <div className="text-center max-w-lg mx-auto" style={{ marginTop: '2rem' }}>
       <h1 className="text-2xl font-bold mb-6">Gestion des playlists Spotify</h1>
 
-      {/* Champ pour entrer l'ID de la playlist */}
       <div className="mb-6">
         <input
           type="text"
@@ -146,7 +155,6 @@ const ButtonRefreshSpotify = () => {
         />
       </div>
 
-      {/* Bouton pour synchroniser une seule playlist */}
       <button
         className={`bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-full ${
           singleSyncLoading || loading || scraping ? 'opacity-50 cursor-not-allowed' : ''
@@ -157,7 +165,6 @@ const ButtonRefreshSpotify = () => {
         {singleSyncLoading ? 'Synchronisation de la playlist...' : 'Synchroniser une playlist'}
       </button>
 
-      {/* Bouton pour synchroniser toutes les playlists */}
       <button
         className={`bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded mb-4 w-full ${
           loading || scraping || singleSyncLoading ? 'opacity-50 cursor-not-allowed' : ''
@@ -168,7 +175,6 @@ const ButtonRefreshSpotify = () => {
         {loading ? 'Synchronisation globale en cours...' : 'Synchronisation globale'}
       </button>
 
-      {/* Bouton pour le scrap */}
       <button
         className={`bg-slate-800 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded mb-4 w-full ${
           scraping || loading || singleSyncLoading ? 'opacity-50 cursor-not-allowed' : ''
@@ -179,7 +185,6 @@ const ButtonRefreshSpotify = () => {
         {scraping ? 'Scraping en cours...' : 'Scraper les playlists'}
       </button>
 
-      {/* Section des messages de progression */}
       <div className="mt-6 bg-gray-100 p-4 rounded shadow-sm text-left">
         <h2 className="text-lg font-semibold mb-3">Progression :</h2>
         {messages.length === 0 ? (
