@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AzuracastPlayer from '../components/AzuracastPlayer';
@@ -6,41 +5,43 @@ import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import ChromecastButton from '../components/ChromecastButton';
 import { apiFetch } from '../utils/api';
-import { getCookie } from '../utils/auth';
+import { getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
 
 const HomePage = () => {
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
 
+  // Au chargement, si on a un accessToken, on tente /api/auth/me
   useEffect(() => {
-    // Si le cookie d'authentification est présent, on appelle /api/auth/me
-    if (getCookie('token')) {
-      apiFetch('https://ourmusic-api.ovh/api/auth/me')  
-      .then((data) => setUserInfo(data))
-      .catch((err) => {
-        console.log("Utilisateur non authentifié", err);
-        setUserInfo(null);
-      }
-    );
-  }
-}, []);
+    const token = getAccessToken();
+    if (token) {
+      apiFetch('https://ourmusic-api.ovh/api/auth/me')
+        .then((data) => setUserInfo(data))
+        .catch((err) => {
+          console.log("Utilisateur non authentifié ou token expiré:", err);
+          setUserInfo(null);
+          // Possibilité de retirer le token local si on veut
+          setAccessToken(null);
+        });
+    }
+  }, []);
 
-const handleLogout = () => {
-    // Pour la déconnexion, on peut supprimer le cookie
-    document.cookie = "token=; Max-Age=0; path=/";
+  const handleLogout = async () => {
+    try {
+      // Efface le refresh cookie
+      await logoutFetch();
+    } catch (err) {
+      console.log('Erreur logout :', err);
+    }
+    // Effacer l’access token local
+    setAccessToken(null);
     setUserInfo(null);
-    window.location.reload();
   };
 
   return (
     <div>
       <header className="flex justify-between items-center p-4">
-        {/* 
-          Si userInfo existe, afficher le nom d'utilisateur 
-          + le bouton de déconnexion et le lien SpotifyRefresh (si admin).
-          Sinon, afficher Login / Register. 
-        */}
         <div>
           {userInfo ? (
             <div className="flex items-center gap-3">
@@ -91,10 +92,10 @@ const handleLogout = () => {
           isOpen={isLoginModalOpen}
           onRequestClose={() => setLoginModalOpen(false)}
           onLoginSuccess={(data) => {
-            setUserInfo(data.user || data);
+            // data contient { accessToken, user: {...} }
+            setUserInfo(data.user);
             setLoginModalOpen(false);
           }}
-          shouldCloseOnOverlayClick={true}
         />
       )}
 
@@ -102,7 +103,6 @@ const handleLogout = () => {
         <RegisterModal
           isOpen={isRegisterModalOpen}
           onRequestClose={() => setRegisterModalOpen(false)}
-          shouldCloseOnOverlayClick={true}
         />
       )}
 

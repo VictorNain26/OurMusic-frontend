@@ -1,7 +1,6 @@
-// src/components/LoginModal.jsx
 import React, { useState } from 'react';
 import Modal from 'react-modal';
-import { apiFetch } from '../utils/api';
+import { apiFetch, setAccessToken } from '../utils/api';
 
 const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
   const [email, setEmail]     = useState('');
@@ -11,13 +10,21 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Ici, la réponse contiendra { message, accessToken, user }
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
-        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
       console.log('Connexion réussie :', data);
+
+      // On stocke l’accessToken dans localStorage
+      if (data.accessToken) {
+        setAccessToken(data.accessToken);
+      }
+
+      // On prévient le parent qu'on s'est loggé (pour userInfo)
       if (onLoginSuccess) onLoginSuccess(data);
+
       onRequestClose();
     } catch (err) {
       setError(err.message);
@@ -28,9 +35,7 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      // On réduit l'opacité et on ajoute un flou
       overlayClassName="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center"
-      // On peut laisser 'className' gérer le contenu du modal
       className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 mx-4"
       shouldCloseOnOverlayClick={true}
     >
