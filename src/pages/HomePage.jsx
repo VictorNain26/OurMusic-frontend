@@ -27,7 +27,6 @@ const HomePage = () => {
 }, []);
 
 const handleLogout = () => {
-    console.log(getCookie('token'));
     // Pour la déconnexion, on peut supprimer le cookie
     document.cookie = "token=; Max-Age=0; path=/";
     setUserInfo(null);
