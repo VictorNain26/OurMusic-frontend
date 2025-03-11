@@ -5,6 +5,7 @@ import { apiFetch } from '../utils/api';
 const LikedTracksList = () => {
   const [likedTracks, setLikedTracks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchLikedTracks = async () => {
     setLoading(true);
@@ -20,6 +21,22 @@ const LikedTracksList = () => {
   useEffect(() => {
     fetchLikedTracks();
   }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Voulez-vous supprimer ce morceau ?")) return;
+    setDeleting(true);
+    try {
+      // Appel à l'endpoint DELETE avec l'ID dans l'URL
+      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
+        method: 'DELETE',
+      });
+      // Mettre à jour la liste en refaisant un fetch ou en retirant l'élément du state
+      fetchLikedTracks();
+    } catch (err) {
+      console.error("Erreur lors de la suppression :", err);
+    }
+    setDeleting(false);
+  };
 
   return (
     <div className="mt-6">
@@ -50,6 +67,13 @@ const LikedTracksList = () => {
                   Voir sur YouTube
                 </a>
               </div>
+              <button
+                onClick={() => handleDelete(track.id)}
+                disabled={deleting}
+                className="ml-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+              >
+                Supprimer
+              </button>
             </li>
           ))}
         </ul>
