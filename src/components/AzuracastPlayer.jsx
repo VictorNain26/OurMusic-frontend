@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import TrackLikeButton from './TrackLikeButton';
 
 const AzuracastPlayer = () => {
   const sseBaseUri = "https://ourmusic-azuracast.ovh/api/live/nowplaying/sse";
@@ -185,6 +186,7 @@ const AzuracastPlayer = () => {
               className="w-48 rounded-md mx-auto"
             />
           )}
+          <TrackLikeButton track={currentSong} />
         </div>
       )}
 

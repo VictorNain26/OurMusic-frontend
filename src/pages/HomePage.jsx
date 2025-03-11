@@ -6,6 +6,7 @@ import RegisterModal from '../components/RegisterModal';
 import ChromecastButton from '../components/ChromecastButton';
 import { apiFetch } from '../utils/api';
 import { getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
+import LikedTracksList from '../components/LikedTracksList';
 
 const HomePage = () => {
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
@@ -106,7 +107,12 @@ const HomePage = () => {
         />
       )}
 
-      <AzuracastPlayer />
+
+      <div>
+        <AzuracastPlayer />
+        
+        {userInfo && <LikedTracksList />}
+      </div>
     </div>
   );
 };
