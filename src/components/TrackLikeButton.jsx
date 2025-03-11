@@ -1,4 +1,4 @@
-/// ✅ TrackLikeButton.jsx (corrigé - ouverture login si non connecté + état toujours en Like + fix ReferenceError)
+/// ✅ TrackLikeButton.jsx (corrigé - ouverture login si non connecté + état toujours en Like + fix ReferenceError + compatibilité AzuracastPlayer)
 import React, { useEffect, useState } from 'react';
 import { apiFetch, getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
@@ -21,7 +21,7 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
     }
     setIsLoggedIn(true);
 
-    if (track && likedTracks?.length > 0) {
+    if (track && Array.isArray(likedTracks)) {
       const match = likedTracks.find(item =>
         item.title?.toLowerCase() === track.title?.toLowerCase() &&
         item.artist?.toLowerCase() === track.artist?.toLowerCase()
@@ -51,8 +51,10 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
         method: 'POST',
         body: JSON.stringify(payload),
       });
-      if (data.likedTrack && setLikedTracks) {
+      if (data.likedTrack && typeof setLikedTracks === 'function') {
         setLikedTracks((prev) => [...prev, data.likedTrack]);
+        setLiked(true);
+        setLikedTrackId(data.likedTrack.id);
         toast.success('Morceau liké');
       }
     } catch (err) {
@@ -68,7 +70,7 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${likedTrackId}`, {
         method: 'DELETE',
       });
-      if (setLikedTracks) {
+      if (typeof setLikedTracks === 'function') {
         setLikedTracks((prev) => prev.filter((t) =>
           !(t.id === likedTrackId ||
             (t.title?.toLowerCase() === track.title?.toLowerCase() &&
