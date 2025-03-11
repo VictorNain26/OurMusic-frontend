@@ -1,3 +1,4 @@
+/// ✅ TrackLikeButton.jsx (corrigé - ouverture login si non connecté + état toujours en Like)
 import React, { useEffect, useState } from 'react';
 import { apiFetch, getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
@@ -6,11 +7,19 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
   const [loading, setLoading] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likedTrackId, setLikedTrackId] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const youtubeUrl = track.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track.artist + " " + track.title)}`;
 
   useEffect(() => {
-    if (!getAccessToken()) return;
+    const token = getAccessToken();
+    if (!token) {
+      setIsLoggedIn(false);
+      setLiked(false);
+      setLikedTrackId(null);
+      return;
+    }
+    setIsLoggedIn(true);
     const match = likedTracks.find(item =>
       item.title.toLowerCase() === track.title.toLowerCase() &&
       item.artist.toLowerCase() === track.artist.toLowerCase()
@@ -25,6 +34,13 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
   }, [track, likedTracks]);
 
   const handleLike = async () => {
+    if (!isLoggedIn) {
+      toast.error("Veuillez vous connecter pour liker un morceau.");
+      const loginButton = document.querySelector("button[data-login-button]");
+      if (loginButton) loginButton.click();
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = { title: track.title, artist: track.artist, artwork: track.art || '', youtubeUrl };
@@ -53,7 +69,7 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
         setLikedTracks((prev) => prev.filter((t) =>
           !(t.id === likedTrackId ||
             (t.title.toLowerCase() === track.title.toLowerCase() &&
-            t.artist.toLowerCase() === track.artist.toLowerCase())
+             t.artist.toLowerCase() === track.artist.toLowerCase())
           )
         ));
       }
@@ -61,14 +77,14 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       setLikedTrackId(null);
       toast.success('Morceau retiré des likes');
     } catch (err) {
-      toast.error('Erreur lors du unlike');
+      toast.error("Erreur lors du unlike");
     }
     setLoading(false);
   };
 
   return (
     <div className="mt-4">
-      {liked ? (
+      {liked && isLoggedIn ? (
         <button onClick={handleUnlike} disabled={loading} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
           {loading ? 'Traitement...' : 'Unlike'}
         </button>
