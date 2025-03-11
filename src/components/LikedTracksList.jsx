@@ -1,5 +1,6 @@
 import React from 'react';
 import { apiFetch } from '../utils/api';
+import { toast } from 'react-hot-toast';
 
 const LikedTracksList = ({ likedTracks, setLikedTracks }) => {
   const [deleting, setDeleting] = React.useState(false);
@@ -13,9 +14,10 @@ const LikedTracksList = ({ likedTracks, setLikedTracks }) => {
       });
       if (setLikedTracks) {
         setLikedTracks((prev) => prev.filter((t) => t.id !== id));
+        toast.success('Morceau supprimé');
       }
     } catch (err) {
-      console.error("Erreur lors de la suppression :", err);
+      toast.error('Erreur lors de la suppression');
     }
     setDeleting(false);
   };

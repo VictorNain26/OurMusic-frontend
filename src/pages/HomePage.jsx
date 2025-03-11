@@ -7,6 +7,7 @@ import ChromecastButton from '../components/ChromecastButton';
 import { apiFetch } from '../utils/api';
 import { getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
 import LikedTracksList from '../components/LikedTracksList';
+import { Toaster, toast } from 'react-hot-toast';
 
 const HomePage = () => {
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
@@ -48,10 +49,12 @@ const HomePage = () => {
     }
     setAccessToken(null);
     setUserInfo(null);
+    toast.success('Déconnecté avec succès');
   };
 
   return (
     <div>
+      <Toaster position="top-right" />
       <header className="flex justify-between items-center p-4">
         <div>
           {userInfo ? (
@@ -88,6 +91,7 @@ const HomePage = () => {
             setUserInfo(data.user);
             setLoginModalOpen(false);
             refreshLikedTracks();
+            toast.success('Connexion réussie');
           }}
         />
       )}
@@ -100,7 +104,6 @@ const HomePage = () => {
       )}
 
       <AzuracastPlayer onLikeChange={refreshLikedTracks} likedTracks={likedTracks} setLikedTracks={setLikedTracks} />
-
       {userInfo && <LikedTracksList likedTracks={likedTracks} setLikedTracks={setLikedTracks} />}
     </div>
   );

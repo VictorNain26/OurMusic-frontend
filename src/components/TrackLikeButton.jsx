@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiFetch, getAccessToken } from '../utils/api';
+import { toast } from 'react-hot-toast';
 
 const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
   const [loading, setLoading] = useState(false);
@@ -33,9 +34,10 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       });
       if (data.likedTrack && setLikedTracks) {
         setLikedTracks((prev) => [...prev, data.likedTrack]);
+        toast.success('Morceau liké');
       }
     } catch (err) {
-      console.error("Erreur lors du like :", err);
+      toast.error('Erreur lors du like');
     }
     setLoading(false);
   };
@@ -49,9 +51,10 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       });
       if (setLikedTracks) {
         setLikedTracks((prev) => prev.filter((t) => t.id !== likedTrackId));
+        toast.success('Morceau retiré des likes');
       }
     } catch (err) {
-      console.error("Erreur lors du unlike :", err);
+      toast.error("Erreur lors du unlike");
     }
     setLoading(false);
   };
