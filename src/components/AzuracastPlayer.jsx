@@ -23,7 +23,6 @@ const AzuracastPlayer = ({ onLikeChange }) => {
   const sseRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
 
-  // Met à jour les informations nowPlaying et la durée
   const updateNowPlaying = (npData) => {
     setNowPlaying(npData);
     if (npData && npData.now_playing) {
@@ -32,7 +31,6 @@ const AzuracastPlayer = ({ onLikeChange }) => {
     }
   };
 
-  // Fonction de gestion des données SSE selon la doc AzuraCast
   const handleSseData = (ssePayload, useTime = true) => {
     const data = ssePayload.data;
     if (useTime && data.current_time) {
@@ -43,21 +41,17 @@ const AzuracastPlayer = ({ onLikeChange }) => {
     }
   };
 
-  // Fonction de connexion SSE avec reconnexion automatique
   const connectSSE = () => {
     if (sseRef.current) {
       sseRef.current.close();
     }
-
     const sse = new EventSource(sseUri);
     sseRef.current = sse;
-
     sse.onopen = () => {
       console.log("Connexion SSE établie.");
       setIsConnected(true);
       setError('');
     };
-
     sse.onmessage = (e) => {
       if (e.data.trim() === '.') return;
       try {
@@ -84,7 +78,6 @@ const AzuracastPlayer = ({ onLikeChange }) => {
         console.error("Erreur lors du traitement du message SSE:", err);
       }
     };
-
     sse.onerror = () => {
       console.error("Erreur lors de la connexion SSE.");
       setError("Erreur lors de la connexion SSE. Nouvelle tentative dans 5 secondes...");
@@ -102,14 +95,12 @@ const AzuracastPlayer = ({ onLikeChange }) => {
 
   useEffect(() => {
     connectSSE();
-
     const handleOnline = () => {
       console.log("Connexion réseau rétablie, tentative de reconnexion SSE...");
       if (!isConnected) {
         connectSSE();
       }
     };
-
     window.addEventListener('online', handleOnline);
     return () => {
       window.removeEventListener('online', handleOnline);

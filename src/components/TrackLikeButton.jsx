@@ -1,6 +1,6 @@
 // src/components/TrackLikeButton.jsx
 import React, { useEffect, useState } from 'react';
-import { apiFetch } from '../utils/api';
+import { apiFetch, getAccessToken } from '../utils/api';
 
 const TrackLikeButton = ({ track, onLikeChange }) => {
   const [liked, setLiked] = useState(false);
@@ -29,6 +29,8 @@ const TrackLikeButton = ({ track, onLikeChange }) => {
   };
 
   useEffect(() => {
+    // Ne rien faire si aucun utilisateur n'est connecté
+    if (!getAccessToken()) return;
     if (track && track.title && track.artist) {
       checkIfLiked();
     }

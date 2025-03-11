@@ -15,8 +15,9 @@ const HomePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [likedTracks, setLikedTracks] = useState([]);
 
-  // Fonction pour rafraîchir la liste des morceaux likés
+  // Rafraîchit la liste des morceaux likés uniquement si un utilisateur est connecté
   const refreshLikedTracks = async () => {
+    if (!getAccessToken()) return;
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
       setLikedTracks(data.likedTracks || []);
@@ -25,7 +26,7 @@ const HomePage = () => {
     }
   };
 
-  // Vérification de l'authentification et récupération de la liste au chargement
+  // Au chargement, on vérifie l'authentification et on rafraîchit la liste
   useEffect(() => {
     const token = getAccessToken();
     if (token) {
@@ -111,11 +112,10 @@ const HomePage = () => {
       )}
 
       <div>
-        {/* On passe refreshLikedTracks au lecteur pour mettre à jour la liste après like/unlike */}
+        {/* Passage de la fonction de rafraîchissement au lecteur */}
         <AzuracastPlayer onLikeChange={refreshLikedTracks} />
-        {userInfo && (
-          <LikedTracksList likedTracks={likedTracks} refreshLikedTracks={refreshLikedTracks} />
-        )}
+        {/* Affichage de la liste uniquement si un utilisateur est connecté */}
+        {userInfo && <LikedTracksList likedTracks={likedTracks} refreshLikedTracks={refreshLikedTracks} />}
       </div>
     </div>
   );
