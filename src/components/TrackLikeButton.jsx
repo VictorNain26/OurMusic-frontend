@@ -1,4 +1,4 @@
-/// ✅ TrackLikeButton.jsx (corrigé - ouverture login si non connecté + état toujours en Like)
+/// ✅ TrackLikeButton.jsx (corrigé - ouverture login si non connecté + état toujours en Like + fix ReferenceError)
 import React, { useEffect, useState } from 'react';
 import { apiFetch, getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
@@ -9,7 +9,7 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
   const [likedTrackId, setLikedTrackId] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const youtubeUrl = track.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track.artist + " " + track.title)}`;
+  const youtubeUrl = track?.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track?.artist + " " + track?.title)}`;
 
   useEffect(() => {
     const token = getAccessToken();
@@ -20,16 +20,19 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       return;
     }
     setIsLoggedIn(true);
-    const match = likedTracks.find(item =>
-      item.title.toLowerCase() === track.title.toLowerCase() &&
-      item.artist.toLowerCase() === track.artist.toLowerCase()
-    );
-    if (match) {
-      setLiked(true);
-      setLikedTrackId(match.id);
-    } else {
-      setLiked(false);
-      setLikedTrackId(null);
+
+    if (track && likedTracks?.length > 0) {
+      const match = likedTracks.find(item =>
+        item.title?.toLowerCase() === track.title?.toLowerCase() &&
+        item.artist?.toLowerCase() === track.artist?.toLowerCase()
+      );
+      if (match) {
+        setLiked(true);
+        setLikedTrackId(match.id);
+      } else {
+        setLiked(false);
+        setLikedTrackId(null);
+      }
     }
   }, [track, likedTracks]);
 
@@ -68,8 +71,8 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       if (setLikedTracks) {
         setLikedTracks((prev) => prev.filter((t) =>
           !(t.id === likedTrackId ||
-            (t.title.toLowerCase() === track.title.toLowerCase() &&
-             t.artist.toLowerCase() === track.artist.toLowerCase())
+            (t.title?.toLowerCase() === track.title?.toLowerCase() &&
+             t.artist?.toLowerCase() === track.artist?.toLowerCase())
           )
         ));
       }
