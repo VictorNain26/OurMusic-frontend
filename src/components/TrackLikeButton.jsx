@@ -2,15 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { apiFetch } from '../utils/api';
 
-const TrackLikeButton = ({ track }) => {
+const TrackLikeButton = ({ track, onLikeChange }) => {
   const [liked, setLiked] = useState(false);
   const [likedTrackId, setLikedTrackId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Déduire l'URL YouTube par défaut si non fournie
   const youtubeUrl = track.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track.artist + " " + track.title)}`;
 
-  // Vérifier si le morceau est déjà liké pour l'utilisateur connecté
   const checkIfLiked = async () => {
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
@@ -42,7 +40,7 @@ const TrackLikeButton = ({ track }) => {
       const payload = {
         title: track.title,
         artist: track.artist,
-        artwork: track.art || '', // On utilise la propriété "art" comme artwork
+        artwork: track.art || '',
         youtubeUrl,
       };
       const data = await apiFetch('https://ourmusic-api.ovh/api/track/like', {
@@ -52,6 +50,7 @@ const TrackLikeButton = ({ track }) => {
       if (data.likedTrack) {
         setLiked(true);
         setLikedTrackId(data.likedTrack.id);
+        if (onLikeChange) onLikeChange();
       }
     } catch (err) {
       console.error("Erreur lors du like :", err);
@@ -63,18 +62,17 @@ const TrackLikeButton = ({ track }) => {
     if (!likedTrackId) return;
     setLoading(true);
     try {
-      // Appeler DELETE sur l'URL avec l'ID du morceau à retirer
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${likedTrackId}`, {
         method: 'DELETE',
       });
       setLiked(false);
       setLikedTrackId(null);
+      if (onLikeChange) onLikeChange();
     } catch (err) {
       console.error("Erreur lors du unlike :", err);
     }
     setLoading(false);
   };
-
 
   return (
     <div className="mt-4">

@@ -1,37 +1,20 @@
 // src/components/LikedTracksList.jsx
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { apiFetch } from '../utils/api';
 
-const LikedTracksList = () => {
-  const [likedTracks, setLikedTracks] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-
-  const fetchLikedTracks = async () => {
-    setLoading(true);
-    try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
-      setLikedTracks(data.likedTracks || []);
-    } catch (err) {
-      console.error("Erreur lors de la récupération des morceaux likés :", err);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchLikedTracks();
-  }, []);
+const LikedTracksList = ({ likedTracks, refreshLikedTracks }) => {
+  const [deleting, setDeleting] = React.useState(false);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Voulez-vous supprimer ce morceau ?")) return;
     setDeleting(true);
     try {
-      // Appel à l'endpoint DELETE avec l'ID dans l'URL
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
         method: 'DELETE',
       });
-      // Mettre à jour la liste en refaisant un fetch ou en retirant l'élément du state
-      fetchLikedTracks();
+      if (refreshLikedTracks) {
+        refreshLikedTracks();
+      }
     } catch (err) {
       console.error("Erreur lors de la suppression :", err);
     }
@@ -41,9 +24,7 @@ const LikedTracksList = () => {
   return (
     <div className="mt-6">
       <h2 className="text-xl font-bold mb-4">Morceaux likés</h2>
-      {loading ? (
-        <p>Chargement...</p>
-      ) : likedTracks.length === 0 ? (
+      {likedTracks.length === 0 ? (
         <p>Aucun morceau liké pour le moment.</p>
       ) : (
         <ul className="space-y-4">

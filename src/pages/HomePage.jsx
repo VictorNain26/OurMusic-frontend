@@ -1,3 +1,4 @@
+// src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AzuracastPlayer from '../components/AzuracastPlayer';
@@ -12,17 +13,30 @@ const HomePage = () => {
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [likedTracks, setLikedTracks] = useState([]);
 
-  // Au chargement, si on a un accessToken, on tente /api/auth/me
+  // Fonction pour rafraîchir la liste des morceaux likés
+  const refreshLikedTracks = async () => {
+    try {
+      const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
+      setLikedTracks(data.likedTracks || []);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des morceaux likés :", err);
+    }
+  };
+
+  // Vérification de l'authentification et récupération de la liste au chargement
   useEffect(() => {
     const token = getAccessToken();
     if (token) {
       apiFetch('https://ourmusic-api.ovh/api/auth/me')
-        .then((data) => setUserInfo(data))
+        .then((data) => {
+          setUserInfo(data);
+          refreshLikedTracks();
+        })
         .catch((err) => {
           console.log("Utilisateur non authentifié ou token expiré:", err);
           setUserInfo(null);
-          // Possibilité de retirer le token local si on veut
           setAccessToken(null);
         });
     }
@@ -30,12 +44,10 @@ const HomePage = () => {
 
   const handleLogout = async () => {
     try {
-      // Efface le refresh cookie
       await logoutFetch();
     } catch (err) {
       console.log('Erreur logout :', err);
     }
-    // Effacer l’access token local
     setAccessToken(null);
     setUserInfo(null);
   };
@@ -46,18 +58,10 @@ const HomePage = () => {
         <div>
           {userInfo ? (
             <div className="flex items-center gap-3">
-              {/* Nom d'utilisateur à la place des boutons */}
-              <span className="font-semibold">
-                {userInfo.username}
-              </span>
-
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-              >
+              <span className="font-semibold">{userInfo.username}</span>
+              <button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
                 Déconnexion
               </button>
-
               {userInfo.role === 'admin' && (
                 <Link
                   to="/spotify-refresh"
@@ -84,7 +88,6 @@ const HomePage = () => {
             </div>
           )}
         </div>
-
         <ChromecastButton />
       </header>
 
@@ -93,9 +96,9 @@ const HomePage = () => {
           isOpen={isLoginModalOpen}
           onRequestClose={() => setLoginModalOpen(false)}
           onLoginSuccess={(data) => {
-            // data contient { accessToken, user: {...} }
             setUserInfo(data.user);
             setLoginModalOpen(false);
+            refreshLikedTracks();
           }}
         />
       )}
@@ -107,11 +110,12 @@ const HomePage = () => {
         />
       )}
 
-
       <div>
-        <AzuracastPlayer />
-        
-        {userInfo && <LikedTracksList />}
+        {/* On passe refreshLikedTracks au lecteur pour mettre à jour la liste après like/unlike */}
+        <AzuracastPlayer onLikeChange={refreshLikedTracks} />
+        {userInfo && (
+          <LikedTracksList likedTracks={likedTracks} refreshLikedTracks={refreshLikedTracks} />
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
+// src/components/AzuracastPlayer.jsx
 import { useState, useEffect, useRef } from 'react';
 import TrackLikeButton from './TrackLikeButton';
 
-const AzuracastPlayer = () => {
+const AzuracastPlayer = ({ onLikeChange }) => {
   const sseBaseUri = "https://ourmusic-azuracast.ovh/api/live/nowplaying/sse";
   const sseUriParams = new URLSearchParams({
     cf_connect: JSON.stringify({
@@ -35,7 +36,6 @@ const AzuracastPlayer = () => {
   const handleSseData = (ssePayload, useTime = true) => {
     const data = ssePayload.data;
     if (useTime && data.current_time) {
-      // Met à jour le temps courant si fourni
       setTrackElapsed(data.current_time);
     }
     if (data.np) {
@@ -65,14 +65,11 @@ const AzuracastPlayer = () => {
         if ('connect' in jsonData) {
           const connectData = jsonData.connect;
           if ('data' in connectData) {
-            // Format legacy
             connectData.data.forEach((initialRow) => handleSseData(initialRow));
           } else {
-            // Nouveau format Centrifugo
             if ('time' in connectData) {
               setTrackElapsed(Math.floor(connectData.time / 1000));
             }
-            // Itère sur les abonnements pour récupérer les publications
             for (const subName in connectData.subs) {
               const sub = connectData.subs[subName];
               if (sub.publications && sub.publications.length > 0) {
@@ -104,7 +101,6 @@ const AzuracastPlayer = () => {
   };
 
   useEffect(() => {
-    // Connexion initiale
     connectSSE();
 
     const handleOnline = () => {
@@ -161,7 +157,6 @@ const AzuracastPlayer = () => {
     }
   };
 
-  // Affichage d'un spinner tant que les données ne sont pas chargées
   if (!nowPlaying) {
     return (
       <div className="fixed inset-0 bg-white flex items-center justify-center overflow-hidden z-50">
@@ -186,7 +181,7 @@ const AzuracastPlayer = () => {
               className="w-48 rounded-md mx-auto"
             />
           )}
-          <TrackLikeButton track={currentSong} />
+          <TrackLikeButton track={currentSong} onLikeChange={onLikeChange} />
         </div>
       )}
 
