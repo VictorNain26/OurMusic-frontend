@@ -50,11 +50,18 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
         method: 'DELETE',
       });
       if (setLikedTracks) {
-        setLikedTracks((prev) => prev.filter((t) => t.id !== likedTrackId));
-        toast.success('Morceau retiré des likes');
+        setLikedTracks((prev) => prev.filter((t) =>
+          !(t.id === likedTrackId ||
+            (t.title.toLowerCase() === track.title.toLowerCase() &&
+            t.artist.toLowerCase() === track.artist.toLowerCase())
+          )
+        ));
       }
+      setLiked(false);
+      setLikedTrackId(null);
+      toast.success('Morceau retiré des likes');
     } catch (err) {
-      toast.error("Erreur lors du unlike");
+      toast.error('Erreur lors du unlike');
     }
     setLoading(false);
   };
