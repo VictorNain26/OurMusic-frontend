@@ -1,28 +1,31 @@
-/// ✅ TrackLikeButton.jsx (corrigé - ouverture login si non connecté + état toujours en Like + fix ReferenceError + compatibilité AzuracastPlayer)
+// ✅ TrackLikeButton.jsx (corrigé définitivement avec fallback sécurisé sur likedTracks)
 import React, { useEffect, useState } from 'react';
 import { apiFetch, getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
 
-const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
+const TrackLikeButton = ({ track, likedTracks, setLikedTracks }) => {
   const [loading, setLoading] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likedTrackId, setLikedTrackId] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const youtubeUrl = track?.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track?.artist + " " + track?.title)}`;
+  const safeLikedTracks = Array.isArray(likedTracks) ? likedTracks : [];
+
+  const youtubeUrl = track?.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track?.artist + ' ' + track?.title)}`;
 
   useEffect(() => {
     const token = getAccessToken();
-    if (!token) {
-      setIsLoggedIn(false);
+    const loggedIn = Boolean(token);
+    setIsLoggedIn(loggedIn);
+
+    if (!loggedIn) {
       setLiked(false);
       setLikedTrackId(null);
       return;
     }
-    setIsLoggedIn(true);
 
-    if (track && Array.isArray(likedTracks)) {
-      const match = likedTracks.find(item =>
+    if (track && safeLikedTracks.length > 0) {
+      const match = safeLikedTracks.find(item =>
         item.title?.toLowerCase() === track.title?.toLowerCase() &&
         item.artist?.toLowerCase() === track.artist?.toLowerCase()
       );
@@ -33,8 +36,11 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
         setLiked(false);
         setLikedTrackId(null);
       }
+    } else {
+      setLiked(false);
+      setLikedTrackId(null);
     }
-  }, [track, likedTracks]);
+  }, [track, safeLikedTracks]);
 
   const handleLike = async () => {
     if (!isLoggedIn) {
@@ -46,7 +52,12 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
 
     setLoading(true);
     try {
-      const payload = { title: track.title, artist: track.artist, artwork: track.art || '', youtubeUrl };
+      const payload = {
+        title: track.title,
+        artist: track.artist,
+        artwork: track.art || '',
+        youtubeUrl,
+      };
       const data = await apiFetch('https://ourmusic-api.ovh/api/track/like', {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -59,8 +70,9 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       }
     } catch (err) {
       toast.error('Erreur lors du like');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleUnlike = async () => {
@@ -83,18 +95,27 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       toast.success('Morceau retiré des likes');
     } catch (err) {
       toast.error("Erreur lors du unlike");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div className="mt-4">
       {liked && isLoggedIn ? (
-        <button onClick={handleUnlike} disabled={loading} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+        <button
+          onClick={handleUnlike}
+          disabled={loading}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+        >
           {loading ? 'Traitement...' : 'Unlike'}
         </button>
       ) : (
-        <button onClick={handleLike} disabled={loading} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+        <button
+          onClick={handleLike}
+          disabled={loading}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        >
           {loading ? 'Traitement...' : 'Like'}
         </button>
       )}
