@@ -172,7 +172,7 @@ const AzuracastPlayer = ({ onLikeChange }) => {
               className="w-48 rounded-md mx-auto"
             />
           )}
-          <TrackLikeButton track={currentSong} onLikeChange={onLikeChange} />
+          <TrackLikeButton track={currentSong} likedTracks={likedTracks} setLikedTracks={setLikedTracks} />
         </div>
       )}
 

@@ -1,8 +1,7 @@
-// src/components/LikedTracksList.jsx
 import React from 'react';
 import { apiFetch } from '../utils/api';
 
-const LikedTracksList = ({ likedTracks, refreshLikedTracks }) => {
+const LikedTracksList = ({ likedTracks, setLikedTracks }) => {
   const [deleting, setDeleting] = React.useState(false);
 
   const handleDelete = async (id) => {
@@ -12,8 +11,8 @@ const LikedTracksList = ({ likedTracks, refreshLikedTracks }) => {
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
         method: 'DELETE',
       });
-      if (refreshLikedTracks) {
-        refreshLikedTracks();
+      if (setLikedTracks) {
+        setLikedTracks((prev) => prev.filter((t) => t.id !== id));
       }
     } catch (err) {
       console.error("Erreur lors de la suppression :", err);
@@ -31,28 +30,13 @@ const LikedTracksList = ({ likedTracks, refreshLikedTracks }) => {
           {likedTracks.map(track => (
             <li key={track.id} className="flex items-center gap-4">
               {track.artwork && (
-                <img
-                  src={track.artwork}
-                  alt={`${track.artist} - ${track.title}`}
-                  className="w-16 h-16 object-cover rounded"
-                />
+                <img src={track.artwork} alt={`${track.artist} - ${track.title}`} className="w-16 h-16 object-cover rounded" />
               )}
               <div>
                 <p className="font-semibold">{track.artist} - {track.title}</p>
-                <a
-                  href={track.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  Voir sur YouTube
-                </a>
+                <a href={track.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Voir sur YouTube</a>
               </div>
-              <button
-                onClick={() => handleDelete(track.id)}
-                disabled={deleting}
-                className="ml-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-              >
+              <button onClick={() => handleDelete(track.id)} disabled={deleting} className="ml-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
                 Supprimer
               </button>
             </li>

@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AzuracastPlayer from '../components/AzuracastPlayer';
@@ -15,7 +14,6 @@ const HomePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [likedTracks, setLikedTracks] = useState([]);
 
-  // Rafraîchit la liste des morceaux likés uniquement si un utilisateur est connecté
   const refreshLikedTracks = async () => {
     if (!getAccessToken()) return;
     try {
@@ -26,7 +24,6 @@ const HomePage = () => {
     }
   };
 
-  // Au chargement, on vérifie l'authentification et on rafraîchit la liste
   useEffect(() => {
     const token = getAccessToken();
     if (token) {
@@ -64,26 +61,17 @@ const HomePage = () => {
                 Déconnexion
               </button>
               {userInfo.role === 'admin' && (
-                <Link
-                  to="/spotify-refresh"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                >
+                <Link to="/spotify-refresh" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                   Refresh Spotify
                 </Link>
               )}
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setLoginModalOpen(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-              >
+              <button onClick={() => setLoginModalOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                 Login
               </button>
-              <button
-                onClick={() => setRegisterModalOpen(true)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-              >
+              <button onClick={() => setRegisterModalOpen(true)} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
                 Register
               </button>
             </div>
@@ -111,12 +99,9 @@ const HomePage = () => {
         />
       )}
 
-      <div>
-        {/* Passage de la fonction de rafraîchissement au lecteur */}
-        <AzuracastPlayer onLikeChange={refreshLikedTracks} />
-        {/* Affichage de la liste uniquement si un utilisateur est connecté */}
-        {userInfo && <LikedTracksList likedTracks={likedTracks} refreshLikedTracks={refreshLikedTracks} />}
-      </div>
+      <AzuracastPlayer onLikeChange={refreshLikedTracks} likedTracks={likedTracks} setLikedTracks={setLikedTracks} />
+
+      {userInfo && <LikedTracksList likedTracks={likedTracks} setLikedTracks={setLikedTracks} />}
     </div>
   );
 };
