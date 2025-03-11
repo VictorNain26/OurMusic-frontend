@@ -63,10 +63,9 @@ const TrackLikeButton = ({ track }) => {
     if (!likedTrackId) return;
     setLoading(true);
     try {
-      const payload = { id: likedTrackId };
-      await apiFetch('https://ourmusic-api.ovh/api/track/like', {
+      // Appeler DELETE sur l'URL avec l'ID du morceau à retirer
+      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${likedTrackId}`, {
         method: 'DELETE',
-        body: JSON.stringify(payload),
       });
       setLiked(false);
       setLikedTrackId(null);
@@ -75,6 +74,7 @@ const TrackLikeButton = ({ track }) => {
     }
     setLoading(false);
   };
+
 
   return (
     <div className="mt-4">
