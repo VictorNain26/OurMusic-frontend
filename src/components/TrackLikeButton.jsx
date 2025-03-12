@@ -1,15 +1,13 @@
-// ✅ TrackLikeButton.jsx (corrigé définitivement avec fallback sécurisé sur likedTracks)
 import React, { useEffect, useState } from 'react';
 import { apiFetch, getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
+import Button from './ui/Button';
 
-const TrackLikeButton = ({ track, likedTracks, setLikedTracks }) => {
+const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
   const [loading, setLoading] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likedTrackId, setLikedTrackId] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const safeLikedTracks = Array.isArray(likedTracks) ? likedTracks : [];
 
   const youtubeUrl = track?.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track?.artist + ' ' + track?.title)}`;
 
@@ -24,10 +22,10 @@ const TrackLikeButton = ({ track, likedTracks, setLikedTracks }) => {
       return;
     }
 
-    if (track && safeLikedTracks.length > 0) {
-      const match = safeLikedTracks.find(item =>
-        item.title?.toLowerCase() === track.title?.toLowerCase() &&
-        item.artist?.toLowerCase() === track.artist?.toLowerCase()
+    if (track && likedTracks.length > 0) {
+      const match = likedTracks.find(
+        (item) => item.title?.toLowerCase() === track.title?.toLowerCase() &&
+                  item.artist?.toLowerCase() === track.artist?.toLowerCase()
       );
       if (match) {
         setLiked(true);
@@ -40,7 +38,7 @@ const TrackLikeButton = ({ track, likedTracks, setLikedTracks }) => {
       setLiked(false);
       setLikedTrackId(null);
     }
-  }, [track, safeLikedTracks]);
+  }, [track, likedTracks]);
 
   const handleLike = async () => {
     if (!isLoggedIn) {
@@ -83,12 +81,9 @@ const TrackLikeButton = ({ track, likedTracks, setLikedTracks }) => {
         method: 'DELETE',
       });
       if (typeof setLikedTracks === 'function') {
-        setLikedTracks((prev) => prev.filter((t) =>
-          !(t.id === likedTrackId ||
-            (t.title?.toLowerCase() === track.title?.toLowerCase() &&
-             t.artist?.toLowerCase() === track.artist?.toLowerCase())
-          )
-        ));
+        setLikedTracks((prev) =>
+          prev.filter((t) => t.id !== likedTrackId && !(t.title?.toLowerCase() === track.title?.toLowerCase() && t.artist?.toLowerCase() === track.artist?.toLowerCase()))
+        );
       }
       setLiked(false);
       setLikedTrackId(null);
@@ -103,21 +98,21 @@ const TrackLikeButton = ({ track, likedTracks, setLikedTracks }) => {
   return (
     <div className="mt-4">
       {liked && isLoggedIn ? (
-        <button
+        <Button
           onClick={handleUnlike}
           disabled={loading}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+          className="bg-red-500 hover:bg-red-600 text-white"
         >
           {loading ? 'Traitement...' : 'Unlike'}
-        </button>
+        </Button>
       ) : (
-        <button
+        <Button
           onClick={handleLike}
           disabled={loading}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-500 hover:bg-blue-600 text-white"
         >
           {loading ? 'Traitement...' : 'Like'}
-        </button>
+        </Button>
       )}
     </div>
   );

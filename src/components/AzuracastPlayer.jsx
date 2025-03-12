@@ -1,64 +1,53 @@
-// ✅ Refactored AzuracastPlayer.jsx — Fix undefined likedTracks + Clean & DRY principles
-import { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TrackLikeButton from './TrackLikeButton';
 
 const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => {
-  const sseBaseUri = "https://ourmusic-azuracast.ovh/api/live/nowplaying/sse";
-  const sseUriParams = new URLSearchParams({
-    cf_connect: JSON.stringify({
-      subs: { "station:ourmusic": { recover: true } },
-    }),
-  });
-  const sseUri = `${sseBaseUri}?${sseUriParams.toString()}`;
-
   const [nowPlaying, setNowPlaying] = useState(null);
   const [error, setError] = useState('');
-  const [trackElapsed, setTrackElapsed] = useState(0);
-  const [trackDuration, setTrackDuration] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
-  const [isConnected, setIsConnected] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   const audioRef = useRef(null);
   const sseRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
+  const reconnectRef = useRef(null);
 
-  const updateNowPlaying = (npData) => {
-    setNowPlaying(npData);
-    const np = npData?.now_playing;
-    setTrackElapsed(np?.elapsed || 0);
-    setTrackDuration(np?.duration || 0);
+  const sseUri = `https://ourmusic-azuracast.ovh/api/live/nowplaying/sse?${new URLSearchParams({
+    cf_connect: JSON.stringify({ subs: { "station:ourmusic": { recover: true } } })
+  })}`;
+
+  const updateNowPlaying = (data) => {
+    setNowPlaying(data);
+    const np = data?.now_playing;
+    setElapsed(np?.elapsed || 0);
+    setDuration(np?.duration || 0);
   };
 
   const handleSseData = (payload, useTime = true) => {
     const data = payload?.data;
-    if (useTime && data?.current_time) setTrackElapsed(data.current_time);
+    if (useTime && data?.current_time) setElapsed(data.current_time);
     if (data?.np) updateNowPlaying(data.np);
   };
 
   const connectSSE = () => {
-    if (sseRef.current) sseRef.current.close();
+    sseRef.current?.close();
     const sse = new EventSource(sseUri);
     sseRef.current = sse;
 
     sse.onopen = () => {
-      setIsConnected(true);
+      setConnected(true);
       setError('');
     };
 
     sse.onmessage = (e) => {
       if (e.data.trim() === '.') return;
       try {
-        const jsonData = JSON.parse(e.data);
-        if (jsonData.connect?.data) {
-          jsonData.connect.data.forEach((row) => handleSseData(row));
-        } else if (jsonData.connect?.subs) {
-          Object.values(jsonData.connect.subs).forEach((sub) => {
-            sub.publications?.forEach((row) => handleSseData(row, false));
-          });
-        } else if (jsonData.pub) {
-          handleSseData(jsonData.pub);
-        }
+        const json = JSON.parse(e.data);
+        if (json.connect?.data) json.connect.data.forEach((row) => handleSseData(row));
+        else if (json.connect?.subs) Object.values(json.connect.subs).forEach((sub) => sub.publications?.forEach((row) => handleSseData(row, false)));
+        else if (json.pub) handleSseData(json.pub);
       } catch (err) {
         console.error("Erreur SSE:", err);
       }
@@ -66,33 +55,28 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
 
     sse.onerror = () => {
       setError("Erreur de connexion SSE. Reconnexion dans 5s...");
-      setIsConnected(false);
+      setConnected(false);
       sse.close();
-      reconnectTimeoutRef.current = setTimeout(() => {
-        if (navigator.onLine) connectSSE();
-      }, 5000);
+      reconnectRef.current = setTimeout(() => navigator.onLine && connectSSE(), 5000);
     };
   };
 
   useEffect(() => {
     connectSSE();
-    const handleOnline = () => !isConnected && connectSSE();
-    window.addEventListener('online', handleOnline);
+    window.addEventListener('online', () => !connected && connectSSE());
     return () => {
-      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('online', () => {});
       sseRef.current?.close();
-      clearTimeout(reconnectTimeoutRef.current);
+      clearTimeout(reconnectRef.current);
     };
-  }, [sseUri, isConnected]);
+  }, []);
 
   useEffect(() => {
-    if (trackElapsed < trackDuration) {
-      const intervalId = setInterval(() => {
-        setTrackElapsed((prev) => (prev < trackDuration ? prev + 1 : prev));
-      }, 1000);
-      return () => clearInterval(intervalId);
+    if (elapsed < duration) {
+      const interval = setInterval(() => setElapsed((prev) => (prev < duration ? prev + 1 : prev)), 1000);
+      return () => clearInterval(interval);
     }
-  }, [trackElapsed, trackDuration]);
+  }, [elapsed, duration]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
@@ -127,14 +111,14 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
   }
 
   return (
-    <div className="mx-auto my-5 max-w-2xl text-center">
+    <div className="mx-auto my-6 max-w-3xl px-4 text-center">
       <h2 className="text-2xl font-bold mb-4">{station.name}</h2>
 
       {currentSong && (
         <div className="mb-4">
-          <p className="text-lg font-semibold">En cours : {currentSong.artist} - {currentSong.title}</p>
+          <p className="text-lg font-semibold break-words">🎵 {currentSong.artist} - {currentSong.title}</p>
           {currentSong.art && (
-            <img src={currentSong.art} alt={`${currentSong.artist} - ${currentSong.title}`} className="w-48 rounded-md mx-auto" />
+            <img src={currentSong.art} alt={`${currentSong.artist} - ${currentSong.title}`} className="w-48 mx-auto rounded shadow my-3" />
           )}
           <TrackLikeButton track={currentSong} likedTracks={likedTracks} setLikedTracks={setLikedTracks} />
         </div>
@@ -142,32 +126,36 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
 
       {station.listen_url && <audio ref={audioRef} preload="auto" />}
 
-      <div className="mt-4">
+      <div className="flex justify-center gap-4 mt-4 flex-wrap">
         <button
           onClick={isPlaying ? handleStop : handlePlay}
           disabled={!station.listen_url}
-          className={`px-6 py-2 text-lg text-white rounded transition-colors disabled:opacity-50 ${
-            isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-          }`}
+          className={`px-6 py-2 text-white rounded transition-colors ${isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
         >
           {isPlaying ? 'Stop' : 'Play'}
         </button>
-      </div>
-
-      <div className="mt-3">
         <label className="text-lg font-medium">
-          Volume: <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-48" />
+          Volume:
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="ml-2 align-middle"
+          />
         </label>
       </div>
 
       <div className="mt-4 text-sm">
-        {Math.floor(trackElapsed / 60)}:{('0' + (trackElapsed % 60)).slice(-2)} / {Math.floor(trackDuration / 60)}:{('0' + (trackDuration % 60)).slice(-2)}
+        {Math.floor(elapsed / 60)}:{('0' + (elapsed % 60)).slice(-2)} / {Math.floor(duration / 60)}:{('0' + (duration % 60)).slice(-2)}
       </div>
 
       {nowPlaying?.song_history?.length > 0 && (
         <div className="mt-6 text-left">
           <h3 className="text-xl font-semibold mb-2">Historique des 5 derniers morceaux :</h3>
-          <ul className="list-disc list-inside">
+          <ul className="list-disc list-inside text-sm space-y-1">
             {nowPlaying.song_history.slice(0, 5).map((item) => (
               <li key={item.sh_id}>{item.song.artist} - {item.song.title}</li>
             ))}

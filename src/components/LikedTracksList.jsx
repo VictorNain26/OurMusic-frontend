@@ -1,46 +1,61 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { apiFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
+import Button from './ui/Button';
 
-const LikedTracksList = ({ likedTracks, setLikedTracks }) => {
-  const [deleting, setDeleting] = React.useState(false);
+const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
+  const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Voulez-vous supprimer ce morceau ?")) return;
     setDeleting(true);
     try {
-      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
-        method: 'DELETE',
-      });
-      if (setLikedTracks) {
+      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, { method: 'DELETE' });
+      if (typeof setLikedTracks === 'function') {
         setLikedTracks((prev) => prev.filter((t) => t.id !== id));
         toast.success('Morceau supprimé');
       }
     } catch (err) {
       toast.error('Erreur lors de la suppression');
+    } finally {
+      setDeleting(false);
     }
-    setDeleting(false);
   };
 
   return (
-    <div className="mt-6">
-      <h2 className="text-xl font-bold mb-4">Morceaux likés</h2>
+    <div className="mt-8 max-w-3xl mx-auto px-4">
+      <h2 className="text-2xl font-bold mb-4">Morceaux likés</h2>
       {likedTracks.length === 0 ? (
-        <p>Aucun morceau liké pour le moment.</p>
+        <p className="text-gray-500">Aucun morceau liké pour le moment.</p>
       ) : (
         <ul className="space-y-4">
-          {likedTracks.map(track => (
-            <li key={track.id} className="flex items-center gap-4">
+          {likedTracks.map((track) => (
+            <li key={track.id} className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow">
               {track.artwork && (
-                <img src={track.artwork} alt={`${track.artist} - ${track.title}`} className="w-16 h-16 object-cover rounded" />
+                <img
+                  src={track.artwork}
+                  alt={`${track.artist} - ${track.title}`}
+                  className="w-24 h-24 object-cover rounded"
+                />
               )}
-              <div>
-                <p className="font-semibold">{track.artist} - {track.title}</p>
-                <a href={track.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Voir sur YouTube</a>
+              <div className="flex-1 w-full">
+                <p className="font-semibold break-words">{track.artist} - {track.title}</p>
+                <a
+                  href={track.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline text-sm"
+                >
+                  Voir sur YouTube
+                </a>
               </div>
-              <button onClick={() => handleDelete(track.id)} disabled={deleting} className="ml-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+              <Button
+                onClick={() => handleDelete(track.id)}
+                disabled={deleting}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
+              >
                 Supprimer
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
