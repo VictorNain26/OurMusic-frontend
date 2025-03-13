@@ -9,8 +9,20 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
-    host: '0.0.0.0', // Permet d'accepter des connexions extérieures (depuis le réseau Docker)
-    port: 5173,   // Assurez-vous que c'est bien le port utilisé
+    host: '0.0.0.0',
+    port: 5173,
     allowedHosts: ['ourmusic.fr'],
+    proxy: {
+      '/api': {
+        target: 'https://ourmusic-api.ovh',
+        changeOrigin: true,
+        secure: false,
+        rewrite: path => path.replace(/^\/api/, ''),
+      }
+    },
+    cors: {
+      origin: 'https://ourmusic.fr',
+      credentials: true,
+    }
   }
 })

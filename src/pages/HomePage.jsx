@@ -43,6 +43,7 @@ const HomePage = () => {
         onRequestClose={() => setIsLoginOpen(false)}
         onLoginSuccess={(data) => {
           setUserInfo(data.user);
+          refreshLikedTracks();
           setIsLoginOpen(false);
           toast.success('Connexion réussie');
         }}

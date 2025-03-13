@@ -27,8 +27,9 @@ export const useAuth = () => {
   };
 
   useEffect(() => {
-    if (getAccessToken()) fetchUser();
-  }, []);
+    const token = getAccessToken();
+    if (token) fetchUser();
+  }, [getAccessToken()]);
 
   return { userInfo, setUserInfo, logout };
 };
