@@ -40,6 +40,7 @@ async function tryRefreshToken() {
   return refreshPromise;
 }
 
+// src/utils/api.js
 export async function apiFetch(url, options = {}) {
   let accessToken = getAccessToken();
   const mergedHeaders = {
@@ -47,13 +48,12 @@ export async function apiFetch(url, options = {}) {
     ...(options.headers || {})
   };
 
-  // Si on a un token => on ajoute Authorization
   if (accessToken) {
     mergedHeaders['Authorization'] = 'Bearer ' + accessToken;
   }
 
   const fetchOptions = {
-    credentials: 'include', // pour envoyer le cookie refresh
+    credentials: 'include',
     mode: 'cors',
     ...options,
     headers: mergedHeaders,
@@ -61,22 +61,26 @@ export async function apiFetch(url, options = {}) {
 
   let response = await fetch(url, fetchOptions);
 
-  // Si 401 => essayer refresh
   if (response.status === 401 && accessToken) {
     console.log('Access token expiré, tentative de refresh...');
     try {
       await tryRefreshToken();
-      // On retente la requête avec le nouveau token
+
+      // ✅ 🔥 CORRECTION IMPORTANTE : recharger le nouveau token
       accessToken = getAccessToken();
+
+      // ✅ 🔥 RECREER les headers avec le NOUVEAU token
       const secondHeaders = {
         ...mergedHeaders,
-        Authorization: 'Bearer ' + accessToken
+        Authorization: 'Bearer ' + accessToken,
       };
-      response = await fetch(url, { ...fetchOptions, headers: secondHeaders });
+
+      response = await fetch(url, {
+        ...fetchOptions,
+        headers: secondHeaders, // ⚠️ << le fix essentiel
+      });
     } catch (err) {
       console.log('Echec du refresh token :', err);
-      // On laisse la requête échouer et on gérera côté front
-      // (ex: redirection login, etc.)
       throw new Error('Token expiré');
     }
   }
@@ -88,6 +92,7 @@ export async function apiFetch(url, options = {}) {
 
   return response.json();
 }
+
 
 export function logoutFetch() {
   // Appel pour effacer le cookie refresh
