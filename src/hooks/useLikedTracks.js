@@ -8,6 +8,7 @@ export const useLikedTracks = () => {
     const token = getAccessToken();
     if (!token) throw new Error('Utilisateur non connecté');
     const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
+    console.log('✅ Tracks récupérés:', data);
     return data.likedTracks;
   };
 
@@ -19,14 +20,20 @@ export const useLikedTracks = () => {
 
   const deleteTrack = useMutation({
     mutationFn: async (id) => {
+      console.log('🚨 Suppression track ID envoyé:', id);
+      if (!id || typeof id !== 'number') throw new Error('ID de suppression invalide');
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
     onSuccess: (deletedId) => {
+      console.log('✅ Track supprimé:', deletedId);
       queryClient.setQueryData(['likedTracks'], (prev) =>
         prev?.filter((track) => track.id !== deletedId)
       );
     },
+    onError: (error) => {
+      console.error('❌ Erreur suppression track:', error.message);
+    }
   });
 
   const likeTrack = useMutation({
@@ -38,8 +45,12 @@ export const useLikedTracks = () => {
       return res.likedTrack;
     },
     onSuccess: (newTrack) => {
+      console.log('✅ Nouveau track liké:', newTrack);
       queryClient.setQueryData(['likedTracks'], (prev) => [...(prev || []), newTrack]);
     },
+    onError: (error) => {
+      console.error('❌ Erreur like track:', error.message);
+    }
   });
 
   return {

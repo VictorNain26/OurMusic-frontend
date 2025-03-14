@@ -13,9 +13,7 @@ function setAccessToken(token) {
   }
 }
 
-// Tentative de refresh si l'access token est expiré
 async function tryRefreshToken() {
-  // Pour éviter d’appeler /refresh plusieurs fois en parallèle
   if (!isRefreshing) {
     isRefreshing = true;
     refreshPromise = fetch('https://ourmusic-api.ovh/api/auth/refresh', {
@@ -23,24 +21,20 @@ async function tryRefreshToken() {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     })
-    .then(async (res) => {
-      if (!res.ok) {
-        throw new Error("Echec refresh token");
-      }
-      const data = await res.json();
-      // data.accessToken => le nouveau token
-      setAccessToken(data.accessToken);
-      return data.accessToken;
-    })
-    .finally(() => {
-      isRefreshing = false;
-      refreshPromise = null;
-    });
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Échec refresh token');
+        const data = await res.json();
+        setAccessToken(data.accessToken);
+        return data.accessToken;
+      })
+      .finally(() => {
+        isRefreshing = false;
+        refreshPromise = null;
+      });
   }
   return refreshPromise;
 }
 
-// src/utils/api.js
 export async function apiFetch(url, options = {}) {
   let accessToken = getAccessToken();
   const mergedHeaders = {
@@ -62,7 +56,7 @@ export async function apiFetch(url, options = {}) {
   let response = await fetch(url, fetchOptions);
 
   if (response.status === 401 && accessToken) {
-    console.log('Access token expiré, tentative de refresh...');
+    console.log('⚠️ Access token expiré, tentative de refresh...');
     try {
       await tryRefreshToken();
       accessToken = getAccessToken();
@@ -70,10 +64,9 @@ export async function apiFetch(url, options = {}) {
         ...mergedHeaders,
         Authorization: 'Bearer ' + accessToken,
       };
-
       response = await fetch(url, { ...fetchOptions, headers: secondHeaders });
     } catch (err) {
-      console.log('Échec du refresh token :', err);
+      console.log('🚫 Refresh token échoué:', err);
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
   }
@@ -98,7 +91,6 @@ export async function apiFetch(url, options = {}) {
 }
 
 export function logoutFetch() {
-  // Appel pour effacer le cookie refresh
   return fetch('https://ourmusic-api.ovh/api/auth/logout', {
     method: 'POST',
     credentials: 'include',
