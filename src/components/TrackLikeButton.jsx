@@ -79,6 +79,7 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
     if (!likedTrackId) return;
     setLoading(true);
     try {
+      console.log('Unliking track ID:', likedTrackId);
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${likedTrackId}`, {
         method: 'DELETE',
       });

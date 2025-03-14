@@ -10,7 +10,6 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
     if (!window.confirm("Voulez-vous supprimer ce morceau ?")) return;
     setDeleting(true);
     try {
-      console.log('Unliking track ID:', likedTrackId);
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
         method: 'DELETE',
       });
