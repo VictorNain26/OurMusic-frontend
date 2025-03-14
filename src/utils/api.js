@@ -54,7 +54,9 @@ export async function apiFetch(url, options = {}) {
   };
 
   let response = await fetch(url, fetchOptions);
+  let responseText = await response.text();
 
+  // ✅ Réessayer si token expiré
   if (response.status === 401 && accessToken) {
     console.log('⚠️ Access token expiré, tentative de refresh...');
     try {
@@ -65,30 +67,31 @@ export async function apiFetch(url, options = {}) {
         Authorization: 'Bearer ' + accessToken,
       };
       response = await fetch(url, { ...fetchOptions, headers: secondHeaders });
+      responseText = await response.text();
     } catch (err) {
-      console.log('🚫 Refresh token échoué:', err);
+      console.error('🚫 Refresh token échoué:', err);
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
   }
 
-  const responseText = await response.text();
+  // ✅ Toujours tenter de parser la réponse
+  let parsed;
+  try {
+    parsed = JSON.parse(responseText);
+  } catch (err) {
+    console.error('❌ Réponse non parsable:', responseText);
+    throw new Error('Erreur API non parsable');
+  }
 
   if (!response.ok) {
-    console.error('[API ERROR]', responseText);
-    try {
-      const errorJson = JSON.parse(responseText);
-      throw new Error(errorJson?.error || 'Erreur serveur');
-    } catch {
-      throw new Error('Erreur API non parsable');
-    }
+    const errorMessage = parsed?.error || 'Erreur inconnue';
+    console.error('[API ERROR]', errorMessage);
+    throw new Error(errorMessage);
   }
 
-  try {
-    return JSON.parse(responseText);
-  } catch {
-    return {};
-  }
+  return parsed;
 }
+
 
 export function logoutFetch() {
   return fetch('https://ourmusic-api.ovh/api/auth/logout', {
