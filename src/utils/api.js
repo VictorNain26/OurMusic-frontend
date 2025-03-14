@@ -66,10 +66,8 @@ export async function apiFetch(url, options = {}) {
     try {
       await tryRefreshToken();
 
-      // ✅ 🔥 CORRECTION IMPORTANTE : recharger le nouveau token
       accessToken = getAccessToken();
 
-      // ✅ 🔥 RECREER les headers avec le NOUVEAU token
       const secondHeaders = {
         ...mergedHeaders,
         Authorization: 'Bearer ' + accessToken,
@@ -77,7 +75,7 @@ export async function apiFetch(url, options = {}) {
 
       response = await fetch(url, {
         ...fetchOptions,
-        headers: secondHeaders, // ⚠️ << le fix essentiel
+        headers: secondHeaders,
       });
     } catch (err) {
       console.log('Echec du refresh token :', err);
@@ -87,7 +85,8 @@ export async function apiFetch(url, options = {}) {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || 'Erreur API');
+    console.error('[API ERROR]', errorText);
+    throw new Error('Une erreur est survenue. Veuillez réessayer plus tard.');
   }
 
   return response.json();

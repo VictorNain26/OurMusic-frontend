@@ -21,8 +21,8 @@ const RegisterModal = ({ isOpen, onRequestClose, onRegisterSuccess }) => {
       if (onRegisterSuccess) onRegisterSuccess(data.user);
       onRequestClose();
     } catch (err) {
-      console.error('Erreur lors de l’inscription :', err);
-      setError('Une erreur est survenue lors de l’inscription. Veuillez réessayer.');
+      console.error('[Register Error]', err);
+      setError("Échec de l'inscription. Veuillez réessayer.");
     }
   };
 
@@ -33,33 +33,17 @@ const RegisterModal = ({ isOpen, onRequestClose, onRegisterSuccess }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">Nom d'utilisateur</label>
-          <Input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+          <Input value={username} onChange={(e) => setUsername(e.target.value)} required />
         </div>
         <div>
           <label className="block mb-1 font-medium">Email</label>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div>
           <label className="block mb-1 font-medium">Mot de passe</label>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
-        <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-          S'inscrire
-        </Button>
+        <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">S'inscrire</Button>
       </form>
     </ModalWrapper>
   );

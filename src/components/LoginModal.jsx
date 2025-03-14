@@ -16,13 +16,12 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
-
       if (data.accessToken) setAccessToken(data.accessToken);
       if (onLoginSuccess) onLoginSuccess(data);
       onRequestClose();
     } catch (err) {
-      console.error('Erreur lors de la connexion :', err);
-      setError('Une erreur est survenue lors de la connexion. Veuillez réessayer.');
+      console.error('[Login Error]', err);
+      setError("Échec de la connexion. Veuillez réessayer.");
     }
   };
 
@@ -33,28 +32,13 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">Email</label>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div>
           <label className="block mb-1 font-medium">Mot de passe</label>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
-        <Button
-          type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          Se connecter
-        </Button>
+        <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">Se connecter</Button>
       </form>
     </ModalWrapper>
   );
