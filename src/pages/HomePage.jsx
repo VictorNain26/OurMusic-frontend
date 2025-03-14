@@ -1,3 +1,4 @@
+// src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
 import LoginModal from '../components/LoginModal';
@@ -57,7 +58,7 @@ const HomePage = () => {
       <AzuracastPlayer
         likedTracks={likedTracks}
         setLikedTracks={setLikedTracks}
-        onLikeChange={refreshLikedTracks}
+        onLikeChange={refreshLikedTracks} // ✅ Correction ici
       />
 
       {userInfo && <LikedTracksList likedTracks={likedTracks} setLikedTracks={setLikedTracks} />}

@@ -5,27 +5,24 @@ import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 
 const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
-  const [deleting, setDeleting] = useState(false);
+  const [trackIdEnCours, setTrackIdEnCours] = useState(null);
 
   const handleDelete = async (id) => {
-    // Vérifier que l'utilisateur est connecté
     const token = getAccessToken();
     if (!token) {
       toast.error("Vous devez être connecté pour supprimer un morceau.");
       return;
     }
 
-    // Demande de confirmation
     if (!window.confirm("Voulez-vous vraiment supprimer ce morceau ?")) return;
 
-    setDeleting(true);
     try {
-      // Envoyer la requête DELETE avec le token inclus via apiFetch
+      setTrackIdEnCours(id); // ✅ uniquement le bouton du morceau en cours est désactivé
+
       const data = await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
         method: 'DELETE',
       });
 
-      // Vérifier la réponse et mettre à jour l'état
       if (data.error) {
         toast.error(data.error);
       } else {
@@ -36,7 +33,7 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
       console.error('Erreur lors de la suppression du morceau :', err);
       toast.error('Impossible de supprimer le morceau. Veuillez réessayer.');
     } finally {
-      setDeleting(false);
+      setTrackIdEnCours(null);
     }
   };
 
@@ -74,10 +71,10 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
               </div>
               <Button
                 onClick={() => handleDelete(track.id)}
-                disabled={deleting}
+                disabled={trackIdEnCours === track.id}
                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
               >
-                {deleting ? 'Traitement...' : 'Supprimer'}
+                {trackIdEnCours === track.id ? 'Traitement...' : 'Supprimer'}
               </Button>
             </li>
           ))}

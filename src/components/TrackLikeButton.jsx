@@ -3,7 +3,7 @@ import { apiFetch, getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 
-const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
+const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks, refreshLikedTracks }) => {
   const [loading, setLoading] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likedTrackId, setLikedTrackId] = useState(null);
@@ -79,18 +79,20 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
     if (!likedTrackId) return;
     setLoading(true);
     try {
-      console.log('Unliking track ID:', likedTrackId);
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${likedTrackId}`, {
         method: 'DELETE',
       });
+
       if (typeof setLikedTracks === 'function') {
-        setLikedTracks((prev) =>
-          prev.filter((t) => t.id !== likedTrackId && !(t.title?.toLowerCase() === track.title?.toLowerCase() && t.artist?.toLowerCase() === track.artist?.toLowerCase()))
-        );
+        setLikedTracks((prev) => prev.filter((t) => t.id !== likedTrackId));
       }
+
       setLiked(false);
       setLikedTrackId(null);
       toast.success('Morceau retiré des likes');
+
+      // 🔁 Force un rafraîchissement de la liste depuis le backend
+      if (typeof refreshLikedTracks === 'function') refreshLikedTracks();
     } catch (err) {
       console.error('Erreur lors du unlike :', err);
       toast.error('Impossible de retirer le like. Veuillez réessayer.');
