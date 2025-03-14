@@ -1,5 +1,6 @@
+// src/components/LikedTracksList.jsx
 import React, { useState } from 'react';
-import { apiFetch } from '../utils/api';
+import { apiFetch, getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 
@@ -7,16 +8,29 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Voulez-vous supprimer ce morceau ?")) return;
+    // Vérifier que l'utilisateur est connecté
+    const token = getAccessToken();
+    if (!token) {
+      toast.error("Vous devez être connecté pour supprimer un morceau.");
+      return;
+    }
+
+    // Demande de confirmation
+    if (!window.confirm("Voulez-vous vraiment supprimer ce morceau ?")) return;
+
     setDeleting(true);
     try {
-      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
+      // Envoyer la requête DELETE avec le token inclus via apiFetch
+      const data = await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
         method: 'DELETE',
       });
 
-      if (typeof setLikedTracks === 'function') {
+      // Vérifier la réponse et mettre à jour l'état
+      if (data.error) {
+        toast.error(data.error);
+      } else {
         setLikedTracks((prev) => prev.filter((t) => t.id !== id));
-        toast.success('Morceau supprimé');
+        toast.success('Morceau retiré des likes');
       }
     } catch (err) {
       console.error('Erreur lors de la suppression du morceau :', err);
@@ -46,7 +60,9 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
                 />
               )}
               <div className="flex-1 w-full">
-                <p className="font-semibold break-words">{track.artist} - {track.title}</p>
+                <p className="font-semibold break-words">
+                  {track.artist} - {track.title}
+                </p>
                 <a
                   href={track.youtubeUrl}
                   target="_blank"
@@ -61,7 +77,7 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
                 disabled={deleting}
                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
               >
-                Supprimer
+                {deleting ? 'Traitement...' : 'Supprimer'}
               </Button>
             </li>
           ))}

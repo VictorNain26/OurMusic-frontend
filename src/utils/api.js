@@ -65,20 +65,15 @@ export async function apiFetch(url, options = {}) {
     console.log('Access token expiré, tentative de refresh...');
     try {
       await tryRefreshToken();
-
       accessToken = getAccessToken();
-
       const secondHeaders = {
         ...mergedHeaders,
         Authorization: 'Bearer ' + accessToken,
       };
 
-      response = await fetch(url, {
-        ...fetchOptions,
-        headers: secondHeaders,
-      });
+      response = await fetch(url, { ...fetchOptions, headers: secondHeaders });
     } catch (err) {
-      console.log('Echec du refresh token :', err);
+      console.log('Échec du refresh token :', err);
       throw new Error('Token expiré');
     }
   }
