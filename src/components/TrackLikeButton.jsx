@@ -46,15 +46,11 @@ const TrackLikeButton = ({ track }) => {
     }
   };
 
+  const { confirmAndDelete } = useLikedTracks();
+
   const handleUnlike = async () => {
     if (!likedTrackId) return;
-    try {
-      await deleteTrack.mutateAsync(likedTrackId);
-      toast.success('Morceau retiré des likes');
-    } catch (err) {
-      console.error('Erreur unlike :', err);
-      toast.error('Impossible de retirer le like.');
-    }
+    await confirmAndDelete(likedTrackId);
   };
 
   return (

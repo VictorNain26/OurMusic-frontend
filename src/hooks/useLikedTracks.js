@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, getAccessToken } from '../utils/api';
+import { toast } from 'react-hot-toast';
 
 export const useLikedTracks = () => {
   const queryClient = useQueryClient();
@@ -53,11 +54,23 @@ export const useLikedTracks = () => {
     }
   });
 
+  const confirmAndDelete = async (id) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer ce morceau ?")) return;
+    try {
+      await deleteTrack.mutateAsync(id);
+      toast.success("Morceau supprimé.");
+    } catch (err) {
+      console.error('Erreur suppression :', err);
+      toast.error(err.message || 'Erreur lors de la suppression.');
+    }
+  };
+
   return {
     likedTracks,
     isLoading,
     refetch,
     deleteTrack,
     likeTrack,
+    confirmAndDelete,
   };
 };

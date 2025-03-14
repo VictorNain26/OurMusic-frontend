@@ -1,22 +1,15 @@
 import React from 'react';
-import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 
 const LikedTracksList = () => {
   const { likedTracks, isLoading, deleteTrack } = useLikedTracks();
+  const { confirmAndDelete } = useLikedTracks();
+
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer ce morceau ?")) return;
-
-    try {
-      await deleteTrack.mutateAsync(id);
-      toast.success("Morceau supprimé.");
-    } catch (err) {
-      console.error('Erreur suppression :', err);
-      toast.error(err.message || 'Erreur lors de la suppression.');
-    }
+    await confirmAndDelete(id);
   };
 
   return (
