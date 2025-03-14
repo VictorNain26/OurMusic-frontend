@@ -1,16 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiFetch, setAccessToken } from '../utils/api';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
+import { parseAuthError } from '../utils/errorMessages';
 
 const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setError('');
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!isOpen) resetForm();
+  }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (!email || !password) {
+      setError('Tous les champs sont obligatoires.');
+      return;
+    }
+
+    setLoading(true);
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
@@ -21,7 +42,9 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
       onRequestClose();
     } catch (err) {
       console.error('[Login Error]', err);
-      setError("Échec de la connexion. Veuillez réessayer.");
+      setError(parseAuthError(err.message || ''));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,7 +61,9 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
           <label className="block mb-1 font-medium">Mot de passe</label>
           <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
-        <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">Se connecter</Button>
+        <Button type="submit" disabled={loading} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+          {loading ? 'Connexion...' : 'Se connecter'}
+        </Button>
       </form>
     </ModalWrapper>
   );
