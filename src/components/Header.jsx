@@ -2,15 +2,18 @@ import React from 'react';
 import Button from './ui/Button';
 import { Link } from 'react-router-dom';
 import ChromecastButton from './ChromecastButton';
+import { useAuthStore } from '../store/authStore';
 
-const Header = ({ userInfo, onLogin, onRegister, onLogout }) => {
+const Header = ({ onLogin, onRegister, onLogout }) => {
+  const { user } = useAuthStore();
+
   return (
     <header className="flex flex-wrap justify-between items-center p-4 border-b gap-3">
       <div className="flex items-center gap-3 flex-wrap">
-        {userInfo ? (
+        {user ? (
           <>
-            <span className="font-semibold text-lg">{userInfo.username}</span>
-            {userInfo.role === 'admin' && (
+            <span className="font-semibold text-lg">{user.username}</span>
+            {user.role === 'admin' && (
               <>
                 <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full uppercase tracking-wide">
                   Admin

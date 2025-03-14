@@ -1,18 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import Header from '../components/Header';
+import React from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
 import LikedTracksList from '../components/LikedTracksList';
-import LoginModal from '../components/LoginModal';
-import RegisterModal from '../components/RegisterModal';
-import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 
 const HomePage = () => {
-  const { user, authReady, fetchUser, logout } = useAuthStore();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const { user, authReady, fetchUser } = useAuthStore();
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchUser();
   }, []);
 
@@ -26,20 +20,6 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Toaster position="top-right" />
-
-      {/* 🔝 Barre d’en-tête */}
-      <Header
-        onLogin={() => setIsLoginOpen(true)}
-        onRegister={() => setIsRegisterOpen(true)}
-        onLogout={logout}
-      />
-
-      {/* 🔐 Modaux auth */}
-      <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
-      <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
-
-      {/* 🎶 Player + morceaux likés */}
       <AzuracastPlayer />
       {user && <LikedTracksList />}
     </div>
