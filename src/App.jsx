@@ -1,17 +1,36 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ButtonRefreshSpotify from './components/ButtonRefreshSpotify';
+import Layout from './layout/Layout';
+import AuthGuard from './layout/AuthGuard';
+import AdminGuard from './layout/AdminGuard';
 
 function App() {
   return (
     <Routes>
-      {/* Page d'accueil publique */}
-      <Route path="/" element={<HomePage />} />
+      {/* 🏠 Page publique */}
+      <Route
+        path="/"
+        element={
+          <Layout>
+            <HomePage />
+          </Layout>
+        }
+      />
 
-      {/* Route protégée pour accéder à spotify-refresh */}
-        <Route path="/spotify-refresh" element={<ButtonRefreshSpotify />} />
+      {/* 🔐 Admin Dashboard */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <AdminGuard>
+            <Layout>
+              <ButtonRefreshSpotify />
+            </Layout>
+          </AdminGuard>
+        }
+      />
 
-      {/* Redirection par défaut */}
+      {/* 🚧 Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

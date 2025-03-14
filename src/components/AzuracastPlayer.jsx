@@ -1,14 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TrackLikeButton from './TrackLikeButton';
+import { usePlayerStore } from '../store/playerStore';
 
-const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => {
+const AzuracastPlayer = () => {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(1);
   const [connected, setConnected] = useState(false);
+
+  const isPlaying = usePlayerStore((state) => state.isPlaying);
+  const setPlaying = usePlayerStore((state) => state.setPlaying);
+  const volume = usePlayerStore((state) => state.volume);
+  const setVolume = usePlayerStore((state) => state.setVolume);
 
   const audioRef = useRef(null);
   const sseRef = useRef(null);
@@ -46,7 +50,10 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
       try {
         const json = JSON.parse(e.data);
         if (json.connect?.data) json.connect.data.forEach((row) => handleSseData(row));
-        else if (json.connect?.subs) Object.values(json.connect.subs).forEach((sub) => sub.publications?.forEach((row) => handleSseData(row, false)));
+        else if (json.connect?.subs)
+          Object.values(json.connect.subs).forEach((sub) =>
+            sub.publications?.forEach((row) => handleSseData(row, false))
+          );
         else if (json.pub) handleSseData(json.pub);
       } catch (err) {
         console.error("Erreur SSE:", err);
@@ -90,7 +97,7 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
     if (!audioRef.current.src) audioRef.current.src = station.listen_url;
     audioRef.current.load();
     audioRef.current.play();
-    setIsPlaying(true);
+    setPlaying(true);
   };
 
   const handleStop = () => {
@@ -98,7 +105,7 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
       audioRef.current.pause();
       audioRef.current.removeAttribute('src');
       audioRef.current.load();
-      setIsPlaying(false);
+      setPlaying(false);
     }
   };
 
@@ -116,11 +123,17 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
 
       {currentSong && (
         <div className="mb-4">
-          <p className="text-lg font-semibold break-words">🎵 {currentSong.artist} - {currentSong.title}</p>
+          <p className="text-lg font-semibold break-words">
+            🎵 {currentSong.artist} - {currentSong.title}
+          </p>
           {currentSong.art && (
-            <img src={currentSong.art} alt={`${currentSong.artist} - ${currentSong.title}`} className="w-48 mx-auto rounded shadow my-3" />
+            <img
+              src={currentSong.art}
+              alt={`${currentSong.artist} - ${currentSong.title}`}
+              className="w-48 mx-auto rounded shadow my-3"
+            />
           )}
-          <TrackLikeButton track={currentSong} likedTracks={likedTracks} setLikedTracks={setLikedTracks} />
+          <TrackLikeButton track={currentSong} />
         </div>
       )}
 
@@ -130,10 +143,13 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
         <button
           onClick={isPlaying ? handleStop : handlePlay}
           disabled={!station.listen_url}
-          className={`px-6 py-2 text-white rounded transition-colors ${isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+          className={`px-6 py-2 text-white rounded transition-colors ${
+            isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+          }`}
         >
           {isPlaying ? 'Stop' : 'Play'}
         </button>
+
         <label className="text-lg font-medium">
           Volume:
           <input
@@ -149,7 +165,8 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
       </div>
 
       <div className="mt-4 text-sm">
-        {Math.floor(elapsed / 60)}:{('0' + (elapsed % 60)).slice(-2)} / {Math.floor(duration / 60)}:{('0' + (duration % 60)).slice(-2)}
+        {Math.floor(elapsed / 60)}:{('0' + (elapsed % 60)).slice(-2)} /{' '}
+        {Math.floor(duration / 60)}:{('0' + (duration % 60)).slice(-2)}
       </div>
 
       {nowPlaying?.song_history?.length > 0 && (
@@ -157,7 +174,9 @@ const AzuracastPlayer = ({ onLikeChange, likedTracks = [], setLikedTracks }) => 
           <h3 className="text-xl font-semibold mb-2">Historique des 5 derniers morceaux :</h3>
           <ul className="list-disc list-inside text-sm space-y-1">
             {nowPlaying.song_history.slice(0, 5).map((item) => (
-              <li key={item.sh_id}>{item.song.artist} - {item.song.title}</li>
+              <li key={item.sh_id}>
+                {item.song.artist} - {item.song.title}
+              </li>
             ))}
           </ul>
         </div>

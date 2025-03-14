@@ -1,67 +1,47 @@
-// src/pages/HomePage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import Header from '../components/Header';
 import AzuracastPlayer from '../components/AzuracastPlayer';
+import LikedTracksList from '../components/LikedTracksList';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
-import Header from '../components/Header';
-import { useAuth } from '../hooks/useAuth';
-import { getAccessToken, apiFetch } from '../utils/api';
-import LikedTracksList from '../components/LikedTracksList';
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
+import { useAuthStore } from '../store/authStore';
 
 const HomePage = () => {
-  const { userInfo, setUserInfo, logout } = useAuth();
+  const { user, authReady, fetchUser, logout } = useAuthStore();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [likedTracks, setLikedTracks] = useState([]);
-
-  const refreshLikedTracks = async () => {
-    if (!getAccessToken()) return;
-    try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
-      setLikedTracks(data.likedTracks || []);
-    } catch (err) {
-      console.error("Erreur liked tracks :", err);
-    }
-  };
 
   useEffect(() => {
-    if (userInfo) refreshLikedTracks();
-  }, [userInfo]);
+    fetchUser();
+  }, []);
+
+  if (!authReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-12 h-12 border-8 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="min-h-screen bg-white">
       <Toaster position="top-right" />
+
+      {/* 🔝 Barre d’en-tête */}
       <Header
-        userInfo={userInfo}
         onLogin={() => setIsLoginOpen(true)}
         onRegister={() => setIsRegisterOpen(true)}
         onLogout={logout}
       />
 
-      <LoginModal
-        isOpen={isLoginOpen}
-        onRequestClose={() => setIsLoginOpen(false)}
-        onLoginSuccess={(data) => {
-          setUserInfo(data.user);
-          refreshLikedTracks();
-          setIsLoginOpen(false);
-          toast.success('Connexion réussie');
-        }}
-      />
+      {/* 🔐 Modaux auth */}
+      <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
+      <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
 
-      <RegisterModal
-        isOpen={isRegisterOpen}
-        onRequestClose={() => setIsRegisterOpen(false)}
-      />
-
-      <AzuracastPlayer
-        likedTracks={likedTracks}
-        setLikedTracks={setLikedTracks}
-        onLikeChange={refreshLikedTracks} // ✅ Correction ici
-      />
-
-      {userInfo && <LikedTracksList likedTracks={likedTracks} setLikedTracks={setLikedTracks} />}
+      {/* 🎶 Player + morceaux likés */}
+      <AzuracastPlayer />
+      {user && <LikedTracksList />}
     </div>
   );
 };

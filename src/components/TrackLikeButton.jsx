@@ -1,123 +1,79 @@
 import React, { useEffect, useState } from 'react';
-import { apiFetch, getAccessToken } from '../utils/api';
+import { getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
+import { useLikedTracks } from '../hooks/useLikedTracks';
 
-const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks, refreshLikedTracks }) => {
-  const [loading, setLoading] = useState(false);
-  const [liked, setLiked] = useState(false);
-  const [likedTrackId, setLikedTrackId] = useState(null);
+const TrackLikeButton = ({ track }) => {
+  const { likedTracks, likeTrack, deleteTrack } = useLikedTracks();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const youtubeUrl = track?.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track?.artist + ' ' + track?.title)}`;
 
   useEffect(() => {
     const token = getAccessToken();
-    const loggedIn = Boolean(token);
-    setIsLoggedIn(loggedIn);
+    setIsLoggedIn(Boolean(token));
+  }, []);
 
-    if (!loggedIn) {
-      setLiked(false);
-      setLikedTrackId(null);
-      return;
-    }
+  const match = likedTracks.find(
+    (item) =>
+      item.title?.toLowerCase() === track.title?.toLowerCase() &&
+      item.artist?.toLowerCase() === track.artist?.toLowerCase()
+  );
 
-    if (track && likedTracks.length > 0) {
-      const match = likedTracks.find(
-        (item) =>
-          item.title?.toLowerCase() === track.title?.toLowerCase() &&
-          item.artist?.toLowerCase() === track.artist?.toLowerCase()
-      );
-      if (match) {
-        setLiked(true);
-        setLikedTrackId(match.id);
-      } else {
-        setLiked(false);
-        setLikedTrackId(null);
-      }
-    } else {
-      setLiked(false);
-      setLikedTrackId(null);
-    }
-  }, [track, likedTracks]);
+  const isLiked = Boolean(match);
+  const likedTrackId = match?.id;
 
   const handleLike = async () => {
     if (!isLoggedIn) {
-      toast.error("Veuillez vous connecter pour liker un morceau.");
+      toast.error("Veuillez vous connecter pour liker.");
       const loginButton = document.querySelector("button[data-login-button]");
       if (loginButton) loginButton.click();
       return;
     }
 
-    setLoading(true);
     try {
-      const payload = {
+      await likeTrack.mutateAsync({
         title: track.title,
         artist: track.artist,
         artwork: track.art || '',
         youtubeUrl,
-      };
-      const data = await apiFetch('https://ourmusic-api.ovh/api/track/like', {
-        method: 'POST',
-        body: JSON.stringify(payload),
       });
-      if (data.likedTrack && typeof setLikedTracks === 'function') {
-        setLikedTracks((prev) => [...prev, data.likedTrack]);
-        setLiked(true);
-        setLikedTrackId(data.likedTrack.id);
-        toast.success('Morceau liké');
-      }
+      toast.success('Morceau liké');
     } catch (err) {
       console.error('Erreur lors du like :', err);
-      toast.error('Impossible de liker le morceau. Veuillez réessayer.');
-    } finally {
-      setLoading(false);
+      toast.error('Impossible de liker le morceau.');
     }
   };
 
   const handleUnlike = async () => {
     if (!likedTrackId) return;
-    setLoading(true);
     try {
-      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${likedTrackId}`, {
-        method: 'DELETE',
-      });
-
-      if (typeof setLikedTracks === 'function') {
-        setLikedTracks((prev) => prev.filter((t) => t.id !== likedTrackId));
-      }
-
-      setLiked(false);
-      setLikedTrackId(null);
+      await deleteTrack.mutateAsync(likedTrackId);
       toast.success('Morceau retiré des likes');
-
-      // 🔁 Force un rafraîchissement de la liste depuis le backend
-      if (typeof refreshLikedTracks === 'function') refreshLikedTracks();
     } catch (err) {
-      console.error('Erreur lors du unlike :', err);
-      toast.error('Impossible de retirer le like. Veuillez réessayer.');
-    } finally {
-      setLoading(false);
+      console.error('Erreur unlike :', err);
+      toast.error('Impossible de retirer le like.');
     }
   };
 
   return (
     <div className="mt-4">
-      {liked && isLoggedIn ? (
+      {isLiked ? (
         <Button
           onClick={handleUnlike}
-          disabled={loading}
+          disabled={deleteTrack.isPending}
           className="bg-red-500 hover:bg-red-600 text-white"
         >
-          {loading ? 'Traitement...' : 'Unlike'}
+          {deleteTrack.isPending ? 'Traitement...' : 'Unlike'}
         </Button>
       ) : (
         <Button
           onClick={handleLike}
-          disabled={loading}
+          disabled={likeTrack.isPending}
           className="bg-blue-500 hover:bg-blue-600 text-white"
         >
-          {loading ? 'Traitement...' : 'Like'}
+          {likeTrack.isPending ? 'Traitement...' : 'Like'}
         </Button>
       )}
     </div>

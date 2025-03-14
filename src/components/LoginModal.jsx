@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { apiFetch, setAccessToken } from '../utils/api';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
-import { parseAuthError } from '../utils/errorMessages';
+import { useAuthStore } from '../store/authStore';
 
-const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
+const LoginModal = ({ isOpen, onRequestClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { login, error, loading } = useAuthStore();
 
   const resetForm = () => {
     setEmail('');
     setPassword('');
-    setError('');
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -24,28 +20,8 @@ const LoginModal = ({ isOpen, onRequestClose, onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (!email || !password) {
-      setError('Tous les champs sont obligatoires.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
-      if (data.accessToken) setAccessToken(data.accessToken);
-      if (onLoginSuccess) onLoginSuccess(data);
-      onRequestClose();
-    } catch (err) {
-      console.error('[Login Error]', err);
-      setError(parseAuthError(err.message || ''));
-    } finally {
-      setLoading(false);
-    }
+    const success = await login(email, password);
+    if (success) onRequestClose();
   };
 
   return (

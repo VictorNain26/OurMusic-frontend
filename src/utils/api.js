@@ -74,19 +74,28 @@ export async function apiFetch(url, options = {}) {
       response = await fetch(url, { ...fetchOptions, headers: secondHeaders });
     } catch (err) {
       console.log('Échec du refresh token :', err);
-      throw new Error('Token expiré');
+      throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
   }
 
+  const responseText = await response.text();
+
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error('[API ERROR]', errorText);
-    throw new Error('Une erreur est survenue. Veuillez réessayer plus tard.');
+    console.error('[API ERROR]', responseText);
+    try {
+      const errorJson = JSON.parse(responseText);
+      throw new Error(errorJson?.error || 'Erreur serveur');
+    } catch {
+      throw new Error('Erreur API non parsable');
+    }
   }
 
-  return response.json();
+  try {
+    return JSON.parse(responseText);
+  } catch {
+    return {};
+  }
 }
-
 
 export function logoutFetch() {
   // Appel pour effacer le cookie refresh
