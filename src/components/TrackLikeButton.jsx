@@ -24,8 +24,9 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
 
     if (track && likedTracks.length > 0) {
       const match = likedTracks.find(
-        (item) => item.title?.toLowerCase() === track.title?.toLowerCase() &&
-                  item.artist?.toLowerCase() === track.artist?.toLowerCase()
+        (item) =>
+          item.title?.toLowerCase() === track.title?.toLowerCase() &&
+          item.artist?.toLowerCase() === track.artist?.toLowerCase()
       );
       if (match) {
         setLiked(true);
@@ -67,7 +68,8 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
         toast.success('Morceau liké');
       }
     } catch (err) {
-      toast.error('Erreur lors du like');
+      console.error('Erreur lors du like :', err);
+      toast.error('Impossible de liker le morceau. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -89,7 +91,8 @@ const TrackLikeButton = ({ track, likedTracks = [], setLikedTracks }) => {
       setLikedTrackId(null);
       toast.success('Morceau retiré des likes');
     } catch (err) {
-      toast.error("Erreur lors du unlike");
+      console.error('Erreur lors du unlike :', err);
+      toast.error('Impossible de retirer le like. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }

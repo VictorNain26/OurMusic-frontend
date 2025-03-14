@@ -10,13 +10,17 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
     if (!window.confirm("Voulez-vous supprimer ce morceau ?")) return;
     setDeleting(true);
     try {
-      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, { method: 'DELETE' });
+      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, {
+        method: 'DELETE',
+      });
+
       if (typeof setLikedTracks === 'function') {
         setLikedTracks((prev) => prev.filter((t) => t.id !== id));
         toast.success('Morceau supprimé');
       }
     } catch (err) {
-      toast.error('Erreur lors de la suppression');
+      console.error('Erreur lors de la suppression du morceau :', err);
+      toast.error('Impossible de supprimer le morceau. Veuillez réessayer.');
     } finally {
       setDeleting(false);
     }
@@ -30,7 +34,10 @@ const LikedTracksList = ({ likedTracks = [], setLikedTracks }) => {
       ) : (
         <ul className="space-y-4">
           {likedTracks.map((track) => (
-            <li key={track.id} className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow">
+            <li
+              key={track.id}
+              className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow"
+            >
               {track.artwork && (
                 <img
                   src={track.artwork}
