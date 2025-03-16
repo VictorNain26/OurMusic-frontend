@@ -80,7 +80,8 @@ export async function apiFetch(url, options = {}) {
     parsed = JSON.parse(responseText);
   } catch (err) {
     console.error('❌ Réponse non parsable:', responseText);
-    throw new Error('Erreur API non parsable');
+    // 🔥 Retourne le texte brut si pas du JSON mais erreur explicite
+    throw new Error(responseText || 'Erreur API non parsable');
   }
 
   if (!response.ok) {
@@ -91,7 +92,6 @@ export async function apiFetch(url, options = {}) {
 
   return parsed;
 }
-
 
 export function logoutFetch() {
   return fetch('https://ourmusic-api.ovh/api/auth/logout', {
