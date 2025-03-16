@@ -37,6 +37,8 @@ async function tryRefreshToken() {
 
 export async function apiFetch(url, options = {}) {
   let accessToken = getAccessToken();
+  console.info(url, options);
+
   const mergedHeaders = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
