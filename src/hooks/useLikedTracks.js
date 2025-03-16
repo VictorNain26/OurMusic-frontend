@@ -64,7 +64,7 @@ export const useLikedTracks = () => {
       toast.success('🗑️ Morceau supprimé');
     },
     onError: (err) => {
-      console.log(id);
+      console.info(id);
       console.error('[DeleteTrack Error]', err);
       toast.error(err.message || 'Erreur lors de la suppression');
     },
@@ -79,7 +79,7 @@ export const useLikedTracks = () => {
     try {
       await deleteTrack.mutateAsync(id);
     } catch (err) {
-      console.log(id);
+      console.info(id);
       console.error('[handleDelete Error]', err);
     }
   };
