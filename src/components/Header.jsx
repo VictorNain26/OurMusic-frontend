@@ -9,13 +9,11 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
   const { user, authReady } = useAuthStore();
 
   return (
-    <header className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm">
-      {/* ▶️ Logo / App Name */}
+    <header className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm z-10">
       <div className="text-xl font-bold text-gray-800">OurMusic</div>
 
-      {/* 👤 Zone utilisateur avec animation si authReady */}
       {authReady && (
-        <div className="flex items-center flex-wrap gap-3 animate-fade">
+        <div className="flex items-center flex-wrap gap-3">
           {user ? (
             <>
               <span className="font-medium text-gray-700">{user.username}</span>
@@ -59,7 +57,6 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
             </>
           )}
 
-          {/* 📺 Chromecast */}
           <ChromecastButton />
         </div>
       )}

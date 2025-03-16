@@ -2,8 +2,6 @@ import React, { useEffect } from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
 import LikedTracksList from '../components/LikedTracksList';
 import { useAuthStore } from '../store/authStore';
-import { AnimatePresence, motion } from 'framer-motion';
-import PageWrapper from '../layout/PageWrapper';
 
 const HomePage = () => {
   const { user, authReady, fetchUser } = useAuthStore();
@@ -21,22 +19,10 @@ const HomePage = () => {
   }
 
   return (
-    <PageWrapper className="bg-white">
+    <div className="min-h-screen bg-white">
       <AzuracastPlayer />
-      <AnimatePresence mode="wait">
-        {user && (
-          <motion.div
-            key="liked-tracks-wrapper"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            transition={{ duration: 0.5 }}
-          >
-            <LikedTracksList />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </PageWrapper>
+      {user && <LikedTracksList />}
+    </div>
   );
 };
 
