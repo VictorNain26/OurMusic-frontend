@@ -54,7 +54,6 @@ export const useLikedTracks = () => {
       if (!id || typeof id !== 'number' || isNaN(id)) {
         throw new Error('ID de suppression invalide');
       }
-      console.log('Suppression du morceau', id);
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },

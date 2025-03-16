@@ -54,14 +54,13 @@ export async function apiFetch(url, options = {}) {
     ...options,
     headers: mergedHeaders,
   };
-  console.info("Fetch", url, fetchOptions);
 
   let response = await fetch(url, fetchOptions);
   let responseText = await response.text();
 
   // 🔁 Tentative de refresh si token expiré
   if (response.status === 401 && accessToken) {
-    console.log('⚠️ Access token expiré, tentative de refresh...');
+    console.info('⚠️ Access token expiré, tentative de refresh...');
     try {
       await tryRefreshToken();
       accessToken = getAccessToken();

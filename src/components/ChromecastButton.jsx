@@ -19,7 +19,7 @@ const ChromecastButton = () => {
         cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
         (event) => {
           if (event.sessionState === cast.framework.SessionState.NO_SESSION) {
-            console.log('[Chromecast] Aucune session active, tentative de reconnexion...');
+            console.info('[Chromecast] Aucune session active, tentative de reconnexion...');
             context.requestSession().catch((err) =>
               console.error('[Chromecast] Reconnexion échouée:', err)
             );
@@ -59,7 +59,7 @@ const ChromecastButton = () => {
     const context = cast.framework.CastContext.getInstance();
     context.requestSession()
       .then(() => {
-        console.log('[Chromecast] Session démarrée avec succès.');
+        console.info('[Chromecast] Session démarrée avec succès.');
       })
       .catch((err) => {
         console.error('[Chromecast] Erreur lors du cast :', err);
