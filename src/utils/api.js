@@ -86,7 +86,7 @@ export async function apiFetch(url, options = {}) {
   // ✅ Parsing intelligent
   let parsed;
   try {
-    parsed = JSON.parse(responseText);
+    parsed = responseText;
   } catch (err) {
     console.error('❌ Réponse non parsable:', responseText);
     if (!response.ok) throw new Error(responseText);
