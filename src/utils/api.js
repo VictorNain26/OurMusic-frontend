@@ -54,6 +54,7 @@ export async function apiFetch(url, options = {}) {
     ...options,
     headers: mergedHeaders,
   };
+  console.info("Fetch", url, fetchOptions);
 
   let response = await fetch(url, fetchOptions);
   let responseText = await response.text();
