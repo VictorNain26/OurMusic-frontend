@@ -71,7 +71,7 @@ export const useLikedTracks = () => {
   });
 
   const handleDelete = async (id) => {
-    if (!id || isNaN(id)) {
+    if (!id || typeof id !== 'number' || isNaN(id)) {
       console.warn('[handleDelete] ID non valide côté front :', id);
       toast.error('ID de suppression invalide');
       return;
