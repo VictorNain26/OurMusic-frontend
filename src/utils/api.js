@@ -40,12 +40,14 @@ export async function apiFetch(url, options = {}) {
   console.info(url, options);
 
   const mergedHeaders = {
-    'Content-Type': 'application/json',
     ...(options.headers || {}),
+    Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+    'Content-Type': 'application/json',
   };
 
-  if (accessToken) {
-    mergedHeaders['Authorization'] = 'Bearer ' + accessToken;
+  // ✅ Supprimer Content-Type si DELETE sans body
+  if (options.method === 'DELETE' && !options.body) {
+    delete mergedHeaders['Content-Type'];
   }
 
   const fetchOptions = {
@@ -68,7 +70,7 @@ export async function apiFetch(url, options = {}) {
       accessToken = getAccessToken();
       const secondHeaders = {
         ...mergedHeaders,
-        Authorization: 'Bearer ' + accessToken,
+        Authorization: `Bearer ${accessToken}`,
       };
       response = await fetch(url, { ...fetchOptions, headers: secondHeaders });
       responseText = await response.text();
@@ -102,7 +104,7 @@ export async function apiFetch(url, options = {}) {
 
   // ✅ Gestion des erreurs explicites
   if (!response.ok) {
-    const errorMessage = parsed?.error || 'Erreur inconnue';
+    const errorMessage = parsed?.error || parsed?.message || response.statusText || 'Erreur inconnue';
     console.error('[API ERROR]', errorMessage);
     throw new Error(errorMessage);
   }
