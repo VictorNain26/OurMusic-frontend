@@ -8,12 +8,12 @@ const LikedTracksList = () => {
     likedTracks,
     isLoading,
     isError,
-    deleteImmediately,
+    handleDelete,
   } = useLikedTracks();
 
-  const handleDelete = async (id) => {
+  const handleDeleteClick = async (id) => {
     if (!id || isNaN(id)) return;
-    await deleteImmediately(id);
+    await handleDelete(id);
   };
 
   const renderContent = () => {
@@ -63,7 +63,7 @@ const LikedTracksList = () => {
               </div>
 
               <Button
-                onClick={() => handleDelete(track.id)}
+                onClick={() => handleDeleteClick(track.id)}
                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
               >
                 Supprimer

@@ -1,4 +1,3 @@
-// src/components/TrackLikeButton.jsx
 import React from 'react';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
@@ -6,18 +5,16 @@ import { useLikedTracks } from '../hooks/useLikedTracks';
 import { useAuthStore } from '../store/authStore';
 
 const TrackLikeButton = ({ track }) => {
-  const { likedTracks, likeTrack, deleteImmediately } = useLikedTracks();
+  const { likedTracks, likeTrack, handleDelete } = useLikedTracks();
   const { user } = useAuthStore();
   const isLoggedIn = !!user;
 
-  // Génère l’URL YouTube si absente
   const youtubeUrl =
     track?.youtubeUrl ||
     `https://www.youtube.com/results?search_query=${encodeURIComponent(
       track?.artist + ' ' + track?.title
     )}`;
 
-  // Vérifie si le morceau est déjà liké
   const match = likedTracks.find(
     (item) =>
       item.title?.toLowerCase() === track.title?.toLowerCase() &&
@@ -51,7 +48,7 @@ const TrackLikeButton = ({ track }) => {
   const handleUnlike = async () => {
     if (!likedTrackId) return;
     try {
-      await deleteImmediately(likedTrackId);
+      await handleDelete(likedTrackId);
     } catch (err) {
       console.error('[TrackLikeButton → Unlike Error]', err);
       toast.error('Erreur lors du unlike');

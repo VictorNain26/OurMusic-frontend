@@ -40,7 +40,7 @@ export const useLikedTracks = () => {
       return res.likedTrack;
     },
     onSuccess: (newTrack) => {
-      queryClient.setQueryData(['likedTracks'], (prev) => [...(prev || []), newTrack]);
+      queryClient.setQueryData(['likedTracks'], (prev = []) => [...prev, newTrack]);
       toast.success('🎶 Morceau liké !');
     },
     onError: (err) => {
@@ -58,8 +58,8 @@ export const useLikedTracks = () => {
       return id;
     },
     onSuccess: (deletedId) => {
-      queryClient.setQueryData(['likedTracks'], (prev) =>
-        (prev || []).filter((track) => track.id !== deletedId)
+      queryClient.setQueryData(['likedTracks'], (prev = []) =>
+        prev.filter((track) => track.id !== deletedId)
       );
       toast.success('🗑️ Morceau supprimé');
     },
@@ -69,17 +69,16 @@ export const useLikedTracks = () => {
     },
   });
 
-  // 👉 Suppression immédiate (utilisé dans les composants)
-  const deleteImmediately = async (id) => {
+  const handleDelete = async (id) => {
+    if (!id || isNaN(id)) {
+      console.warn('[handleDelete] ID non valide côté front :', id);
+      toast.error('ID de suppression invalide');
+      return;
+    }
     try {
-      if (!id || isNaN(id)) {
-        console.warn('[deleteImmediately] ID non valide côté front :', id);
-        toast.error('ID de suppression invalide');
-        return;
-      }
       await deleteTrack.mutateAsync(id);
     } catch (err) {
-      console.error('[deleteImmediately Error]', err);
+      console.error('[handleDelete Error]', err);
     }
   };
 
@@ -90,6 +89,6 @@ export const useLikedTracks = () => {
     refetch,
     likeTrack,
     deleteTrack,
-    deleteImmediately,
+    handleDelete,
   };
 };
