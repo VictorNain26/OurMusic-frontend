@@ -1,15 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Button from './ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 
 const LikedTracksList = () => {
-  const {
-    likedTracks,
-    isLoading,
-    isError,
-    handleDelete,
-  } = useLikedTracks();
+  const { likedTracks, isLoading, isError, handleDelete } = useLikedTracks();
 
   const handleDeleteClick = async (id) => {
     if (!id || isNaN(id)) return;
@@ -25,7 +20,7 @@ const LikedTracksList = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 1.2, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
           className="bg-blue-100 text-blue-700 text-sm font-semibold px-2 py-0.5 rounded-full"
         >
           {likedTracks.length}
@@ -35,17 +30,9 @@ const LikedTracksList = () => {
   );
 
   const renderContent = () => {
-    if (isLoading) {
-      return <p className="text-gray-500">Chargement des morceaux...</p>;
-    }
-
-    if (isError) {
-      return <p className="text-red-500">Erreur lors du chargement des morceaux.</p>;
-    }
-
-    if (likedTracks.length === 0) {
-      return <p className="text-gray-500">Aucun morceau liké pour le moment.</p>;
-    }
+    if (isLoading) return <p className="text-gray-500">Chargement des morceaux...</p>;
+    if (isError) return <p className="text-red-500">Erreur lors du chargement des morceaux.</p>;
+    if (likedTracks.length === 0) return <p className="text-gray-500">Aucun morceau liké pour le moment.</p>;
 
     return (
       <ul className="space-y-4">
@@ -56,7 +43,7 @@ const LikedTracksList = () => {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
               layout
               className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow"
             >
@@ -67,7 +54,6 @@ const LikedTracksList = () => {
                   className="w-24 h-24 object-cover rounded"
                 />
               )}
-
               <div className="flex-1 w-full">
                 <p className="font-semibold break-words">
                   {track.artist} - {track.title}
@@ -81,7 +67,6 @@ const LikedTracksList = () => {
                   Voir sur YouTube
                 </a>
               </div>
-
               <Button
                 onClick={() => handleDeleteClick(track.id)}
                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
@@ -102,7 +87,7 @@ const LikedTracksList = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 30 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
         className="mt-8 max-w-3xl mx-auto px-4"
       >
         {renderHeader()}
