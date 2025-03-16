@@ -54,6 +54,7 @@ export const useLikedTracks = () => {
       if (!id || typeof id !== 'number' || isNaN(id)) {
         throw new Error('ID de suppression invalide');
       }
+      console.log('Suppression du morceau', id);
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
@@ -64,7 +65,6 @@ export const useLikedTracks = () => {
       toast.success('🗑️ Morceau supprimé');
     },
     onError: (err) => {
-      console.info('[DeleteTrack Error]',id);
       console.error('[DeleteTrack Error]', err);
       toast.error(err.message || 'Erreur lors de la suppression');
     },
@@ -79,7 +79,6 @@ export const useLikedTracks = () => {
     try {
       await deleteTrack.mutateAsync(id);
     } catch (err) {
-      console.info('[handleDelete Error]',id);
       console.error('[handleDelete Error]', err);
     }
   };
