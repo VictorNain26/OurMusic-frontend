@@ -1,11 +1,9 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import ButtonRefreshSpotify from './components/ButtonRefreshSpotify';
+import AdminDashboard from './pages/AdminDashboard';
 import Layout from './layout/Layout';
-import AuthGuard from './layout/AuthGuard';
 import AdminGuard from './layout/AdminGuard';
 import { AnimatePresence } from 'framer-motion';
-import PageWrapper from './layout/PageWrapper';
 
 function App() {
   const location = useLocation();
@@ -17,9 +15,7 @@ function App() {
           path="/"
           element={
             <Layout>
-              <PageWrapper>
-                <HomePage />
-              </PageWrapper>
+              <HomePage />
             </Layout>
           }
         />
@@ -28,9 +24,7 @@ function App() {
           element={
             <AdminGuard>
               <Layout>
-                <PageWrapper>
-                  <ButtonRefreshSpotify />
-                </PageWrapper>
+                <AdminDashboard />
               </Layout>
             </AdminGuard>
           }

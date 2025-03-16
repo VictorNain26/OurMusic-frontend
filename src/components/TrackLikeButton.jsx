@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 import { useAuthStore } from '../store/authStore';
+import { motion } from 'framer-motion';
 
 const TrackLikeButton = ({ track }) => {
   const { likedTracks, likeTrack, handleDelete } = useLikedTracks();
@@ -57,23 +58,25 @@ const TrackLikeButton = ({ track }) => {
 
   return (
     <div className="mt-4">
-      {isLiked ? (
-        <Button
-          onClick={handleUnlike}
-          disabled={likeTrack.isPending}
-          className="bg-red-500 hover:bg-red-600 text-white"
-        >
-          {likeTrack.isPending ? 'Retrait...' : 'Unlike'}
-        </Button>
-      ) : (
-        <Button
-          onClick={handleLike}
-          disabled={likeTrack.isPending}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          {likeTrack.isPending ? 'Ajout...' : 'Like'}
-        </Button>
-      )}
+      <motion.div whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 300 }}>
+        {isLiked ? (
+          <Button
+            onClick={handleUnlike}
+            disabled={likeTrack.isPending}
+            className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
+          >
+            {likeTrack.isPending ? 'Retrait...' : 'Unlike'}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleLike}
+            disabled={likeTrack.isPending}
+            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            {likeTrack.isPending ? 'Ajout...' : 'Like'}
+          </Button>
+        )}
+      </motion.div>
     </div>
   );
 };

@@ -20,7 +20,7 @@ const LikedTracksList = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 1.2, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
           className="bg-blue-100 text-blue-700 text-sm font-semibold px-2 py-0.5 rounded-full"
         >
           {likedTracks.length}
@@ -40,10 +40,10 @@ const LikedTracksList = () => {
           {likedTracks.map((track) => (
             <motion.li
               key={track.id}
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              exit={{ opacity: 0, scale: 0.92, y: -10 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
               layout
               className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow"
             >
@@ -54,7 +54,7 @@ const LikedTracksList = () => {
                   className="w-24 h-24 object-cover rounded"
                 />
               )}
-              <div className="flex-1 w-full">
+              <div className="flex-1 w-full min-w-0">
                 <p className="font-semibold break-words">
                   {track.artist} - {track.title}
                 </p>
@@ -69,7 +69,7 @@ const LikedTracksList = () => {
               </div>
               <Button
                 onClick={() => handleDeleteClick(track.id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
+                className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
               >
                 Supprimer
               </Button>
@@ -81,19 +81,16 @@ const LikedTracksList = () => {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key="liked-tracks-list"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 30 }}
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
-        className="mt-8 max-w-3xl mx-auto px-4"
-      >
-        {renderHeader()}
-        {renderContent()}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="mt-8 max-w-3xl mx-auto px-4"
+    >
+      {renderHeader()}
+      {renderContent()}
+    </motion.div>
   );
 };
 
