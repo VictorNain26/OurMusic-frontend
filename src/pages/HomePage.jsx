@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
 import LikedTracksList from '../components/LikedTracksList';
 import { useAuthStore } from '../store/authStore';
+import PageWrapper from '../layout/PageWrapper';
 
 const HomePage = () => {
   const { user, authReady, fetchUser } = useAuthStore();
@@ -20,10 +21,10 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <PageWrapper className="bg-white">
       <AzuracastPlayer />
       {user && <LikedTracksList />}
-    </div>
+    </PageWrapper>
   );
 };
 

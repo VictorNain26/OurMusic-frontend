@@ -31,22 +31,16 @@ const Layout = ({ children }) => {
     <>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
 
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      >
-        <Header
-          onLogin={() => setIsLoginOpen(true)}
-          onRegister={() => setIsRegisterOpen(true)}
-          onLogout={useAuthStore.getState().logout}
-        />
-      </motion.header>
+      <Header
+        onLogin={() => setIsLoginOpen(true)}
+        onRegister={() => setIsRegisterOpen(true)}
+        onLogout={useAuthStore.getState().logout}
+      />
 
       <motion.main
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
         className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 max-w-6xl mx-auto"
       >
         {children}

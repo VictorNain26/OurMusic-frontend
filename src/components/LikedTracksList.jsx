@@ -18,6 +18,22 @@ const LikedTracksList = () => {
     await handleDelete(id);
   };
 
+  // Variants pour effet cascade
+  const listVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10, scale: 0.96 },
+    visible: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -10, scale: 0.92 },
+  };
+
   const renderHeader = () => (
     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
       💖 Morceaux likés
@@ -42,16 +58,21 @@ const LikedTracksList = () => {
     if (likedTracks.length === 0) return <p className="text-gray-500">Aucun morceau liké pour le moment.</p>;
 
     return (
-      <ul className="space-y-4">
+      <motion.ul
+        variants={listVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+        className="space-y-4"
+      >
         <AnimatePresence>
           {likedTracks.map((track) => (
             <motion.li
               key={track.id}
-              initial={{ opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: -10 }}
+              variants={itemVariants}
               transition={{ duration: 0.4, ease: 'easeOut' }}
               layout
+              exit="exit"
               className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow"
             >
               {track.artwork && (
@@ -83,16 +104,16 @@ const LikedTracksList = () => {
             </motion.li>
           ))}
         </AnimatePresence>
-      </ul>
+      </motion.ul>
     );
   };
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={controls}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: 'easeOut', delay: 0.5 }}
       className="mt-8 max-w-3xl mx-auto px-4"
     >
       {renderHeader()}
@@ -102,3 +123,4 @@ const LikedTracksList = () => {
 };
 
 export default LikedTracksList;
+// Compare this snippet from src/components/TrackLikeButton.jsx:

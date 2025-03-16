@@ -15,18 +15,22 @@ const App = () => {
         <Route
           path="/"
           element={
-            <Layout>
-              <HomePage />
-            </Layout>
+            <AnimatePresence mode="wait">
+              <Layout>
+                <HomePage />
+              </Layout>
+            </AnimatePresence>
           }
         />
         <Route
           path="/admin/dashboard"
           element={
             <AdminGuard>
-              <Layout>
-                <AdminDashboard />
-              </Layout>
+              <AnimatePresence mode="wait">
+                <Layout>
+                  <AdminDashboard />
+                </Layout>
+              </AnimatePresence>
             </AdminGuard>
           }
         />
