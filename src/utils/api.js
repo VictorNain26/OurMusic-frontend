@@ -55,6 +55,8 @@ export async function apiFetch(url, options = {}) {
     headers: mergedHeaders,
   };
 
+  console.info('🚀 Fetch:', url, fetchOptions);
+
   let response = await fetch(url, fetchOptions);
   let responseText = await response.text();
 
@@ -87,17 +89,14 @@ export async function apiFetch(url, options = {}) {
   try {
     parsed = JSON.parse(responseText);
   } catch (err) {
-    // ✅ Si ce n’est pas du JSON, on ignore le parse sans log d’erreur bruyante
     if (import.meta.env.DEV) {
       console.warn('🛈 Réponse non parsable JSON (fallback texte brut):', responseText);
     }
 
-    // ✅ Si erreur HTTP (ex: 400) et texte non JSON → on relance une erreur propre
     if (!response.ok) {
       throw new Error(responseText || response.statusText || 'Erreur serveur');
     }
 
-    // ✅ Sinon (cas rare : 200 OK mais texte brut), on retourne tel quel
     return responseText;
   }
 
