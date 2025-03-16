@@ -79,6 +79,7 @@ export const useLikedTracks = () => {
     try {
       await deleteTrack.mutateAsync(id);
     } catch (err) {
+      console.log(id);
       console.error('[handleDelete Error]', err);
     }
   };
