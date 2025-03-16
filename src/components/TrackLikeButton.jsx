@@ -8,6 +8,7 @@ const TrackLikeButton = ({ track }) => {
   const { likedTracks, likeTrack, deleteImmediately } = useLikedTracks();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Génère l’URL YouTube si absente
   const youtubeUrl =
     track?.youtubeUrl ||
     `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -15,10 +16,10 @@ const TrackLikeButton = ({ track }) => {
     )}`;
 
   useEffect(() => {
-    const token = getAccessToken();
-    setIsLoggedIn(Boolean(token));
+    setIsLoggedIn(Boolean(getAccessToken()));
   }, []);
 
+  // Vérifie si le morceau est déjà liké
   const match = likedTracks.find(
     (item) =>
       item.title?.toLowerCase() === track.title?.toLowerCase() &&
@@ -31,8 +32,8 @@ const TrackLikeButton = ({ track }) => {
   const handleLike = async () => {
     if (!isLoggedIn) {
       toast.error("Veuillez vous connecter pour liker.");
-      const loginButton = document.querySelector("button[data-login-button]");
-      if (loginButton) loginButton.click();
+      const loginBtn = document.querySelector('[data-login-button]');
+      if (loginBtn) loginBtn.click();
       return;
     }
 
@@ -44,14 +45,19 @@ const TrackLikeButton = ({ track }) => {
         youtubeUrl,
       });
     } catch (err) {
-      console.error('Erreur lors du like :', err);
-      toast.error('Impossible de liker le morceau.');
+      console.error('[TrackLikeButton → Like Error]', err);
+      toast.error(err.message || 'Erreur lors du like');
     }
   };
 
   const handleUnlike = async () => {
     if (!likedTrackId) return;
-    await deleteImmediately(likedTrackId);
+    try {
+      await deleteImmediately(likedTrackId);
+    } catch (err) {
+      console.error('[TrackLikeButton → Unlike Error]', err);
+      toast.error('Erreur lors du unlike');
+    }
   };
 
   return (
@@ -62,7 +68,7 @@ const TrackLikeButton = ({ track }) => {
           disabled={likeTrack.isPending}
           className="bg-red-500 hover:bg-red-600 text-white"
         >
-          {likeTrack.isPending ? 'Traitement...' : 'Unlike'}
+          {likeTrack.isPending ? 'Retrait...' : 'Unlike'}
         </Button>
       ) : (
         <Button
@@ -70,7 +76,7 @@ const TrackLikeButton = ({ track }) => {
           disabled={likeTrack.isPending}
           className="bg-blue-500 hover:bg-blue-600 text-white"
         >
-          {likeTrack.isPending ? 'Traitement...' : 'Like'}
+          {likeTrack.isPending ? 'Ajout...' : 'Like'}
         </Button>
       )}
     </div>

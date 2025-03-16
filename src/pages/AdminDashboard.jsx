@@ -3,13 +3,15 @@ import ButtonRefreshSpotify from '../components/ButtonRefreshSpotify';
 
 const AdminDashboard = () => {
   return (
-    <div className="max-w-4xl mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6 text-center">🎛️ Dashboard Admin</h1>
+    <div className="max-w-4xl mx-auto py-10 px-4">
+      <h1 className="text-3xl font-bold mb-8 text-center">🎛️ Dashboard Administrateur</h1>
 
-      <div className="bg-white p-6 rounded-xl shadow-xl">
-        <h2 className="text-xl font-semibold mb-4">📦 Gestion des Playlists Spotify</h2>
-        <ButtonRefreshSpotify />
-      </div>
+      <section className="bg-white rounded-xl shadow-xl p-6 space-y-6">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">📦 Gestion des playlists Spotify</h2>
+          <ButtonRefreshSpotify />
+        </div>
+      </section>
     </div>
   );
 };

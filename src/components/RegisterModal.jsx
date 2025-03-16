@@ -8,16 +8,14 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { register, loading } = useAuthStore();
-
-  const resetForm = () => {
-    setUsername('');
-    setEmail('');
-    setPassword('');
-  };
+  const { register, loading, error } = useAuthStore();
 
   useEffect(() => {
-    if (!isOpen) resetForm();
+    if (!isOpen) {
+      setUsername('');
+      setEmail('');
+      setPassword('');
+    }
   }, [isOpen]);
 
   const handleSubmit = async (e) => {
@@ -28,22 +26,49 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
 
   return (
     <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
-      <h2 className="text-2xl font-semibold mb-4">S'inscrire</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-center">Créer un compte</h2>
+
+      {error && <p className="text-red-500 mb-4 text-sm text-center">{error}</p>}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">Nom d'utilisateur</label>
-          <Input value={username} onChange={(e) => setUsername(e.target.value)} required />
+          <Input
+            placeholder="Nom d'utilisateur"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
         </div>
+
         <div>
           <label className="block mb-1 font-medium">Email</label>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            type="email"
+            placeholder="Adresse email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
+
         <div>
           <label className="block mb-1 font-medium">Mot de passe</label>
-          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <Input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
-        <Button type="submit" disabled={loading} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-          {loading ? "Création du compte..." : "S'inscrire"}
+
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+        >
+          {loading ? 'Création du compte...' : "S'inscrire"}
         </Button>
       </form>
     </ModalWrapper>

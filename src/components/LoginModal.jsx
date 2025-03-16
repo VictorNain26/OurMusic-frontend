@@ -9,13 +9,11 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
   const [password, setPassword] = useState('');
   const { login, error, loading } = useAuthStore();
 
-  const resetForm = () => {
-    setEmail('');
-    setPassword('');
-  };
-
   useEffect(() => {
-    if (!isOpen) resetForm();
+    if (!isOpen) {
+      setEmail('');
+      setPassword('');
+    }
   }, [isOpen]);
 
   const handleSubmit = async (e) => {
@@ -26,18 +24,38 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
 
   return (
     <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
-      <h2 className="text-2xl font-semibold mb-4">Se connecter</h2>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      <h2 className="text-2xl font-semibold mb-4 text-center">Se connecter</h2>
+
+      {error && <p className="text-red-500 mb-4 text-sm text-center">{error}</p>}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">Email</label>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            type="email"
+            placeholder="Adresse email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
+
         <div>
           <label className="block mb-1 font-medium">Mot de passe</label>
-          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <Input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
-        <Button type="submit" disabled={loading} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+        >
           {loading ? 'Connexion...' : 'Se connecter'}
         </Button>
       </form>

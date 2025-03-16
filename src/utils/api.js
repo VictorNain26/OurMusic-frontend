@@ -39,7 +39,7 @@ export async function apiFetch(url, options = {}) {
   let accessToken = getAccessToken();
   const mergedHeaders = {
     'Content-Type': 'application/json',
-    ...(options.headers || {})
+    ...(options.headers || {}),
   };
 
   if (accessToken) {
@@ -56,7 +56,7 @@ export async function apiFetch(url, options = {}) {
   let response = await fetch(url, fetchOptions);
   let responseText = await response.text();
 
-  // ✅ Réessayer si token expiré
+  // 🔁 Tentative de refresh si token expiré
   if (response.status === 401 && accessToken) {
     console.log('⚠️ Access token expiré, tentative de refresh...');
     try {
@@ -74,21 +74,32 @@ export async function apiFetch(url, options = {}) {
     }
   }
 
-  // ✅ Toujours tenter de parser la réponse
+  // ✅ Réponse vide ou sans contenu → retour vide
+  if (!responseText || responseText.trim() === '') {
+    if (response.ok) return {}; // Réponse vide mais OK (ex: 204)
+    throw new Error('Réponse vide du serveur.');
+  }
+
+  // ✅ Parsing intelligent
   let parsed;
   try {
     parsed = JSON.parse(responseText);
   } catch (err) {
     console.error('❌ Réponse non parsable:', responseText);
-    // 🔥 Retourne le texte brut si pas du JSON mais erreur explicite
-    throw new Error(responseText || 'Erreur API non parsable');
+    if (!response.ok) throw new Error(responseText);
+    // Si status 200 mais non JSON (rare) → retourner le texte brut
+    return responseText;
   }
 
+  // ✅ Gestion des erreurs explicites
   if (!response.ok) {
     const errorMessage = parsed?.error || 'Erreur inconnue';
     console.error('[API ERROR]', errorMessage);
     throw new Error(errorMessage);
   }
+
+  // ✅ Debug utile (optionnel)
+  console.log('[apiFetch]', url, '→', parsed);
 
   return parsed;
 }
