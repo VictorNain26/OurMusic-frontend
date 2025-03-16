@@ -8,7 +8,7 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
   const { user, authReady } = useAuthStore();
 
   return (
-    <header className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm z-20">
+    <header className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm">
       <div className="text-xl font-bold text-gray-800">
         <Link to="/">OurMusic</Link>
       </div>
@@ -18,7 +18,6 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
           {user ? (
             <>
               <span className="font-medium text-gray-700">{user.username}</span>
-
               {user.role === 'admin' && (
                 <>
                   <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full uppercase tracking-wide">
@@ -32,7 +31,6 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
                   </Link>
                 </>
               )}
-
               <Button
                 onClick={onLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-sm"
@@ -57,7 +55,6 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
               </Button>
             </>
           )}
-
           <ChromecastButton />
         </div>
       )}

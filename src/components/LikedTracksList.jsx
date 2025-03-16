@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Button from './ui/Button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 
 const LikedTracksList = () => {
   const { likedTracks, isLoading, isError, handleDelete } = useLikedTracks();
+  const controls = useAnimation();
+  const [ref, inView] = useInView({ threshold: 0.2, triggerOnce: true });
+
+  useEffect(() => {
+    if (inView) controls.start({ opacity: 1, y: 0 });
+  }, [inView, controls]);
 
   const handleDeleteClick = async (id) => {
     if (!id || isNaN(id)) return;
@@ -82,10 +89,10 @@ const LikedTracksList = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      animate={controls}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
       className="mt-8 max-w-3xl mx-auto px-4"
     >
       {renderHeader()}
