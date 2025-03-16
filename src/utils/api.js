@@ -86,7 +86,7 @@ export async function apiFetch(url, options = {}) {
   // ✅ Parsing intelligent
   let parsed;
   try {
-    parsed = responseText;
+    parsed = JSON.parse(responseText);
   } catch (err) {
     console.info(responseText);
 
@@ -102,9 +102,6 @@ export async function apiFetch(url, options = {}) {
     console.error('[API ERROR]', errorMessage);
     throw new Error(errorMessage);
   }
-
-  // ✅ Debug utile (optionnel)
-  console.log('[apiFetch]', url, '→', parsed);
 
   return parsed;
 }
