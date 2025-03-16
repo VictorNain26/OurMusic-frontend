@@ -17,19 +17,14 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm z-30"
+        className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm z-10"
       >
-        {/* ▶️ Logo / Nom */}
+        {/* ▶️ Logo / App Name */}
         <div className="text-xl font-bold text-gray-800">OurMusic</div>
 
-        {/* 👤 Utilisateur + Actions */}
+        {/* 👤 Zone utilisateur */}
         {authReady && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="flex items-center flex-wrap gap-3"
-          >
+          <div className="flex items-center flex-wrap gap-3">
             {user ? (
               <>
                 <span className="font-medium text-gray-700">{user.username}</span>
@@ -72,10 +67,9 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
                 </Button>
               </>
             )}
-
             {/* 📺 Chromecast */}
             <ChromecastButton />
-          </motion.div>
+          </div>
         )}
       </motion.header>
     </AnimatePresence>

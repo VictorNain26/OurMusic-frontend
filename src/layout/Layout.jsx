@@ -21,42 +21,34 @@ const Layout = ({ children }) => {
 
   return (
     <>
+      {/* ✅ Toasts globaux */}
       <Toaster position="top-right" />
-      <div className="relative min-h-screen flex flex-col bg-white text-gray-800">
-        {/* 🔹 Header avec un z-index fixe sous les modales */}
+      <AnimatePresence mode="wait">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          key="layout"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="relative z-20"
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="min-h-screen flex flex-col bg-white text-gray-800"
         >
+          {/* 🔝 En-tête animé */}
           <Header
             onLogin={() => setIsLoginOpen(true)}
             onRegister={() => setIsRegisterOpen(true)}
             onLogout={useAuthStore.getState().logout}
           />
+
+          {/* 🔐 Modales Auth */}
+          <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
+          <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
+
+          {/* 📦 Contenu principal */}
+          <main className="flex-1 w-full px-4 py-6 max-w-6xl mx-auto">
+            {children}
+          </main>
         </motion.div>
-
-        {/* 🔹 Modales avec un z-index supérieur */}
-        <AnimatePresence>
-          {isLoginOpen && (
-            <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
-          )}
-          {isRegisterOpen && (
-            <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
-          )}
-        </AnimatePresence>
-
-        {/* 🔹 Contenu principal */}
-        <motion.main
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="flex-1 w-full px-4 py-6 max-w-6xl mx-auto"
-        >
-          {children}
-        </motion.main>
-      </div>
+      </AnimatePresence>
     </>
   );
 };
