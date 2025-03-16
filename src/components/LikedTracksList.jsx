@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Button from './ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLikedTracks } from '../hooks/useLikedTracks';
@@ -15,6 +15,24 @@ const LikedTracksList = () => {
     if (!id || isNaN(id)) return;
     await handleDelete(id);
   };
+
+  const renderHeader = () => (
+    <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+      💖 Morceaux likés
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={likedTracks.length}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 1.2, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          className="bg-blue-100 text-blue-700 text-sm font-semibold px-2 py-0.5 rounded-full"
+        >
+          {likedTracks.length}
+        </motion.span>
+      </AnimatePresence>
+    </h2>
+  );
 
   const renderContent = () => {
     if (isLoading) {
@@ -35,8 +53,10 @@ const LikedTracksList = () => {
           {likedTracks.map((track) => (
             <motion.li
               key={track.id}
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.3 } }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              transition={{ duration: 0.3 }}
               layout
               className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow"
             >
@@ -76,10 +96,19 @@ const LikedTracksList = () => {
   };
 
   return (
-    <div className="mt-8 max-w-3xl mx-auto px-4">
-      <h2 className="text-2xl font-bold mb-4">💖 Morceaux likés</h2>
-      {renderContent()}
-    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="liked-tracks-list"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 30 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="mt-8 max-w-3xl mx-auto px-4"
+      >
+        {renderHeader()}
+        {renderContent()}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
