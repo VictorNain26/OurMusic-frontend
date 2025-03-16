@@ -13,9 +13,9 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
       {/* ▶️ Logo / App Name */}
       <div className="text-xl font-bold text-gray-800">OurMusic</div>
 
-      {/* 👤 Zone utilisateur */}
+      {/* 👤 Zone utilisateur avec animation si authReady */}
       {authReady && (
-        <div className="flex items-center flex-wrap gap-3">
+        <div className="flex items-center flex-wrap gap-3 animate-fade">
           {user ? (
             <>
               <span className="font-medium text-gray-700">{user.username}</span>
