@@ -88,6 +88,8 @@ export async function apiFetch(url, options = {}) {
   try {
     parsed = responseText;
   } catch (err) {
+    console.info(responseText);
+
     console.error('❌ Réponse non parsable:', responseText);
     if (!response.ok) throw new Error(responseText);
     // Si status 200 mais non JSON (rare) → retourner le texte brut
