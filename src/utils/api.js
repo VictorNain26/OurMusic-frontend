@@ -88,22 +88,16 @@ export async function apiFetch(url, options = {}) {
   try {
     parsed = JSON.parse(responseText);
   } catch (err) {
-    console.info(responseText);
+    if (import.meta.env.DEV) {
+      console.warn('🛈 Réponse non parsable JSON (fallback texte brut):', responseText);
+    }
 
-    console.error('❌ Réponse non parsable:', responseText);
-    if (!response.ok) throw new Error(responseText);
-    // Si status 200 mais non JSON (rare) → retourner le texte brut
+    if (!response.ok) {
+      throw new Error(responseText || response.statusText || 'Erreur serveur');
+    }
+
     return responseText;
   }
-
-  // ✅ Gestion des erreurs explicites
-  if (!response.ok) {
-    const errorMessage = parsed?.error || 'Erreur inconnue';
-    console.error('[API ERROR]', errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  return parsed;
 }
 
 export function logoutFetch() {
