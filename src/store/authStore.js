@@ -1,6 +1,8 @@
+// src/store/authStore.js
 import { create } from 'zustand';
 import { apiFetch, getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
+import { queryClient } from '../utils/queryClient';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -99,6 +101,7 @@ export const useAuthStore = create((set, get) => ({
       console.warn('Erreur logout :', err);
     } finally {
       setAccessToken(null);
+      queryClient.removeQueries(['likedTracks']);
       set({ user: null });
       toast.success('Déconnexion réussie');
     }

@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { getAccessToken } from '../utils/api';
+// src/components/TrackLikeButton.jsx
+import React from 'react';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 import { useLikedTracks } from '../hooks/useLikedTracks';
+import { useAuthStore } from '../store/authStore';
 
 const TrackLikeButton = ({ track }) => {
   const { likedTracks, likeTrack, deleteImmediately } = useLikedTracks();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user } = useAuthStore();
+  const isLoggedIn = !!user;
 
   // Génère l’URL YouTube si absente
   const youtubeUrl =
@@ -14,10 +16,6 @@ const TrackLikeButton = ({ track }) => {
     `https://www.youtube.com/results?search_query=${encodeURIComponent(
       track?.artist + ' ' + track?.title
     )}`;
-
-  useEffect(() => {
-    setIsLoggedIn(Boolean(getAccessToken()));
-  }, []);
 
   // Vérifie si le morceau est déjà liké
   const match = likedTracks.find(
