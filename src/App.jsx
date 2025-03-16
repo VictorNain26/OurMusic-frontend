@@ -1,38 +1,43 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ButtonRefreshSpotify from './components/ButtonRefreshSpotify';
 import Layout from './layout/Layout';
 import AuthGuard from './layout/AuthGuard';
 import AdminGuard from './layout/AdminGuard';
+import { AnimatePresence } from 'framer-motion';
+import PageWrapper from './layout/PageWrapper';
 
 function App() {
+  const location = useLocation();
+
   return (
-    <Routes>
-      {/* 🏠 Page publique */}
-      <Route
-        path="/"
-        element={
-          <Layout>
-            <HomePage />
-          </Layout>
-        }
-      />
-
-      {/* 🔐 Admin Dashboard */}
-      <Route
-        path="/admin/dashboard"
-        element={
-          <AdminGuard>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={
             <Layout>
-              <ButtonRefreshSpotify />
+              <PageWrapper>
+                <HomePage />
+              </PageWrapper>
             </Layout>
-          </AdminGuard>
-        }
-      />
-
-      {/* 🚧 Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminGuard>
+              <Layout>
+                <PageWrapper>
+                  <ButtonRefreshSpotify />
+                </PageWrapper>
+              </Layout>
+            </AdminGuard>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
   );
 }
 
