@@ -5,10 +5,14 @@ import Button from './ui/Button';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 
 const TrackLikeButton = ({ track }) => {
-  const { likedTracks, likeTrack, deleteTrack } = useLikedTracks();
+  const { likedTracks, likeTrack, deleteImmediately } = useLikedTracks();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const youtubeUrl = track?.youtubeUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(track?.artist + ' ' + track?.title)}`;
+  const youtubeUrl =
+    track?.youtubeUrl ||
+    `https://www.youtube.com/results?search_query=${encodeURIComponent(
+      track?.artist + ' ' + track?.title
+    )}`;
 
   useEffect(() => {
     const token = getAccessToken();
@@ -39,18 +43,15 @@ const TrackLikeButton = ({ track }) => {
         artwork: track.art || '',
         youtubeUrl,
       });
-      toast.success('Morceau liké');
     } catch (err) {
       console.error('Erreur lors du like :', err);
       toast.error('Impossible de liker le morceau.');
     }
   };
 
-  const { confirmAndDelete } = useLikedTracks();
-
   const handleUnlike = async () => {
     if (!likedTrackId) return;
-    await confirmAndDelete(likedTrackId);
+    await deleteImmediately(likedTrackId);
   };
 
   return (
@@ -58,10 +59,10 @@ const TrackLikeButton = ({ track }) => {
       {isLiked ? (
         <Button
           onClick={handleUnlike}
-          disabled={deleteTrack.isPending}
+          disabled={likeTrack.isPending}
           className="bg-red-500 hover:bg-red-600 text-white"
         >
-          {deleteTrack.isPending ? 'Traitement...' : 'Unlike'}
+          {likeTrack.isPending ? 'Traitement...' : 'Unlike'}
         </Button>
       ) : (
         <Button

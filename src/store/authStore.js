@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { apiFetch, getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   user: null,
   loading: false,
   error: null,
@@ -54,17 +54,16 @@ export const useAuthStore = create((set) => ({
   fetchUser: async () => {
     const token = getAccessToken();
     if (!token) {
-      set({ authReady: true });
+      set({ authReady: true, user: null });
       return;
     }
 
-    set({ loading: true });
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/me');
-      set({ user: data, loading: false, authReady: true });
+      set({ user: data, authReady: true });
     } catch (err) {
-      console.warn('fetchUser failed, trying refresh...', err.message);
-      await useAuthStore.getState().refreshToken();
+      console.warn('[fetchUser] Erreur, tentative de refresh :', err.message);
+      await get().refreshToken();
     }
   },
 
@@ -76,17 +75,18 @@ export const useAuthStore = create((set) => ({
         headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!res.ok) {
-        throw new Error('Refresh échoué');
-      }
+      if (!res.ok) throw new Error('Refresh échoué');
 
       const data = await res.json();
       if (data.accessToken) {
         setAccessToken(data.accessToken);
-        await useAuthStore.getState().fetchUser(); // relance le fetch user
+        await get().fetchUser();
+      } else {
+        setAccessToken(null);
+        set({ user: null, authReady: true });
       }
     } catch (err) {
-      console.warn('[RefreshToken Error]', err);
+      console.warn('[refreshToken] Erreur :', err.message);
       setAccessToken(null);
       set({ user: null, authReady: true });
     }
@@ -95,8 +95,8 @@ export const useAuthStore = create((set) => ({
   logout: async () => {
     try {
       await logoutFetch();
-    } catch (e) {
-      console.warn('logoutFetch error:', e);
+    } catch (err) {
+      console.warn('Erreur logout :', err);
     } finally {
       setAccessToken(null);
       set({ user: null });

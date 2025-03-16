@@ -9,7 +9,6 @@ export const useLikedTracks = () => {
     const token = getAccessToken();
     if (!token) throw new Error('Utilisateur non connecté');
     const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
-    console.log('✅ Tracks récupérés:', data);
     return data.likedTracks;
   };
 
@@ -21,20 +20,17 @@ export const useLikedTracks = () => {
 
   const deleteTrack = useMutation({
     mutationFn: async (id) => {
-      console.log('🚨 Suppression track ID envoyé:', id);
       if (!id || typeof id !== 'number') throw new Error('ID de suppression invalide');
       await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
     onSuccess: (deletedId) => {
-      console.log('✅ Track supprimé:', deletedId);
-      queryClient.setQueryData(['likedTracks'], (prev) =>
-        prev?.filter((track) => track.id !== deletedId)
-      );
+      queryClient.setQueryData(['likedTracks'], (prev) => prev?.filter((track) => track.id !== deletedId));
+      toast.success('Morceau supprimé.');
     },
     onError: (error) => {
-      console.error('❌ Erreur suppression track:', error.message);
-    }
+      toast.error(error.message || 'Erreur lors de la suppression.');
+    },
   });
 
   const likeTrack = useMutation({
@@ -46,22 +42,20 @@ export const useLikedTracks = () => {
       return res.likedTrack;
     },
     onSuccess: (newTrack) => {
-      console.log('✅ Nouveau track liké:', newTrack);
       queryClient.setQueryData(['likedTracks'], (prev) => [...(prev || []), newTrack]);
+      toast.success('Morceau liké.');
     },
     onError: (error) => {
-      console.error('❌ Erreur like track:', error.message);
-    }
+      toast.error(error.message || 'Erreur lors du like.');
+    },
   });
 
-  const confirmAndDelete = async (id) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer ce morceau ?")) return;
+  // 👉 Suppression sans confirmation
+  const deleteImmediately = async (id) => {
     try {
       await deleteTrack.mutateAsync(id);
-      toast.success("Morceau supprimé.");
     } catch (err) {
       console.error('Erreur suppression :', err);
-      toast.error(err.message || 'Erreur lors de la suppression.');
     }
   };
 
@@ -71,6 +65,6 @@ export const useLikedTracks = () => {
     refetch,
     deleteTrack,
     likeTrack,
-    confirmAndDelete,
+    deleteImmediately, // nouveau nom clair
   };
 };

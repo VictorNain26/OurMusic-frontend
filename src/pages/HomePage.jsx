@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
 import LikedTracksList from '../components/LikedTracksList';
 import { useAuthStore } from '../store/authStore';
@@ -6,9 +6,9 @@ import { useAuthStore } from '../store/authStore';
 const HomePage = () => {
   const { user, authReady, fetchUser } = useAuthStore();
 
-  React.useEffect(() => {
-    fetchUser();
-  }, []);
+  useEffect(() => {
+    if (!authReady) fetchUser();
+  }, [authReady, fetchUser]);
 
   if (!authReady) {
     return (

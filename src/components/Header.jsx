@@ -32,10 +32,17 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
           </>
         ) : (
           <>
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={onLogin}>
+            <Button
+              data-login-button
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={onLogin}
+            >
               Login
             </Button>
-            <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={onRegister}>
+            <Button
+              className="bg-green-500 hover:bg-green-600 text-white"
+              onClick={onRegister}
+            >
               Register
             </Button>
           </>

@@ -4,12 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 
 const LikedTracksList = () => {
-  const { likedTracks, isLoading, deleteTrack } = useLikedTracks();
-  const { confirmAndDelete } = useLikedTracks();
-
+  const { likedTracks, isLoading, deleteImmediately } = useLikedTracks();
 
   const handleDelete = async (id) => {
-    await confirmAndDelete(id);
+    await deleteImmediately(id);
   };
 
   return (
