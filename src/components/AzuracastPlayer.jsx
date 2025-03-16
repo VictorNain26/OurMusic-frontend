@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TrackLikeButton from './TrackLikeButton';
 import { usePlayerStore } from '../store/playerStore';
+import { motion } from 'framer-motion';
 
 const AzuracastPlayer = () => {
   const [nowPlaying, setNowPlaying] = useState(null);
@@ -118,7 +119,12 @@ const AzuracastPlayer = () => {
   }
 
   return (
-    <div className="mx-auto my-6 max-w-3xl px-4 text-center">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className="mx-auto my-6 max-w-3xl px-4 text-center"
+    >
       <h2 className="text-2xl font-bold mb-4">{station.name}</h2>
 
       {currentSong && (
@@ -183,7 +189,7 @@ const AzuracastPlayer = () => {
       )}
 
       {error && <div className="mt-4 text-red-500">{error}</div>}
-    </div>
+    </motion.div>
   );
 };
 

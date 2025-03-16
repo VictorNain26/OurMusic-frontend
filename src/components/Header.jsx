@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import ChromecastButton from './ChromecastButton';
 import Button from './ui/Button';
+import { motion } from 'framer-motion';
 
 const Header = ({ onLogin, onRegister, onLogout }) => {
   const { user, authReady } = useAuthStore();
 
   return (
-    <header className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm">
+    <motion.header
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm"
+    >
       <div className="text-xl font-bold text-gray-800">
         <Link to="/">OurMusic</Link>
       </div>
@@ -58,8 +64,9 @@ const Header = ({ onLogin, onRegister, onLogout }) => {
           <ChromecastButton />
         </div>
       )}
-    </header>
+    </motion.header>
   );
 };
 
 export default Header;
+
