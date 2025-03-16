@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+/* Custom global styles */
+html,
+body {
+  @apply bg-white text-gray-800 min-h-screen antialiased;
+}
+
+a {
+  @apply text-blue-600 hover:text-blue-800 underline transition-colors;
+}

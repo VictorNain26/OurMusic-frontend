@@ -19,7 +19,7 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
       <div className="min-h-screen flex flex-col bg-white text-gray-800">
         <Header
           onLogin={() => setIsLoginOpen(true)}
