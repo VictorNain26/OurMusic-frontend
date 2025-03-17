@@ -53,19 +53,22 @@ const LikedTracksList = () => {
   );
 
   const renderContent = () => {
-    if (isLoading) return <p className="text-gray-500">Chargement des morceaux...</p>;
-    if (isError) return <p className="text-red-500">Erreur lors du chargement des morceaux.</p>;
-    if (likedTracks.length === 0) return <p className="text-gray-500">Aucun morceau liké pour le moment.</p>;
+    if (isLoading)
+      return <p className="text-gray-500">Chargement des morceaux...</p>;
+    if (isError)
+      return <p className="text-red-500">Erreur lors du chargement des morceaux.</p>;
+    if (likedTracks.length === 0)
+      return <p className="text-gray-500">Aucun morceau liké pour le moment.</p>;
 
     return (
-      <motion.ul
-        variants={listVariants}
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        className="space-y-4"
-      >
-        <AnimatePresence>
+      <AnimatePresence>
+        <motion.ul
+          variants={listVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          className="space-y-4"
+        >
           {likedTracks.map((track) => (
             <motion.li
               key={track.id}
@@ -103,8 +106,8 @@ const LikedTracksList = () => {
               </Button>
             </motion.li>
           ))}
-        </AnimatePresence>
-      </motion.ul>
+        </motion.ul>
+      </AnimatePresence>
     );
   };
 
@@ -123,4 +126,3 @@ const LikedTracksList = () => {
 };
 
 export default LikedTracksList;
-// Compare this snippet from src/components/TrackLikeButton.jsx:

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { apiFetch, getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
+import { queryClient } from '../utils/queryClient';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -90,4 +91,3 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 }));
-

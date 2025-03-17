@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
-const AuthGuard = ({ children }) => {
+const AdminGuard = ({ children }) => {
   const { user, authReady, fetchUser } = useAuthStore();
 
   useEffect(() => {
-    fetchUser();
-  }, []);
+    if (!authReady) {
+      fetchUser();
+    }
+  }, [authReady, fetchUser]);
 
   if (!authReady) {
     return (
@@ -17,11 +19,11 @@ const AuthGuard = ({ children }) => {
     );
   }
 
-  if (!user) {
+  if (!user || user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
   return children;
 };
 
-export default AuthGuard;
+export default AdminGuard;
