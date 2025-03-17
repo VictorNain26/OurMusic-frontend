@@ -73,9 +73,7 @@ const AzuracastPlayer = () => {
     connectSSE();
 
     const handleOnline = () => {
-      if (!connected) {
-        connectSSE();
-      }
+      if (!connected) connectSSE();
     };
 
     window.addEventListener('online', handleOnline);
@@ -119,7 +117,7 @@ const AzuracastPlayer = () => {
 
   if (!nowPlaying) {
     return (
-      <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+      <div className="w-full flex items-center justify-center py-20">
         <div className="w-12 h-12 border-8 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
       </div>
     );
@@ -129,77 +127,72 @@ const AzuracastPlayer = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.6, ease: 'easeOut', delay: 0.3 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
       className="mx-auto my-6 max-w-3xl px-4 text-center"
     >
-      {!nowPlaying ? (
-        <div className="w-12 h-12 border-8 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto my-10" />
-      ) : (
-        <>
-          <h2 className="text-2xl font-bold mb-4">{station.name}</h2>
-          {currentSong && (
-            <div className="mb-4">
-              <p className="text-lg font-semibold break-words">
-                🎵 {currentSong.artist} - {currentSong.title}
-              </p>
-              {currentSong.art && (
-                <img
-                  src={currentSong.art}
-                  alt={`${currentSong.artist} - ${currentSong.title}`}
-                  className="w-48 mx-auto rounded shadow my-3"
-                />
-              )}
-              <TrackLikeButton track={currentSong} />
-            </div>
+      <h2 className="text-2xl font-bold mb-4">{station.name}</h2>
+
+      {currentSong && (
+        <div className="mb-4">
+          <p className="text-lg font-semibold break-words">
+            🎵 {currentSong.artist} - {currentSong.title}
+          </p>
+          {currentSong.art && (
+            <img
+              src={currentSong.art}
+              alt={`${currentSong.artist} - ${currentSong.title}`}
+              className="w-48 mx-auto rounded shadow my-3"
+            />
           )}
-
-          {station.listen_url && <audio ref={audioRef} preload="auto" />}
-
-          <div className="flex justify-center gap-4 mt-4 flex-wrap">
-            <button
-              onClick={isPlaying ? handleStop : handlePlay}
-              disabled={!station.listen_url}
-              className={`px-6 py-2 text-white rounded transition-colors ${
-                isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-              }`}
-            >
-              {isPlaying ? 'Stop' : 'Play'}
-            </button>
-
-            <label className="text-lg font-medium">
-              Volume:
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="ml-2 align-middle"
-              />
-            </label>
-          </div>
-
-          <div className="mt-4 text-sm">
-            {Math.floor(elapsed / 60)}:{('0' + (elapsed % 60)).slice(-2)} /{' '}
-            {Math.floor(duration / 60)}:{('0' + (duration % 60)).slice(-2)}
-          </div>
-
-          {nowPlaying?.song_history?.length > 0 && (
-            <div className="mt-6 text-left">
-              <h3 className="text-xl font-semibold mb-2">Historique des 5 derniers morceaux :</h3>
-              <ul className="list-disc list-inside text-sm space-y-1">
-                {nowPlaying.song_history.slice(0, 5).map((item) => (
-                  <li key={item.sh_id}>
-                    {item.song.artist} - {item.song.title}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </>
+          <TrackLikeButton track={currentSong} />
+        </div>
       )}
+
+      {station.listen_url && <audio ref={audioRef} preload="auto" />}
+
+      <div className="flex justify-center gap-4 mt-4 flex-wrap">
+        <button
+          onClick={isPlaying ? handleStop : handlePlay}
+          disabled={!station.listen_url}
+          className={`px-6 py-2 text-white rounded transition-colors ${
+            isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+          }`}
+        >
+          {isPlaying ? 'Stop' : 'Play'}
+        </button>
+
+        <label className="text-lg font-medium">
+          Volume:
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="ml-2 align-middle"
+          />
+        </label>
+      </div>
+
+      <div className="mt-4 text-sm">
+        {Math.floor(elapsed / 60)}:{('0' + (elapsed % 60)).slice(-2)} /{' '}
+        {Math.floor(duration / 60)}:{('0' + (duration % 60)).slice(-2)}
+      </div>
+
+      {nowPlaying?.song_history?.length > 0 && (
+        <div className="mt-6 text-left">
+          <h3 className="text-xl font-semibold mb-2">Historique des 5 derniers morceaux :</h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {nowPlaying.song_history.slice(0, 5).map((item) => (
+              <li key={item.sh_id}>
+                {item.song.artist} - {item.song.title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {error && <div className="mt-4 text-red-500">{error}</div>}
     </motion.div>
   );

@@ -4,37 +4,29 @@ import Input from './ui/Input';
 import Button from './ui/Button';
 import { toast } from 'react-hot-toast';
 
+const BASE_URL = 'https://ourmusic-api.ovh/api/live/spotify';
+
+const getSSEUrl = (type, id = '') => {
+  switch (type) {
+    case 'scrape': return `${BASE_URL}/scrape`;
+    case 'syncAll': return `${BASE_URL}/sync`;
+    case 'syncOne': return `${BASE_URL}/sync/${id}`;
+    default: return BASE_URL;
+  }
+};
+
 const ButtonRefreshSpotify = () => {
   const [inputPlaylistId, setInputPlaylistId] = useState('');
-  const {
-    messages,
-    loading,
-    scraping,
-    singleSyncLoading,
-    startSSE,
-    stopSSE,
-  } = useSSE();
-
-  const getUrl = (type, id = '') => {
-    const base = 'https://ourmusic-api.ovh/api/live/spotify';
-    if (type === 'scrape') return `${base}/scrape`;
-    if (type === 'syncOne') return `${base}/sync/${id}`;
-    return `${base}/sync`;
-  };
-
-  const handleGlobalSync = () => startSSE(getUrl('sync'));
-  const handleScrape = () => startSSE(getUrl('scrape'), { isScraping: true });
+  const { messages, status, isBusy, startSSE } = useSSE();
 
   const handleSingleSync = () => {
-    const playlistId = inputPlaylistId.trim();
-    if (!playlistId) {
-      toast.error('Veuillez entrer un ID de playlist valide');
-      return;
-    }
-    startSSE(getUrl('syncOne', playlistId), { isSingle: true });
+    const id = inputPlaylistId.trim();
+    if (!id) return toast.error('Veuillez entrer un ID de playlist');
+    startSSE(getSSEUrl('syncOne', id), { isSingle: true });
   };
 
-  const isBusy = loading || scraping || singleSyncLoading;
+  const handleGlobalSync = () => startSSE(getSSEUrl('syncAll'));
+  const handleScrape = () => startSSE(getSSEUrl('scrape'), { isScraping: true });
 
   return (
     <div className="text-center max-w-lg mx-auto mt-10 px-4">
@@ -53,7 +45,7 @@ const ButtonRefreshSpotify = () => {
         disabled={isBusy}
         className="w-full bg-blue-600 hover:bg-blue-500 text-white mb-3"
       >
-        {singleSyncLoading ? 'Synchronisation de la playlist…' : 'Synchroniser une playlist'}
+        {status.single ? 'Synchronisation en cours…' : 'Synchroniser une playlist'}
       </Button>
 
       <Button
@@ -61,7 +53,7 @@ const ButtonRefreshSpotify = () => {
         disabled={isBusy}
         className="w-full bg-slate-800 hover:bg-slate-600 text-white mb-3"
       >
-        {loading ? 'Synchronisation globale en cours…' : 'Synchronisation globale'}
+        {status.sync ? 'Synchronisation globale…' : 'Synchroniser toutes les playlists'}
       </Button>
 
       <Button
@@ -69,7 +61,7 @@ const ButtonRefreshSpotify = () => {
         disabled={isBusy}
         className="w-full bg-slate-800 hover:bg-slate-600 text-white mb-3"
       >
-        {scraping ? 'Scraping en cours…' : 'Scraper les playlists'}
+        {status.scrape ? 'Scraping en cours…' : 'Scraper les playlists'}
       </Button>
 
       <div className="mt-6 bg-gray-100 p-4 rounded shadow-sm text-left max-h-[300px] overflow-y-auto">

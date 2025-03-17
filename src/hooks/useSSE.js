@@ -3,48 +3,43 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
 
-const defaultFilter = (message = '') =>
-  [
-    "Début de la synchronisation",
-    "Synchronisation réussie",
-    "Toutes les playlists ont été synchronisées",
-    "Début du scrap",
-    "Scrap terminé",
-    "Traitement de la playlist",
-    "Playlist créée",
-    "Playlist existante",
-    "Morceaux ajoutés"
-  ].some((phrase) => message.includes(phrase));
+const DEFAULT_FILTER_MESSAGES = [
+  "Début de la synchronisation",
+  "Synchronisation réussie",
+  "Toutes les playlists ont été synchronisées",
+  "Début du scrap",
+  "Scrap terminé",
+  "Traitement de la playlist",
+  "Playlist créée",
+  "Playlist existante",
+  "Morceaux ajoutés",
+];
+
+const defaultFilter = (msg = '') =>
+  DEFAULT_FILTER_MESSAGES.some((phrase) => msg.includes(phrase));
 
 export const useSSE = () => {
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [scraping, setScraping] = useState(false);
-  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
-
+  const [status, setStatus] = useState({ sync: false, scrape: false, single: false });
   const controllerRef = useRef(null);
 
   const stopSSE = () => {
-    if (controllerRef.current) {
-      controllerRef.current.abort();
-      controllerRef.current = null;
-    }
-    setLoading(false);
-    setScraping(false);
-    setSingleSyncLoading(false);
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    setStatus({ sync: false, scrape: false, single: false });
   };
 
   const startSSE = (url, { isScraping = false, isSingle = false, filter = defaultFilter } = {}) => {
-    stopSSE(); // Clean any existing SSE
+    stopSSE(); // Cleanup
+    setMessages([]);
+    setStatus({
+      sync: !isScraping && !isSingle,
+      scrape: isScraping,
+      single: isSingle,
+    });
 
     const controller = new AbortController();
     controllerRef.current = controller;
-
-    setMessages([]);
-    setLoading(!isScraping && !isSingle);
-    setScraping(isScraping);
-    setSingleSyncLoading(isSingle);
-
     const token = getAccessToken();
 
     fetchEventSource(url, {
@@ -54,10 +49,9 @@ export const useSSE = () => {
 
       onopen(res) {
         if (!res.ok) {
-          console.error('[SSE Error] Échec ouverture flux SSE:', res.status);
-          toast.error(`SSE non ouvert (${res.status})`);
+          toast.error(`Connexion SSE échouée (${res.status})`);
           stopSSE();
-          throw new Error('Flux SSE échoué');
+          throw new Error('SSE non ouvert');
         }
       },
 
@@ -67,27 +61,23 @@ export const useSSE = () => {
         let parsed;
         try {
           parsed = JSON.parse(evt.data);
-        } catch (err) {
-          console.warn('[SSE Parse Error]', evt.data);
-          parsed = { message: `Erreur de parsing : ${evt.data}` };
+        } catch {
+          parsed = { message: `⚠️ Erreur parsing : ${evt.data}` };
         }
 
         const msg = parsed?.pub?.message || parsed?.message || '';
-        if (msg && filter(msg)) {
-          setMessages((prev) => [...prev, msg]);
-        }
+        const err = parsed?.pub?.error || parsed?.error;
 
-        const errorMsg = parsed?.pub?.error || parsed?.error;
-        if (errorMsg) {
-          console.warn('[SSE Received Error]', errorMsg);
-          toast.error(errorMsg);
-          setMessages((prev) => [...prev, `❌ ${errorMsg}`]);
+        if (msg && filter(msg)) setMessages((prev) => [...prev, msg]);
+        if (err) {
+          toast.error(err);
+          setMessages((prev) => [...prev, `❌ ${err}`]);
         }
       },
 
       onerror(err) {
-        console.error('[SSE Fatal Error]', err);
         toast.error('Erreur SSE. Vérifiez votre connexion ou vos droits.');
+        console.error('[SSE Fatal Error]', err);
         stopSSE();
       },
 
@@ -99,9 +89,8 @@ export const useSSE = () => {
 
   return {
     messages,
-    loading,
-    scraping,
-    singleSyncLoading,
+    status,
+    isBusy: status.sync || status.scrape || status.single,
     startSSE,
     stopSSE,
   };
