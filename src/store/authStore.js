@@ -1,8 +1,6 @@
-// src/store/authStore.js
 import { create } from 'zustand';
 import { apiFetch, getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { queryClient } from '../utils/queryClient';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -10,24 +8,19 @@ export const useAuthStore = create((set, get) => ({
   error: null,
   authReady: false,
 
-  setUser: (user) => set({ user }),
-  setLoading: (loading) => set({ loading }),
-  setError: (error) => set({ error }),
-
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
-
       if (data.accessToken) setAccessToken(data.accessToken);
-      set({ user: data.user, loading: false });
+      set({ user: data.user, loading: false, authReady: true });
       toast.success('Connexion réussie');
       return true;
     } catch (err) {
-      console.error('[Login Error]', err);
       set({ error: err.message, loading: false });
       toast.error('Échec de la connexion');
       return false;
@@ -39,14 +32,11 @@ export const useAuthStore = create((set, get) => ({
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/register', {
         method: 'POST',
-        credentials: 'include',
         body: JSON.stringify({ username, email, password }),
       });
-
       toast.success('Inscription réussie');
       return data.user;
     } catch (err) {
-      console.error('[Register Error]', err);
       set({ error: err.message, loading: false });
       toast.error('Échec de l’inscription');
       return null;
@@ -54,17 +44,11 @@ export const useAuthStore = create((set, get) => ({
   },
 
   fetchUser: async () => {
-    const token = getAccessToken();
-    if (!token) {
-      set({ authReady: true, user: null });
-      return;
-    }
-
+    set({ authReady: false });
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/me');
-      set({ user: data, authReady: true });
+      set({ user: data.user, authReady: true });
     } catch (err) {
-      console.warn('[fetchUser] Erreur, tentative de refresh :', err.message);
       await get().refreshToken();
     }
   },
@@ -88,7 +72,6 @@ export const useAuthStore = create((set, get) => ({
         set({ user: null, authReady: true });
       }
     } catch (err) {
-      console.warn('[refreshToken] Erreur :', err.message);
       setAccessToken(null);
       set({ user: null, authReady: true });
     }
@@ -107,3 +90,4 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 }));
+

@@ -1,16 +1,19 @@
-// src/layout/Layout.jsx
 import React, { useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 import Header from '../components/Header';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import { useAuthStore } from '../store/authStore';
-import { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
 const Layout = ({ children }) => {
-  const { user, authReady } = useAuthStore();
+  const { user, authReady, fetchUser, logout } = useAuthStore();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
+  useEffect(() => {
+    if (!authReady) fetchUser();
+  }, [authReady, fetchUser]);
 
   useEffect(() => {
     if (user) {
@@ -30,13 +33,11 @@ const Layout = ({ children }) => {
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-
       <Header
         onLogin={() => setIsLoginOpen(true)}
         onRegister={() => setIsRegisterOpen(true)}
         onLogout={useAuthStore.getState().logout}
       />
-
       <motion.main
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -45,7 +46,6 @@ const Layout = ({ children }) => {
       >
         {children}
       </motion.main>
-
       <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
       <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
     </>

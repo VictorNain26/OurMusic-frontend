@@ -1,4 +1,3 @@
-// src/App.jsx
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import HomePage from './pages/HomePage';
@@ -15,22 +14,18 @@ const App = () => {
         <Route
           path="/"
           element={
-            <AnimatePresence mode="wait">
-              <Layout>
-                <HomePage />
-              </Layout>
-            </AnimatePresence>
+            <Layout>
+              <HomePage />
+            </Layout>
           }
         />
         <Route
           path="/admin/dashboard"
           element={
             <AdminGuard>
-              <AnimatePresence mode="wait">
-                <Layout>
-                  <AdminDashboard />
-                </Layout>
-              </AnimatePresence>
+              <Layout>
+                <AdminDashboard />
+              </Layout>
             </AdminGuard>
           }
         />

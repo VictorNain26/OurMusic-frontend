@@ -6,8 +6,8 @@ const AdminGuard = ({ children }) => {
   const { user, authReady, fetchUser } = useAuthStore();
 
   useEffect(() => {
-    fetchUser();
-  }, []);
+    if (!authReady) fetchUser();
+  }, [authReady, fetchUser]);
 
   if (!authReady) {
     return (
@@ -17,11 +17,7 @@ const AdminGuard = ({ children }) => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (user.role !== 'admin') {
+  if (!user || user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
