@@ -71,13 +71,20 @@ const AzuracastPlayer = () => {
 
   useEffect(() => {
     connectSSE();
-    window.addEventListener('online', () => !connected && connectSSE());
+
+    const handleOnline = () => {
+      if (!connected) {
+        connectSSE();
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
     return () => {
-      window.removeEventListener('online', () => {});
+      window.removeEventListener('online', handleOnline);
       sseRef.current?.close();
       clearTimeout(reconnectRef.current);
     };
-  }, []);
+  }, [connected]);
 
   useEffect(() => {
     if (elapsed < duration) {
