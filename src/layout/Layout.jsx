@@ -4,10 +4,10 @@ import Header from '../components/Header';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import { useAuthStore } from '../store/authStore';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Layout = ({ children }) => {
-  const { user, authReady, fetchUser, logout } = useAuthStore();
+  const { user, authReady, fetchUser } = useAuthStore();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
@@ -33,19 +33,26 @@ const Layout = ({ children }) => {
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+
       <Header
         onLogin={() => setIsLoginOpen(true)}
         onRegister={() => setIsRegisterOpen(true)}
         onLogout={useAuthStore.getState().logout}
       />
-      <motion.main
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
-        className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 max-w-6xl mx-auto"
-      >
-        {children}
-      </motion.main>
+
+      <AnimatePresence mode="wait">
+        <motion.main
+          key="main"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+        >
+          {children}
+        </motion.main>
+      </AnimatePresence>
+
       <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
       <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
     </>

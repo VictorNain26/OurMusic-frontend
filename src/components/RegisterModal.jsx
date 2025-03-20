@@ -20,15 +20,15 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = await register(username, email, password);
-    if (user) onRequestClose();
+    const success = await register(username, email, password);
+    if (success) onRequestClose();
   };
 
   return (
     <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2 className="text-2xl font-semibold mb-4 text-center">Créer un compte</h2>
 
-      {error && <p className="text-red-500 mb-4 text-sm text-center">{error}</p>}
+      {error && <p className="text-red-500 mb-3 text-sm text-center">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

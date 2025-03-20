@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
-const AdminGuard = ({ children }) => {
+const AuthGuard = ({ children }) => {
   const { user, authReady } = useAuthStore();
 
   if (!authReady) {
@@ -13,11 +13,11 @@ const AdminGuard = ({ children }) => {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user) {
     return <Navigate to="/" replace />;
   }
 
   return children;
 };
 
-export default AdminGuard;
+export default AuthGuard;

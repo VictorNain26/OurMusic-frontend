@@ -1,11 +1,11 @@
 let isRefreshing = false;
 let refreshPromise = null;
 
-function getAccessToken() {
+export function getAccessToken() {
   return localStorage.getItem('accessToken') || null;
 }
 
-function setAccessToken(token) {
+export function setAccessToken(token) {
   if (token) {
     localStorage.setItem('accessToken', token);
   } else {
@@ -22,7 +22,7 @@ async function tryRefreshToken() {
       headers: { 'Content-Type': 'application/json' },
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error('Échec refresh token');
+        if (!res.ok) throw new Error('Échec du refresh token');
         const data = await res.json();
         setAccessToken(data.accessToken);
         return data.accessToken;
@@ -37,7 +37,6 @@ async function tryRefreshToken() {
 
 export async function apiFetch(url, options = {}) {
   let accessToken = getAccessToken();
-  console.info(url, options);
 
   const mergedHeaders = {
     ...(options.headers || {}),
@@ -45,67 +44,61 @@ export async function apiFetch(url, options = {}) {
     'Content-Type': 'application/json',
   };
 
-  // ✅ Supprimer Content-Type si DELETE sans body
   if (options.method === 'DELETE' && !options.body) {
     delete mergedHeaders['Content-Type'];
   }
 
   const fetchOptions = {
-    credentials: 'include',
-    mode: 'cors',
     ...options,
     headers: mergedHeaders,
+    credentials: 'include',
+    mode: 'cors',
   };
 
-  console.info('🚀 Fetch:', url, fetchOptions);
+  if (import.meta.env.DEV) {
+    console.info('🔍 apiFetch:', url, fetchOptions);
+  }
 
   let response = await fetch(url, fetchOptions);
   let responseText = await response.text();
 
-  // 🔁 Tentative de refresh si token expiré
   if (response.status === 401 && accessToken) {
-    console.info('⚠️ Access token expiré, tentative de refresh...');
+    if (import.meta.env.DEV) console.warn('⚠️ Access token expiré. Tentative de refresh...');
     try {
       await tryRefreshToken();
       accessToken = getAccessToken();
-      const secondHeaders = {
+
+      const retryHeaders = {
         ...mergedHeaders,
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
       };
-      response = await fetch(url, { ...fetchOptions, headers: secondHeaders });
+
+      response = await fetch(url, { ...fetchOptions, headers: retryHeaders });
       responseText = await response.text();
     } catch (err) {
-      console.error('🚫 Refresh token échoué:', err);
+      console.error('🚫 Refresh échoué :', err);
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
   }
 
-  // ✅ Réponse vide ou sans contenu → retour vide
   if (!responseText || responseText.trim() === '') {
-    if (response.ok) return {}; // Réponse vide mais OK (ex: 204)
+    if (response.ok) return {};
     throw new Error('Réponse vide du serveur.');
   }
 
-  // ✅ Parsing intelligent
   let parsed;
   try {
     parsed = JSON.parse(responseText);
   } catch (err) {
     if (import.meta.env.DEV) {
-      console.warn('🛈 Réponse non parsable JSON (fallback texte brut):', responseText);
+      console.warn('🛈 Réponse non parsable JSON, texte brut :', responseText);
     }
-
-    if (!response.ok) {
-      throw new Error(responseText || response.statusText || 'Erreur serveur');
-    }
-
+    if (!response.ok) throw new Error(responseText || response.statusText || 'Erreur serveur');
     return responseText;
   }
 
-  // ✅ Gestion des erreurs explicites
   if (!response.ok) {
     const errorMessage = parsed?.error || parsed?.message || response.statusText || 'Erreur inconnue';
-    console.error('[API ERROR]', errorMessage);
     throw new Error(errorMessage);
   }
 
@@ -119,5 +112,3 @@ export function logoutFetch() {
     headers: { 'Content-Type': 'application/json' },
   });
 }
-
-export { getAccessToken, setAccessToken };

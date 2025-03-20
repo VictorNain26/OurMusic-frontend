@@ -17,13 +17,14 @@ export const useAuthStore = create((set, get) => ({
         body: JSON.stringify({ email, password }),
         credentials: 'include',
       });
-      if (data.accessToken) setAccessToken(data.accessToken);
+
+      if (data?.accessToken) setAccessToken(data.accessToken);
       set({ user: data.user, loading: false, authReady: true });
       toast.success('Connexion réussie');
       return true;
     } catch (err) {
       set({ error: err.message, loading: false });
-      toast.error('Échec de la connexion');
+      toast.error(err.message || 'Échec de la connexion');
       return false;
     }
   },
@@ -34,12 +35,14 @@ export const useAuthStore = create((set, get) => ({
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ username, email, password }),
+        credentials: 'include',
       });
+
       toast.success('Inscription réussie');
       return data.user;
     } catch (err) {
       set({ error: err.message, loading: false });
-      toast.error('Échec de l’inscription');
+      toast.error(err.message || "Erreur lors de l'inscription");
       return null;
     }
   },
@@ -50,7 +53,7 @@ export const useAuthStore = create((set, get) => ({
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/me');
       set({ user: data.user, authReady: true });
     } catch (err) {
-      await get().refreshToken();
+      await get().refreshToken(); // fallback automatique
     }
   },
 
@@ -65,7 +68,7 @@ export const useAuthStore = create((set, get) => ({
       if (!res.ok) throw new Error('Refresh échoué');
 
       const data = await res.json();
-      if (data.accessToken) {
+      if (data?.accessToken) {
         setAccessToken(data.accessToken);
         await get().fetchUser();
       } else {
@@ -82,7 +85,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       await logoutFetch();
     } catch (err) {
-      console.warn('Erreur logout :', err);
+      console.warn('[Logout error]', err);
     } finally {
       setAccessToken(null);
       queryClient.removeQueries(['likedTracks']);
