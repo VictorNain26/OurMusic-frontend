@@ -20,14 +20,17 @@ export const useAuthStore = create((set, get) => ({
         body: JSON.stringify({ email, password })
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(parseAuthError(text));
+      const text = await res.text();
+      if (!res.ok) throw new Error(parseAuthError(text));
+
+      const data = JSON.parse(text);
+
+      // Ne pas bloquer admin même si email pas vérifié
+      if (!data.user?.emailVerified && data.user?.role !== 'admin') {
+        throw new Error("Veuillez vérifier votre email avant de vous connecter.");
       }
 
-      const data = await res.json();
       if (data?.accessToken) setAccessToken(data.accessToken);
-
       set({ user: data.user, loading: false, authReady: true });
       toast.success('Connexion réussie');
       return true;
@@ -48,13 +51,11 @@ export const useAuthStore = create((set, get) => ({
         body: JSON.stringify({ username, email, password })
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(parseAuthError(text));
-      }
+      const text = await res.text();
+      if (!res.ok) throw new Error(parseAuthError(text));
 
-      const data = await res.json();
-      toast.success('Inscription réussie');
+      const data = JSON.parse(text);
+      toast.success('Inscription réussie. Vérifiez votre email.');
       return data.user;
     } catch (err) {
       set({ error: err.message, loading: false });
@@ -71,7 +72,6 @@ export const useAuthStore = create((set, get) => ({
     }
 
     set({ authReady: false });
-
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/me');
       set({ user: data.user, authReady: true });
