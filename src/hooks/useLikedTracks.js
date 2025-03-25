@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiFetch, getAccessToken } from '../utils/api';
+import { apiFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
+import { useAuthStore } from '../store/authStore';
 
 export const useLikedTracks = () => {
   const queryClient = useQueryClient();
+  const user = useAuthStore.getState().user;
 
   const fetchTracks = async () => {
-    const token = getAccessToken();
-    if (!token) {
-      console.warn('[useLikedTracks] Aucun token, annulation de la requête');
+    if (!user) {
+      console.warn('[useLikedTracks] Aucun utilisateur, skip API');
       return [];
     }
 
@@ -24,7 +25,7 @@ export const useLikedTracks = () => {
   } = useQuery({
     queryKey: ['likedTracks'],
     queryFn: fetchTracks,
-    enabled: !!getAccessToken(),
+    enabled: !!user,
     retry: 1,
     onError: (err) => {
       console.error('[LikedTracks] Échec récupération :', err);

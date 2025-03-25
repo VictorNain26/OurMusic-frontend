@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getAccessToken } from '../utils/api';
+import { useAuthStore } from '../store/authStore';
 import { toast } from 'react-hot-toast';
 
 const DEFAULT_FILTER_MESSAGES = [
@@ -22,6 +23,7 @@ export const useSSE = () => {
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState({ sync: false, scrape: false, single: false });
   const controllerRef = useRef(null);
+  const user = useAuthStore.getState().user;
 
   const stopSSE = () => {
     controllerRef.current?.abort();
@@ -38,13 +40,13 @@ export const useSSE = () => {
       single: isSingle,
     });
 
-    const token = getAccessToken();
-    if (!token) {
+    if (!user) {
       toast.error('Vous devez être connecté pour lancer cette action.');
       setStatus({ sync: false, scrape: false, single: false });
       return;
     }
 
+    const token = getAccessToken();
     const controller = new AbortController();
     controllerRef.current = controller;
 
