@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { apiFetch, getAccessToken, setAccessToken, logoutFetch } from '../utils/api';
+import { apiFetch, getAccessToken, setAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
 import { queryClient } from '../utils/queryClient';
+import { parseAuthError } from '../utils/errorMessages';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -12,19 +13,27 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/email/login', {
+      const res = await fetch('https://ourmusic-api.ovh/api/auth/email/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        body: JSON.stringify({ email, password })
       });
 
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseAuthError(text));
+      }
+
+      const data = await res.json();
       if (data?.accessToken) setAccessToken(data.accessToken);
+
       set({ user: data.user, loading: false, authReady: true });
       toast.success('Connexion réussie');
       return true;
     } catch (err) {
       set({ error: err.message, loading: false });
-      toast.error(err.message || 'Échec de la connexion');
+      toast.error(err.message || 'Erreur lors de la connexion');
       return false;
     }
   },
@@ -32,26 +41,30 @@ export const useAuthStore = create((set, get) => ({
   register: async (username, email, password) => {
     set({ loading: true, error: null });
     try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/email/register', {
+      const res = await fetch('https://ourmusic-api.ovh/api/auth/email/register', {
         method: 'POST',
-        body: JSON.stringify({ username, email, password }),
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        body: JSON.stringify({ username, email, password })
       });
 
-      if (data?.accessToken) setAccessToken(data.accessToken);
-      set({ user: data.user, loading: false, authReady: true });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseAuthError(text));
+      }
+
+      const data = await res.json();
       toast.success('Inscription réussie');
       return data.user;
     } catch (err) {
       set({ error: err.message, loading: false });
-      toast.error(err.message || "Erreur lors de l'inscription");
+      toast.error(err.message || 'Erreur lors de l’inscription');
       return null;
     }
   },
 
   fetchUser: async () => {
     const token = getAccessToken();
-
     if (!token) {
       set({ user: null, authReady: true });
       return;
@@ -63,7 +76,7 @@ export const useAuthStore = create((set, get) => ({
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/me');
       set({ user: data.user, authReady: true });
     } catch (err) {
-      await get().refreshToken(); // fallback automatique
+      await get().refreshToken();
     }
   },
 
@@ -75,7 +88,7 @@ export const useAuthStore = create((set, get) => ({
         headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!res.ok) throw new Error('Refresh échoué');
+      if (!res.ok) throw new Error('Session expirée');
 
       const data = await res.json();
       if (data?.accessToken) {
@@ -93,7 +106,7 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await fetch('https://ourmusic-api.ovh/api/auth/logout', {
+      await fetch('https://ourmusic-api.ovh/api/auth/email/logout', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -108,5 +121,5 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  resetError: () => set({ error: null }),
+  clearError: () => set({ error: null }),
 }));
