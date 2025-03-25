@@ -12,7 +12,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/login', {
+      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/email/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
         credentials: 'include',
@@ -32,12 +32,14 @@ export const useAuthStore = create((set, get) => ({
   register: async (username, email, password) => {
     set({ loading: true, error: null });
     try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/register', {
+      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/email/register', {
         method: 'POST',
         body: JSON.stringify({ username, email, password }),
         credentials: 'include',
       });
 
+      if (data?.accessToken) setAccessToken(data.accessToken);
+      set({ user: data.user, loading: false, authReady: true });
       toast.success('Inscription réussie');
       return data.user;
     } catch (err) {
@@ -91,7 +93,11 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await logoutFetch();
+      await fetch('https://ourmusic-api.ovh/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
     } catch (err) {
       console.warn('[Logout error]', err);
     } finally {
@@ -101,4 +107,6 @@ export const useAuthStore = create((set, get) => ({
       toast.success('Déconnexion réussie');
     }
   },
+
+  resetError: () => set({ error: null }),
 }));

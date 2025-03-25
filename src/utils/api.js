@@ -16,6 +16,7 @@ export function setAccessToken(token) {
 async function tryRefreshToken() {
   if (!isRefreshing) {
     isRefreshing = true;
+
     refreshPromise = fetch('https://ourmusic-api.ovh/api/auth/refresh', {
       method: 'POST',
       credentials: 'include',
@@ -27,82 +28,77 @@ async function tryRefreshToken() {
         setAccessToken(data.accessToken);
         return data.accessToken;
       })
+      .catch(() => {
+        setAccessToken(null);
+        return null;
+      })
       .finally(() => {
         isRefreshing = false;
         refreshPromise = null;
       });
   }
+
   return refreshPromise;
 }
 
 export async function apiFetch(url, options = {}) {
-  let accessToken = getAccessToken();
+  let token = getAccessToken();
 
-  const mergedHeaders = {
+  const headers = {
     ...(options.headers || {}),
-    Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
-    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.method !== 'DELETE' || options.body ? { 'Content-Type': 'application/json' } : {}),
   };
-
-  if (options.method === 'DELETE' && !options.body) {
-    delete mergedHeaders['Content-Type'];
-  }
 
   const fetchOptions = {
     ...options,
-    headers: mergedHeaders,
+    headers,
     credentials: 'include',
     mode: 'cors',
   };
 
   if (import.meta.env.DEV) {
-    console.info('🔍 apiFetch:', url, fetchOptions);
+    console.info('[apiFetch]', url, fetchOptions);
   }
 
-  let response = await fetch(url, fetchOptions);
-  let responseText = await response.text();
+  let res = await fetch(url, fetchOptions);
+  let text = await res.text();
 
-  if (response.status === 401 && accessToken) {
-    if (import.meta.env.DEV) console.warn('⚠️ Access token expiré. Tentative de refresh...');
+  if (res.status === 401 && token) {
     try {
       await tryRefreshToken();
-      accessToken = getAccessToken();
+      token = getAccessToken();
+
+      if (!token) throw new Error('Session expirée');
 
       const retryHeaders = {
-        ...mergedHeaders,
-        Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+        ...headers,
+        Authorization: `Bearer ${token}`,
       };
 
-      response = await fetch(url, { ...fetchOptions, headers: retryHeaders });
-      responseText = await response.text();
+      res = await fetch(url, { ...fetchOptions, headers: retryHeaders });
+      text = await res.text();
     } catch (err) {
-      console.error('🚫 Refresh échoué :', err);
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
   }
 
-  if (!responseText || responseText.trim() === '') {
-    if (response.ok) return {};
+  if (!text || text.trim() === '') {
+    if (res.ok) return {};
     throw new Error('Réponse vide du serveur.');
   }
 
-  let parsed;
   try {
-    parsed = JSON.parse(responseText);
-  } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn('🛈 Réponse non parsable JSON, texte brut :', responseText);
+    const json = JSON.parse(text);
+    if (!res.ok) {
+      throw new Error(json?.error || json?.message || 'Erreur inconnue');
     }
-    if (!response.ok) throw new Error(responseText || response.statusText || 'Erreur serveur');
-    return responseText;
+    return json;
+  } catch (err) {
+    if (!res.ok) throw new Error(text || res.statusText || 'Erreur serveur');
+    if (import.meta.env.DEV) console.warn('[apiFetch] Réponse non JSON :', text);
+    return text;
   }
-
-  if (!response.ok) {
-    const errorMessage = parsed?.error || parsed?.message || response.statusText || 'Erreur inconnue';
-    throw new Error(errorMessage);
-  }
-
-  return parsed;
 }
 
 export function logoutFetch() {
