@@ -48,7 +48,15 @@ export const useAuthStore = create((set, get) => ({
   },
 
   fetchUser: async () => {
+    const token = getAccessToken();
+
+    if (!token) {
+      set({ user: null, authReady: true });
+      return;
+    }
+
     set({ authReady: false });
+
     try {
       const data = await apiFetch('https://ourmusic-api.ovh/api/auth/me');
       set({ user: data.user, authReady: true });
