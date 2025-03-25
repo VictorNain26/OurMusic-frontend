@@ -8,17 +8,16 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const { register, loading, error, resetError } = useAuthStore();
+  const { register, loading, error, clearError } = useAuthStore();
 
   useEffect(() => {
     if (!isOpen) {
       setUsername('');
       setEmail('');
       setPassword('');
-      resetError();
+      clearError();
     }
-  }, [isOpen, resetError]);
+  }, [isOpen, clearError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,11 +29,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
     <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2 className="text-2xl font-semibold mb-4 text-center">Créer un compte</h2>
 
-      {error && (
-        <p className="text-red-500 text-sm text-center bg-red-100 rounded px-3 py-2 mb-3">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-red-500 mb-3 text-sm text-center">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

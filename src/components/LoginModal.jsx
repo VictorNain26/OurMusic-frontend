@@ -3,20 +3,19 @@ import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
 import { useAuthStore } from '../store/authStore';
-import { parseAuthError } from '../utils/errorMessages';
 
 const LoginModal = ({ isOpen, onRequestClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, error, loading, resetError } = useAuthStore();
+  const { login, error, loading, clearError } = useAuthStore();
 
   useEffect(() => {
     if (!isOpen) {
       setEmail('');
       setPassword('');
-      resetError();
+      clearError();
     }
-  }, [isOpen, resetError]);
+  }, [isOpen, clearError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,11 +27,7 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2 className="text-2xl font-semibold mb-4 text-center">Se connecter</h2>
 
-      {error && (
-        <p className="text-red-500 mb-3 text-sm text-center">
-          {parseAuthError(error)}
-        </p>
-      )}
+      {error && <p className="text-red-500 mb-3 text-sm text-center">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
