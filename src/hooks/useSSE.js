@@ -38,9 +38,15 @@ export const useSSE = () => {
       single: isSingle,
     });
 
+    const token = getAccessToken();
+    if (!token) {
+      toast.error('Vous devez être connecté pour lancer cette action.');
+      setStatus({ sync: false, scrape: false, single: false });
+      return;
+    }
+
     const controller = new AbortController();
     controllerRef.current = controller;
-    const token = getAccessToken();
 
     fetchEventSource(url, {
       signal: controller.signal,

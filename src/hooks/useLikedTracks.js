@@ -7,7 +7,11 @@ export const useLikedTracks = () => {
 
   const fetchTracks = async () => {
     const token = getAccessToken();
-    if (!token) throw new Error('Utilisateur non connecté');
+    if (!token) {
+      console.warn('[useLikedTracks] Aucun token, annulation de la requête');
+      return [];
+    }
+
     const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
     return data?.likedTracks || [];
   };
