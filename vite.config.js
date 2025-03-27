@@ -1,28 +1,26 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export default defineConfig({
   base: './',
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   server: {
     host: '0.0.0.0',
     port: 5173,
-    allowedHosts: ['ourmusic.fr'],
     proxy: {
       '/api': {
-        target: 'https://ourmusic-api.ovh',
+        target: process.env.VITE_API_BASE_URL,
         changeOrigin: true,
         secure: false,
-        rewrite: path => path.replace(/^\/api/, ''),
-      }
+      },
     },
     cors: {
-      origin: 'https://ourmusic.fr',
+      origin: true,
       credentials: true,
-    }
-  }
-})
+    },
+  },
+});

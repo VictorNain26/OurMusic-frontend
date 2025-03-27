@@ -1,6 +1,8 @@
 let isRefreshing = false;
 let refreshPromise = null;
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function getAccessToken() {
   return localStorage.getItem('accessToken') || null;
 }
@@ -17,7 +19,7 @@ async function tryRefreshToken() {
   if (!isRefreshing) {
     isRefreshing = true;
 
-    refreshPromise = fetch('https://ourmusic-api.ovh/api/auth/refresh', {
+    refreshPromise = fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -42,6 +44,8 @@ async function tryRefreshToken() {
 }
 
 export async function apiFetch(url, options = {}) {
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+
   let token = getAccessToken();
 
   const headers = {
@@ -58,10 +62,10 @@ export async function apiFetch(url, options = {}) {
   };
 
   if (import.meta.env.DEV) {
-    console.info('[apiFetch]', url, fetchOptions);
+    console.info('[apiFetch]', fullUrl, fetchOptions);
   }
 
-  let res = await fetch(url, fetchOptions);
+  let res = await fetch(fullUrl, fetchOptions);
   let text = await res.text();
 
   if (res.status === 401 && token) {
@@ -76,7 +80,7 @@ export async function apiFetch(url, options = {}) {
         Authorization: `Bearer ${token}`,
       };
 
-      res = await fetch(url, { ...fetchOptions, headers: retryHeaders });
+      res = await fetch(fullUrl, { ...fetchOptions, headers: retryHeaders });
       text = await res.text();
     } catch (err) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
@@ -102,7 +106,7 @@ export async function apiFetch(url, options = {}) {
 }
 
 export function logoutFetch() {
-  return fetch('https://ourmusic-api.ovh/api/auth/logout', {
+  return fetch(`${API_BASE_URL}/api/auth/logout`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
