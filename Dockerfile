@@ -1,32 +1,24 @@
-# Étape 1 : Build de l'application avec npm
-FROM node:18-alpine AS builder
+# Étape 1 : Build Vite
+FROM node:20-alpine AS builder
 
-# Définir le répertoire de travail
 WORKDIR /app
-
-# Copier package.json et package-lock.json (si présent)
-COPY package*.json ./
-
-# Installer les dépendances
-RUN npm install
-
-# Copier l'intégralité du code source
 COPY . .
 
-# Construire l'application (pour Vite, le dossier de sortie par défaut est "dist")
-RUN npm run build
+# Installer uniquement les deps prod + build
+RUN corepack enable && corepack prepare pnpm@latest --activate \
+  && pnpm install --frozen-lockfile \
+  && pnpm build
 
-# Étape 2 : Serve les fichiers buildés avec Nginx
-FROM nginx:alpine
+# Étape 2 : Serveur Nginx optimisé
+FROM nginx:stable-alpine
 
-# Copier le fichier de configuration Nginx personnalisé
+# Copie des fichiers compilés vers Nginx
+COPY --from=builder /app/dist /usr/share/nginx/html
 COPY default.conf /etc/nginx/conf.d/default.conf
 
-# Copier les fichiers buildés depuis l'étape "builder" vers le dossier racine de Nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Suppression du fichier de config par défaut de Nginx
+RUN rm /etc/nginx/conf.d/default.conf.default || true
 
-# Exposer le port 80
 EXPOSE 80
 
-# Lancer Nginx
 CMD ["nginx", "-g", "daemon off;"]

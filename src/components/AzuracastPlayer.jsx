@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import TrackLikeButton from './TrackLikeButton';
 import { usePlayerStore } from '../store/playerStore';
 import { motion } from 'framer-motion';
+import { AZURACAST_URL } from '../utils/config';
 
 const AzuracastPlayer = () => {
   const [nowPlaying, setNowPlaying] = useState(null);
@@ -19,7 +20,7 @@ const AzuracastPlayer = () => {
   const sseRef = useRef(null);
   const reconnectRef = useRef(null);
 
-  const sseUri = `https://ourmusic-azuracast.ovh/api/live/nowplaying/sse?${new URLSearchParams({
+  const sseUri = `${AZURACAST_URL}/api/live/nowplaying/sse?${new URLSearchParams({
     cf_connect: JSON.stringify({ subs: { "station:ourmusic": { recover: true } } })
   })}`;
 
@@ -100,7 +101,7 @@ const AzuracastPlayer = () => {
 
   const handlePlay = () => {
     if (!audioRef.current || !station.listen_url) return;
-    if (!audioRef.current.src) audioRef.current.src = station.listen_url;
+    if (!audioRef.current.src) audioRef.current.src = station.listen_url || `${AZURACAST_URL}/radio/8000/radio.mp3`;
     audioRef.current.load();
     audioRef.current.play();
     setPlaying(true);

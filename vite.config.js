@@ -11,13 +11,14 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    proxy: {
-      '/api': {
-        target: process.env.VITE_API_BASE_URL,
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    proxy: process.env.NODE_ENV === 'development'
+      ? {
+          '/api': {
+            target: process.env.VITE_API_BASE_URL,
+            changeOrigin: true,
+          }
+        }
+      : undefined,
     cors: {
       origin: true,
       credentials: true,
