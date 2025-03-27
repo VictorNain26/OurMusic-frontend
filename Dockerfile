@@ -4,10 +4,16 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY . .
 
-# Installer uniquement les deps prod + build
-RUN corepack enable && corepack prepare pnpm@latest --activate \
-  && pnpm install --frozen-lockfile \
-  && pnpm build
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Supprime node_modules si présent, avant install
+RUN rm -rf node_modules
+
+# Installation des dépendances
+RUN pnpm install --frozen-lockfile
+
+# Build de l'app
+RUN pnpm build
 
 # Étape 2 : Serveur Nginx optimisé
 FROM nginx:stable-alpine
