@@ -1,7 +1,12 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import HomePage from './pages/HomePage';
-import AdminDashboard from './pages/AdminDashboard';
+import { lazy, Suspense } from 'react';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+
 import Layout from './layout/Layout';
 import AdminGuard from './layout/AdminGuard';
 
@@ -15,7 +20,9 @@ const App = () => {
           path="/"
           element={
             <Layout>
-              <HomePage />
+              <Suspense fallback={<div className="text-center py-10">Chargement...</div>}>
+                <HomePage />
+              </Suspense>
             </Layout>
           }
         />
@@ -24,9 +31,27 @@ const App = () => {
           element={
             <AdminGuard>
               <Layout>
-                <AdminDashboard />
+                <Suspense fallback={<div className="text-center py-10">Chargement admin...</div>}>
+                  <AdminDashboard />
+                </Suspense>
               </Layout>
             </AdminGuard>
+          }
+        />
+        <Route
+          path="/verify-email"
+          element={
+            <Suspense fallback={<div className="text-center py-10">Vérification de l’email...</div>}>
+              <VerifyEmailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <Suspense fallback={<div className="text-center py-10">Chargement formulaire…</div>}>
+              <ResetPasswordPage />
+            </Suspense>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

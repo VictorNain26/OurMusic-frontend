@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Header from '../components/Header';
-import LoginModal from '../components/LoginModal';
-import RegisterModal from '../components/RegisterModal';
 import { useAuthStore } from '../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { lazy, Suspense } from 'react';
+
+const LoginModal = lazy(() => import('../components/LoginModal'));
+const RegisterModal = lazy(() => import('../components/RegisterModal'));
 
 const Layout = ({ children }) => {
   const { user, authReady, fetchUser } = useAuthStore();
@@ -53,8 +55,10 @@ const Layout = ({ children }) => {
         </motion.main>
       </AnimatePresence>
 
-      <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
-      <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
+      <Suspense fallback={null}>
+        <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
+        <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
+      </Suspense>
     </>
   );
 };
