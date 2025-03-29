@@ -3,6 +3,7 @@ import { apiFetch, getAccessToken, setAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
 import { queryClient } from '../utils/queryClient';
 import { parseAuthError } from '../utils/errorMessages';
+import { API_BASE_URL } from '../utils/config';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -13,7 +14,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch('https://ourmusic-api.ovh/api/auth/email/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/email/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -25,7 +26,6 @@ export const useAuthStore = create((set, get) => ({
 
       const data = JSON.parse(text);
 
-      // Ne pas bloquer admin même si email pas vérifié
       if (!data.user?.emailVerified && data.user?.role !== 'admin') {
         throw new Error("Veuillez vérifier votre email avant de vous connecter.");
       }
@@ -44,7 +44,7 @@ export const useAuthStore = create((set, get) => ({
   register: async (username, email, password) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch('https://ourmusic-api.ovh/api/auth/email/register', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/email/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -73,7 +73,7 @@ export const useAuthStore = create((set, get) => ({
 
     set({ authReady: false });
     try {
-      const data = await apiFetch('https://ourmusic-api.ovh/api/auth/me');
+      const data = await apiFetch('/api/auth/me');
       set({ user: data.user, authReady: true });
     } catch (err) {
       await get().refreshToken();
@@ -82,7 +82,7 @@ export const useAuthStore = create((set, get) => ({
 
   refreshToken: async () => {
     try {
-      const res = await fetch('https://ourmusic-api.ovh/api/auth/refresh', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -106,7 +106,7 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await fetch('https://ourmusic-api.ovh/api/auth/email/logout', {
+      await fetch(`${API_BASE_URL}/api/auth/email/logout`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

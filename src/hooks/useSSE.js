@@ -3,6 +3,9 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getAccessToken } from '../utils/api';
 import { useAuthStore } from '../store/authStore';
 import { toast } from 'react-hot-toast';
+import { API_BASE_URL } from '../utils/config';
+
+const BASE_URL = `${API_BASE_URL}/api/live/spotify`;
 
 const DEFAULT_FILTER_MESSAGES = [
   "Début de la synchronisation",
@@ -32,7 +35,7 @@ export const useSSE = () => {
   };
 
   const startSSE = (url, { isScraping = false, isSingle = false, filter = defaultFilter } = {}) => {
-    stopSSE(); // Cleanup
+    stopSSE();
     setMessages([]);
     setStatus({
       sync: !isScraping && !isSingle,

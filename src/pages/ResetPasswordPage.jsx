@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import PageWrapper from '../layout/PageWrapper';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import { API_BASE_URL } from '../utils/config';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -32,7 +33,7 @@ const ResetPasswordPage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('https://ourmusic-api.ovh/api/auth/password/reset', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/password/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

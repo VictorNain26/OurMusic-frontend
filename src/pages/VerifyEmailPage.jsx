@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import PageWrapper from '../layout/PageWrapper';
+import { API_BASE_URL } from '../utils/config';
 
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams();
@@ -16,7 +17,7 @@ const VerifyEmailPage = () => {
       return;
     }
 
-    fetch('https://ourmusic-api.ovh/api/auth/email/verify', {
+    fetch(`${API_BASE_URL}/api/auth/email/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

@@ -13,7 +13,7 @@ export const useLikedTracks = () => {
       return [];
     }
 
-    const data = await apiFetch('https://ourmusic-api.ovh/api/track/like');
+    const data = await apiFetch('/api/track/like');
     return data?.likedTracks || [];
   };
 
@@ -38,7 +38,7 @@ export const useLikedTracks = () => {
       if (!trackData.title || !trackData.artist) {
         throw new Error('Données track invalides');
       }
-      const res = await apiFetch('https://ourmusic-api.ovh/api/track/like', {
+      const res = await apiFetch('/api/track/like', {
         method: 'POST',
         body: JSON.stringify(trackData),
       });
@@ -59,7 +59,7 @@ export const useLikedTracks = () => {
       if (!id || typeof id !== 'number' || isNaN(id)) {
         throw new Error('ID de suppression invalide');
       }
-      await apiFetch(`https://ourmusic-api.ovh/api/track/like/${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
     onSuccess: (deletedId) => {
