@@ -5,21 +5,23 @@ import ModalWrapper from './ui/ModalWrapper';
 import { useAuthStore } from '../store/authStore';
 
 const LoginModal = ({ isOpen, onRequestClose }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({ email: '', password: '' });
   const { login, error, loading, clearError } = useAuthStore();
 
   useEffect(() => {
     if (!isOpen) {
-      setEmail('');
-      setPassword('');
+      setForm({ email: '', password: '' });
       clearError();
     }
   }, [isOpen, clearError]);
 
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login(email, password);
+    const success = await login(form.email, form.password);
     if (success) onRequestClose();
   };
 
@@ -33,10 +35,11 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
         <div>
           <label className="block mb-1 font-medium">Email</label>
           <Input
+            name="email"
             type="email"
             placeholder="Adresse email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={form.email}
+            onChange={handleChange}
             required
           />
         </div>
@@ -44,10 +47,11 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
         <div>
           <label className="block mb-1 font-medium">Mot de passe</label>
           <Input
+            name="password"
             type="password"
             placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={form.password}
+            onChange={handleChange}
             required
           />
         </div>

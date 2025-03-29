@@ -8,25 +8,37 @@ const BASE_URL = 'https://ourmusic-api.ovh/api/live/spotify';
 
 const getSSEUrl = (type, id = '') => {
   switch (type) {
-    case 'scrape': return `${BASE_URL}/scrape`;
-    case 'syncAll': return `${BASE_URL}/sync`;
-    case 'syncOne': return `${BASE_URL}/sync/${id}`;
-    default: return BASE_URL;
+    case 'scrape':
+      return `${BASE_URL}/scrape`;
+    case 'syncAll':
+      return `${BASE_URL}/sync`;
+    case 'syncOne':
+      return `${BASE_URL}/sync/${id}`;
+    default:
+      return BASE_URL;
   }
 };
 
 const ButtonRefreshSpotify = () => {
-  const [inputPlaylistId, setInputPlaylistId] = useState('');
+  const [inputId, setInputId] = useState('');
   const { messages, status, isBusy, startSSE } = useSSE();
 
-  const handleSingleSync = () => {
-    const id = inputPlaylistId.trim();
-    if (!id) return toast.error('Veuillez entrer un ID de playlist');
-    startSSE(getSSEUrl('syncOne', id), { isSingle: true });
-  };
+  const handleAction = (type) => {
+    if (type === 'syncOne') {
+      const id = inputId.trim();
+      if (!id) return toast.error('Veuillez entrer un ID de playlist');
+      startSSE(getSSEUrl(type, id), { isSingle: true });
+      return;
+    }
 
-  const handleGlobalSync = () => startSSE(getSSEUrl('syncAll'));
-  const handleScrape = () => startSSE(getSSEUrl('scrape'), { isScraping: true });
+    if (type === 'syncAll') {
+      startSSE(getSSEUrl(type));
+    }
+
+    if (type === 'scrape') {
+      startSSE(getSSEUrl(type), { isScraping: true });
+    }
+  };
 
   return (
     <div className="text-center max-w-lg mx-auto mt-10 px-4">
@@ -35,13 +47,13 @@ const ButtonRefreshSpotify = () => {
       <div className="mb-4">
         <Input
           placeholder="Entrer l'ID de la playlist"
-          value={inputPlaylistId}
-          onChange={(e) => setInputPlaylistId(e.target.value)}
+          value={inputId}
+          onChange={(e) => setInputId(e.target.value)}
         />
       </div>
 
       <Button
-        onClick={handleSingleSync}
+        onClick={() => handleAction('syncOne')}
         disabled={isBusy}
         className="w-full bg-blue-600 hover:bg-blue-500 text-white mb-3"
       >
@@ -49,7 +61,7 @@ const ButtonRefreshSpotify = () => {
       </Button>
 
       <Button
-        onClick={handleGlobalSync}
+        onClick={() => handleAction('syncAll')}
         disabled={isBusy}
         className="w-full bg-slate-800 hover:bg-slate-600 text-white mb-3"
       >
@@ -57,9 +69,9 @@ const ButtonRefreshSpotify = () => {
       </Button>
 
       <Button
-        onClick={handleScrape}
+        onClick={() => handleAction('scrape')}
         disabled={isBusy}
-        className="w-full bg-slate-800 hover:bg-slate-600 text-white mb-3"
+        className="w-full bg-purple-700 hover:bg-purple-600 text-white mb-3"
       >
         {status.scrape ? 'Scraping en cours…' : 'Scraper les playlists'}
       </Button>

@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../utils/config';
 
 const BASE_URL = `${API_BASE_URL}/api/live/spotify`;
 
-const DEFAULT_FILTER_MESSAGES = [
+const DEFAULT_MESSAGES = [
   "Début de la synchronisation",
   "Synchronisation réussie",
   "Toutes les playlists ont été synchronisées",
@@ -20,7 +20,7 @@ const DEFAULT_FILTER_MESSAGES = [
 ];
 
 const defaultFilter = (msg = '') =>
-  DEFAULT_FILTER_MESSAGES.some((phrase) => msg.includes(phrase));
+  DEFAULT_MESSAGES.some((phrase) => msg.includes(phrase));
 
 export const useSSE = () => {
   const [messages, setMessages] = useState([]);
@@ -28,24 +28,25 @@ export const useSSE = () => {
   const controllerRef = useRef(null);
   const user = useAuthStore.getState().user;
 
+  const resetStatus = () =>
+    setStatus({ sync: false, scrape: false, single: false });
+
   const stopSSE = () => {
     controllerRef.current?.abort();
     controllerRef.current = null;
-    setStatus({ sync: false, scrape: false, single: false });
+    resetStatus();
   };
 
   const startSSE = (url, { isScraping = false, isSingle = false, filter = defaultFilter } = {}) => {
     stopSSE();
     setMessages([]);
-    setStatus({
-      sync: !isScraping && !isSingle,
-      scrape: isScraping,
-      single: isSingle,
-    });
+
+    const isSync = !isScraping && !isSingle;
+    setStatus({ sync: isSync, scrape: isScraping, single: isSingle });
 
     if (!user) {
       toast.error('Vous devez être connecté pour lancer cette action.');
-      setStatus({ sync: false, scrape: false, single: false });
+      resetStatus();
       return;
     }
 
@@ -55,14 +56,17 @@ export const useSSE = () => {
 
     fetchEventSource(url, {
       signal: controller.signal,
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      fetch: (u, init) => fetch(u, { ...init, credentials: 'include' }),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
 
       onopen(res) {
         if (!res.ok) {
-          toast.error(`Connexion SSE échouée (${res.status})`);
+          toast.error(`Erreur SSE (${res.status})`);
           stopSSE();
-          throw new Error('SSE non ouvert');
+          throw new Error(`SSE non ouvert : ${res.status}`);
         }
       },
 
@@ -79,7 +83,10 @@ export const useSSE = () => {
         const msg = parsed?.pub?.message || parsed?.message || '';
         const err = parsed?.pub?.error || parsed?.error;
 
-        if (msg && filter(msg)) setMessages((prev) => [...prev, msg]);
+        if (msg && filter(msg)) {
+          setMessages((prev) => [...prev, msg]);
+        }
+
         if (err) {
           toast.error(err);
           setMessages((prev) => [...prev, `❌ ${err}`]);
@@ -87,8 +94,8 @@ export const useSSE = () => {
       },
 
       onerror(err) {
+        console.error('[SSE Error]', err);
         toast.error('Erreur SSE. Vérifiez votre connexion ou vos droits.');
-        console.error('[SSE Fatal Error]', err);
         stopSSE();
       },
 

@@ -12,9 +12,7 @@ const TrackLikeButton = ({ track }) => {
 
   const youtubeUrl =
     track?.youtubeUrl ||
-    `https://www.youtube.com/results?search_query=${encodeURIComponent(
-      track?.artist + ' ' + track?.title
-    )}`;
+    `https://www.youtube.com/results?search_query=${encodeURIComponent(`${track.artist} ${track.title}`)}`;
 
   const match = likedTracks.find(
     (item) =>
@@ -22,7 +20,7 @@ const TrackLikeButton = ({ track }) => {
       item.artist?.toLowerCase() === track.artist?.toLowerCase()
   );
 
-  const isLiked = Boolean(match);
+  const isLiked = !!match;
   const likedTrackId = match?.id;
 
   const handleLike = async () => {
@@ -41,7 +39,7 @@ const TrackLikeButton = ({ track }) => {
         youtubeUrl,
       });
     } catch (err) {
-      console.error('[TrackLikeButton → Like Error]', err);
+      console.error('[TrackLikeButton → Like]', err);
       toast.error(err.message || 'Erreur lors du like');
     }
   };
@@ -51,33 +49,40 @@ const TrackLikeButton = ({ track }) => {
     try {
       await handleDelete(likedTrackId);
     } catch (err) {
-      console.error('[TrackLikeButton → Unlike Error]', err);
+      console.error('[TrackLikeButton → Unlike]', err);
       toast.error('Erreur lors du unlike');
     }
   };
 
+  const handleClick = () => {
+    if (isLiked) return handleUnlike();
+    return handleLike();
+  };
+
   return (
-    <div className="mt-4">
-      <motion.div whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 300 }}>
-        {isLiked ? (
-          <Button
-            onClick={handleUnlike}
-            disabled={likeTrack.isPending}
-            className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
-          >
-            {likeTrack.isPending ? 'Retrait...' : 'Unlike'}
-          </Button>
-        ) : (
-          <Button
-            onClick={handleLike}
-            disabled={likeTrack.isPending}
-            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            {likeTrack.isPending ? 'Ajout...' : 'Like'}
-          </Button>
-        )}
-      </motion.div>
-    </div>
+    <motion.div
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 300 }}
+      className="mt-4"
+    >
+      <Button
+        onClick={handleClick}
+        disabled={likeTrack.isPending}
+        className={`w-full sm:w-auto ${
+          isLiked
+            ? 'bg-red-500 hover:bg-red-600 text-white'
+            : 'bg-blue-500 hover:bg-blue-600 text-white'
+        }`}
+      >
+        {likeTrack.isPending
+          ? isLiked
+            ? 'Retrait...'
+            : 'Ajout...'
+          : isLiked
+          ? 'Unlike'
+          : 'Like'}
+      </Button>
+    </motion.div>
   );
 };
 

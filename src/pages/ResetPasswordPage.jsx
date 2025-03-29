@@ -17,14 +17,17 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!token) {
       toast.error('Token manquant');
       return;
     }
-    if (!password || password.length < 6) {
-      toast.error('Mot de passe trop court');
+
+    if (password.length < 6) {
+      toast.error('Mot de passe trop court (min 6 caractères)');
       return;
     }
+
     if (password !== confirm) {
       toast.error('Les mots de passe ne correspondent pas');
       return;
@@ -35,17 +38,16 @@ const ResetPasswordPage = () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/password/reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data?.message || 'Erreur inconnue');
 
-      toast.success('Mot de passe réinitialisé avec succès !');
-      navigate('/');
+      toast.success('🔐 Mot de passe réinitialisé !');
+      setTimeout(() => navigate('/'), 3000);
     } catch (err) {
       console.error('[ResetPassword Error]', err);
       toast.error(err.message || 'Erreur de réinitialisation');

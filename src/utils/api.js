@@ -45,7 +45,6 @@ async function tryRefreshToken() {
 
 export async function apiFetch(url, options = {}) {
   const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-
   let token = getAccessToken();
 
   const headers = {
@@ -106,7 +105,7 @@ export async function apiFetch(url, options = {}) {
 }
 
 export function logoutFetch() {
-  return fetch(`${API_BASE_URL}/api/auth/logout`, {
+  return fetch(`${API_BASE_URL}/api/auth/email/logout`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

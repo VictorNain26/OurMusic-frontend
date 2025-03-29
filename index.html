@@ -4,15 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="/src/style.css" rel="stylesheet">
     <title>OurMusic - WebRadio</title>
-    <!-- Définition anticipée de la callback Cast -->
+
+    <!-- Style -->
+    <link href="/src/style.css" rel="stylesheet">
+
+    <!-- Chromecast -->
     <script>
       window.__onGCastApiAvailable = function(isAvailable) {
         if (isAvailable) {
           const context = cast.framework.CastContext.getInstance();
           context.setOptions({
-            // Utilisation du receiver par défaut pour tester
             receiverApplicationId: "4A922B9B",
             autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
           });
@@ -20,8 +22,9 @@
         }
       };
     </script>
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" async></script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>

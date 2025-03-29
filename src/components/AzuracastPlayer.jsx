@@ -6,19 +6,22 @@ import { AZURACAST_URL } from '../utils/config';
 
 const AzuracastPlayer = () => {
   const [nowPlaying, setNowPlaying] = useState(null);
-  const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [error, setError] = useState('');
   const [connected, setConnected] = useState(false);
 
-  const isPlaying = usePlayerStore((state) => state.isPlaying);
-  const setPlaying = usePlayerStore((state) => state.setPlaying);
-  const volume = usePlayerStore((state) => state.volume);
-  const setVolume = usePlayerStore((state) => state.setVolume);
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
+  const setPlaying = usePlayerStore((s) => s.setPlaying);
+  const volume = usePlayerStore((s) => s.volume);
+  const setVolume = usePlayerStore((s) => s.setVolume);
 
   const audioRef = useRef(null);
   const sseRef = useRef(null);
-  const reconnectRef = useRef(null);
+  const reconnectTimeout = useRef(null);
+
+  const station = nowPlaying?.station || { name: "OurMusic", listen_url: null };
+  const currentSong = nowPlaying?.now_playing?.song || null;
 
   const sseUri = `${AZURACAST_URL}/api/live/nowplaying/sse?${new URLSearchParams({
     cf_connect: JSON.stringify({ subs: { "station:ourmusic": { recover: true } } })
@@ -31,7 +34,7 @@ const AzuracastPlayer = () => {
     setDuration(np?.duration || 0);
   };
 
-  const handleSseData = (payload, useTime = true) => {
+  const handleSSEPayload = (payload, useTime = true) => {
     const data = payload?.data;
     if (useTime && data?.current_time) setElapsed(data.current_time);
     if (data?.np) updateNowPlaying(data.np);
@@ -48,17 +51,21 @@ const AzuracastPlayer = () => {
     };
 
     sse.onmessage = (e) => {
-      if (e.data.trim() === '.') return;
+      if (!e.data || e.data.trim() === '.') return;
+
       try {
         const json = JSON.parse(e.data);
-        if (json.connect?.data) json.connect.data.forEach((row) => handleSseData(row));
-        else if (json.connect?.subs)
+        if (json.connect?.data) {
+          json.connect.data.forEach((item) => handleSSEPayload(item));
+        } else if (json.connect?.subs) {
           Object.values(json.connect.subs).forEach((sub) =>
-            sub.publications?.forEach((row) => handleSseData(row, false))
+            sub.publications?.forEach((item) => handleSSEPayload(item, false))
           );
-        else if (json.pub) handleSseData(json.pub);
+        } else if (json.pub) {
+          handleSSEPayload(json.pub);
+        }
       } catch (err) {
-        console.error("Erreur SSE:", err);
+        console.error('[AzuracastPlayer] Erreur parsing SSE :', err);
       }
     };
 
@@ -66,28 +73,26 @@ const AzuracastPlayer = () => {
       setError("Erreur de connexion SSE. Reconnexion dans 5s...");
       setConnected(false);
       sse.close();
-      reconnectRef.current = setTimeout(() => navigator.onLine && connectSSE(), 5000);
+      reconnectTimeout.current = setTimeout(() => {
+        if (navigator.onLine) connectSSE();
+      }, 5000);
     };
   };
 
   useEffect(() => {
     connectSSE();
+    window.addEventListener('online', connectSSE);
 
-    const handleOnline = () => {
-      if (!connected) connectSSE();
-    };
-
-    window.addEventListener('online', handleOnline);
     return () => {
-      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('online', connectSSE);
       sseRef.current?.close();
-      clearTimeout(reconnectRef.current);
+      clearTimeout(reconnectTimeout.current);
     };
-  }, [connected]);
+  }, []);
 
   useEffect(() => {
     if (elapsed < duration) {
-      const interval = setInterval(() => setElapsed((prev) => (prev < duration ? prev + 1 : prev)), 1000);
+      const interval = setInterval(() => setElapsed((t) => (t < duration ? t + 1 : t)), 1000);
       return () => clearInterval(interval);
     }
   }, [elapsed, duration]);
@@ -96,15 +101,13 @@ const AzuracastPlayer = () => {
     if (audioRef.current) audioRef.current.volume = volume;
   }, [volume]);
 
-  const station = nowPlaying?.station || { name: "Radio", listen_url: null };
-  const currentSong = nowPlaying?.now_playing?.song || null;
-
   const handlePlay = () => {
     if (!audioRef.current || !station.listen_url) return;
-    if (!audioRef.current.src) audioRef.current.src = station.listen_url || `${AZURACAST_URL}/radio/8000/radio.mp3`;
+    if (!audioRef.current.src) {
+      audioRef.current.src = station.listen_url || `${AZURACAST_URL}/radio/8000/radio.mp3`;
+    }
     audioRef.current.load();
-    audioRef.current.play();
-    setPlaying(true);
+    audioRef.current.play().then(() => setPlaying(true)).catch(console.error);
   };
 
   const handleStop = () => {

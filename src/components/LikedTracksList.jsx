@@ -18,14 +18,9 @@ const LikedTracksList = () => {
     await handleDelete(id);
   };
 
-  // Variants pour effet cascade
   const listVariants = {
     hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+    visible: { transition: { staggerChildren: 0.1 } },
   };
 
   const itemVariants = {
@@ -52,11 +47,49 @@ const LikedTracksList = () => {
     </h2>
   );
 
+  const renderTrackItem = (track) => (
+    <motion.li
+      key={track.id}
+      variants={itemVariants}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      layout
+      exit="exit"
+      className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow"
+    >
+      {track.artwork && (
+        <img
+          src={track.artwork}
+          alt={`${track.artist} - ${track.title}`}
+          className="w-24 h-24 object-cover rounded"
+        />
+      )}
+      <div className="flex-1 w-full min-w-0">
+        <p className="font-semibold break-words">{track.artist} - {track.title}</p>
+        <a
+          href={track.youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline text-sm"
+        >
+          Voir sur YouTube
+        </a>
+      </div>
+      <Button
+        onClick={() => handleDeleteClick(track.id)}
+        className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
+      >
+        Supprimer
+      </Button>
+    </motion.li>
+  );
+
   const renderContent = () => {
     if (isLoading)
       return <p className="text-gray-500">Chargement des morceaux...</p>;
+
     if (isError)
       return <p className="text-red-500">Erreur lors du chargement des morceaux.</p>;
+
     if (likedTracks.length === 0)
       return <p className="text-gray-500">Aucun morceau liké pour le moment.</p>;
 
@@ -69,43 +102,7 @@ const LikedTracksList = () => {
           exit="hidden"
           className="space-y-4"
         >
-          {likedTracks.map((track) => (
-            <motion.li
-              key={track.id}
-              variants={itemVariants}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
-              layout
-              exit="exit"
-              className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 bg-gray-100 rounded shadow"
-            >
-              {track.artwork && (
-                <img
-                  src={track.artwork}
-                  alt={`${track.artist} - ${track.title}`}
-                  className="w-24 h-24 object-cover rounded"
-                />
-              )}
-              <div className="flex-1 w-full min-w-0">
-                <p className="font-semibold break-words">
-                  {track.artist} - {track.title}
-                </p>
-                <a
-                  href={track.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline text-sm"
-                >
-                  Voir sur YouTube
-                </a>
-              </div>
-              <Button
-                onClick={() => handleDeleteClick(track.id)}
-                className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm self-start"
-              >
-                Supprimer
-              </Button>
-            </motion.li>
-          ))}
+          {likedTracks.map(renderTrackItem)}
         </motion.ul>
       </AnimatePresence>
     );

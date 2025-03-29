@@ -7,9 +7,9 @@ export const useLikedTracks = () => {
   const queryClient = useQueryClient();
   const user = useAuthStore.getState().user;
 
-  const fetchTracks = async () => {
+  const fetchLikedTracks = async () => {
     if (!user) {
-      console.warn('[useLikedTracks] Aucun utilisateur, skip API');
+      console.warn('[useLikedTracks] Pas d’utilisateur connecté. Skip API.');
       return [];
     }
 
@@ -24,66 +24,62 @@ export const useLikedTracks = () => {
     refetch,
   } = useQuery({
     queryKey: ['likedTracks'],
-    queryFn: fetchTracks,
+    queryFn: fetchLikedTracks,
     enabled: !!user,
     retry: 1,
     onError: (err) => {
-      console.error('[LikedTracks] Échec récupération :', err);
+      console.error('[useLikedTracks → Query error]', err);
       toast.error(err.message || 'Erreur chargement morceaux likés');
     },
   });
 
   const likeTrack = useMutation({
-    mutationFn: async (trackData) => {
-      if (!trackData.title || !trackData.artist) {
-        throw new Error('Données track invalides');
-      }
+    mutationFn: async ({ title, artist, artwork, youtubeUrl }) => {
+      if (!title || !artist) throw new Error('Titre ou artiste manquant');
       const res = await apiFetch('/api/track/like', {
         method: 'POST',
-        body: JSON.stringify(trackData),
+        body: JSON.stringify({ title, artist, artwork, youtubeUrl }),
       });
-      return res.likedTrack;
+      return res?.likedTrack;
     },
     onSuccess: (newTrack) => {
       queryClient.setQueryData(['likedTracks'], (prev = []) => [...prev, newTrack]);
       toast.success('🎶 Morceau liké !');
     },
     onError: (err) => {
-      console.error('[LikeTrack Error]', err);
+      console.error('[likeTrack → Error]', err);
       toast.error(err.message || 'Erreur lors du like');
     },
   });
 
   const deleteTrack = useMutation({
     mutationFn: async (id) => {
-      if (!id || typeof id !== 'number' || isNaN(id)) {
-        throw new Error('ID de suppression invalide');
-      }
+      if (!id || isNaN(id)) throw new Error('ID de suppression invalide');
       await apiFetch(`/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
     onSuccess: (deletedId) => {
       queryClient.setQueryData(['likedTracks'], (prev = []) =>
-        prev.filter((track) => track.id !== deletedId)
+        prev?.filter((track) => track.id !== deletedId)
       );
       toast.success('🗑️ Morceau supprimé');
     },
     onError: (err) => {
-      console.error('[DeleteTrack Error]', err);
+      console.error('[deleteTrack → Error]', err);
       toast.error(err.message || 'Erreur lors de la suppression');
     },
   });
 
   const handleDelete = async (id) => {
-    if (!id || typeof id !== 'number' || isNaN(id)) {
-      console.warn('[handleDelete] ID non valide côté front :', id);
-      toast.error('ID de suppression invalide');
+    if (!id || isNaN(id)) {
+      toast.error('ID invalide');
       return;
     }
+
     try {
       await deleteTrack.mutateAsync(id);
     } catch (err) {
-      console.error('[handleDelete Error]', err);
+      console.error('[handleDelete]', err);
     }
   };
 

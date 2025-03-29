@@ -1,26 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Header from '../components/Header';
 import { useAuthStore } from '../store/authStore';
-import { motion, AnimatePresence } from 'framer-motion';
-import { lazy, Suspense } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
 
 const Layout = ({ children }) => {
-  const { user, authReady, fetchUser } = useAuthStore();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const { user, authReady, fetchUser, logout } = useAuthStore();
+  const [isLoginOpen, setLoginOpen] = useState(false);
+  const [isRegisterOpen, setRegisterOpen] = useState(false);
 
+  // Initial fetch si nécessaire
   useEffect(() => {
     if (!authReady) fetchUser();
   }, [authReady, fetchUser]);
 
+  // Ferme les modals si l'utilisateur est connecté
   useEffect(() => {
     if (user) {
-      setIsLoginOpen(false);
-      setIsRegisterOpen(false);
+      setLoginOpen(false);
+      setRegisterOpen(false);
     }
   }, [user]);
 
@@ -37,14 +38,14 @@ const Layout = ({ children }) => {
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
 
       <Header
-        onLogin={() => setIsLoginOpen(true)}
-        onRegister={() => setIsRegisterOpen(true)}
-        onLogout={useAuthStore.getState().logout}
+        onLogin={() => setLoginOpen(true)}
+        onRegister={() => setRegisterOpen(true)}
+        onLogout={logout}
       />
 
       <AnimatePresence mode="wait">
         <motion.main
-          key="main"
+          key="layout-main"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
@@ -56,8 +57,8 @@ const Layout = ({ children }) => {
       </AnimatePresence>
 
       <Suspense fallback={null}>
-        <LoginModal isOpen={isLoginOpen} onRequestClose={() => setIsLoginOpen(false)} />
-        <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setIsRegisterOpen(false)} />
+        <LoginModal isOpen={isLoginOpen} onRequestClose={() => setLoginOpen(false)} />
+        <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setRegisterOpen(false)} />
       </Suspense>
     </>
   );
