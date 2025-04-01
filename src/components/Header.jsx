@@ -2,18 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import ChromecastButton from './ChromecastButton';
 import Button from './ui/Button';
-import { useAuthStore } from '../store/authStore';
 
-const Header = ({ onLogin, onRegister, onLogout }) => {
-  const { user, authReady } = useAuthStore();
-
+const Header = ({ onLogin, onRegister, onLogout, user }) => {
   const renderAuthButtons = () => {
-    if (!authReady) return null;
-
     if (user) {
       return (
         <>
-          <span className="font-medium text-gray-700">{user.username}</span>
+          <span className="font-medium text-gray-700">{user.name || user.username || user.email}</span>
 
           {user.role === 'admin' && (
             <>

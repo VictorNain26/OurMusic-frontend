@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
-import { useAuthStore } from '../store/authStore';
+import { authClient } from '../lib/authClient';
 
 const RegisterModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [successMsg, setSuccessMsg] = useState('');
-  const { register, loading, error, clearError } = useAuthStore();
+  const { signUp, isPending, error, clearError } = authClient;
 
   useEffect(() => {
     if (!isOpen) {
@@ -23,8 +23,13 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = await register(form.username, form.email, form.password);
-    if (user) {
+    const res = await signUp.email({
+      email: form.email,
+      password: form.password,
+      name: form.username,
+    });
+
+    if (!res.error) {
       setSuccessMsg("Compte créé ! Vérifiez votre email pour l'activer.");
     }
   };
@@ -78,10 +83,10 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-blue-600 hover:bg-blue-500 text-white"
         >
-          {loading ? 'Création du compte...' : "S'inscrire"}
+          {isPending ? 'Création du compte...' : "S'inscrire"}
         </Button>
       </form>
     </ModalWrapper>

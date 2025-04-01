@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
-import { useAuthStore } from '../store/authStore';
+import { authClient } from '../lib/authClient';
 
 const LoginModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
-  const { login, error, loading, clearError } = useAuthStore();
+  const { signIn, isPending, error, clearError } = authClient;
 
   useEffect(() => {
     if (!isOpen) {
@@ -21,8 +21,14 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login(form.email, form.password);
-    if (success) onRequestClose();
+    const res = await signIn.email({
+      email: form.email,
+      password: form.password
+    });
+
+    if (!res.error) {
+      onRequestClose();
+    }
   };
 
   return (
@@ -58,10 +64,10 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-blue-600 hover:bg-blue-500 text-white"
         >
-          {loading ? 'Connexion...' : 'Se connecter'}
+          {isPending ? 'Connexion...' : 'Se connecter'}
         </Button>
       </form>
     </ModalWrapper>

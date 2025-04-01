@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { useAuthStore } from '../store/authStore';
+import { authClient } from '../lib/authClient';
 
 export const useLikedTracks = () => {
   const queryClient = useQueryClient();
-  const user = useAuthStore.getState().user;
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const fetchLikedTracks = async () => {
     if (!user) {

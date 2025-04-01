@@ -12,10 +12,11 @@
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",
     "@tailwindcss/vite": "^4.0.17",
-    "@tanstack/react-query": "^5.70.0",
+    "@tanstack/react-query": "^5.71.1",
     "axios": "^1.8.4",
+    "better-auth": "^1.2.5",
     "dotenv": "^16.4.7",
-    "framer-motion": "^12.6.2",
+    "framer-motion": "^12.6.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
@@ -33,7 +34,7 @@
     "globals": "^15.15.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.17",
-    "vite": "^6.2.3"
+    "vite": "^6.2.4"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [

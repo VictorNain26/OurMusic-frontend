@@ -2,13 +2,13 @@ import React from 'react';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 import { useLikedTracks } from '../hooks/useLikedTracks';
-import { useAuthStore } from '../store/authStore';
 import { motion } from 'framer-motion';
+import { authClient } from '../lib/authClient';
 
 const TrackLikeButton = ({ track }) => {
   const { likedTracks, likeTrack, handleDelete } = useLikedTracks();
-  const { user } = useAuthStore();
-  const isLoggedIn = !!user;
+  const { data: session } = authClient.useSession();
+  const isLoggedIn = !!session?.user;
 
   const youtubeUrl =
     track?.youtubeUrl ||
