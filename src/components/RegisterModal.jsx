@@ -3,19 +3,19 @@ import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
 import { authClient } from '../lib/authClient';
+import { toast } from 'react-hot-toast';
 
 const RegisterModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [successMsg, setSuccessMsg] = useState('');
-  const { signUp, isPending, error, clearError } = authClient;
+  const { signUp, isPending, error } = authClient;
 
   useEffect(() => {
     if (!isOpen) {
       setForm({ username: '', email: '', password: '' });
       setSuccessMsg('');
-      clearError();
     }
-  }, [isOpen, clearError]);
+  }, [isOpen]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -23,14 +23,17 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const res = await signUp.email({
       email: form.email,
       password: form.password,
       name: form.username,
     });
 
-    if (!res.error) {
-      setSuccessMsg("Compte créé ! Vérifiez votre email pour l'activer.");
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      setSuccessMsg("✅ Compte créé ! Vérifiez votre email.");
     }
   };
 

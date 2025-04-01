@@ -19,8 +19,14 @@ export async function apiFetch(url, options = {}) {
     console.info('[apiFetch]', fullUrl, fetchOptions);
   }
 
-  let res = await fetch(fullUrl, fetchOptions);
-  let text = await res.text();
+  let res, text;
+  try {
+    res = await fetch(fullUrl, fetchOptions);
+    text = await res.text();
+  } catch (err) {
+    console.error('[apiFetch → Network error]', err);
+    throw new Error('Impossible de contacter le serveur');
+  }
 
   if (!text || text.trim() === '') {
     if (res.ok) return {};
@@ -30,6 +36,9 @@ export async function apiFetch(url, options = {}) {
   try {
     const json = JSON.parse(text);
     if (!res.ok) {
+      if (json?.error?.toLowerCase().includes('token')) {
+        console.warn('[apiFetch] ⚠️ Token expiré ou invalide');
+      }
       throw new Error(json?.error || json?.message || 'Erreur inconnue');
     }
     return json;

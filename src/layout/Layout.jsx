@@ -2,7 +2,7 @@ import React, { useState, lazy, Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Header from '../components/Header';
 import { AnimatePresence, motion } from 'framer-motion';
-import { authClient } from '../lib/authClient';
+import { useAuth } from '../hooks/useAuth';
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
@@ -11,10 +11,7 @@ const Layout = ({ children }) => {
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isRegisterOpen, setRegisterOpen] = useState(false);
 
-  const { data: session, isLoading, refetch } = authClient.useSession();
-  const { signOut } = authClient;
-
-  const user = session?.user;
+  const { user, isLoading, signOut } = useAuth();
 
   return (
     <>
@@ -29,7 +26,7 @@ const Layout = ({ children }) => {
           <Header
             onLogin={() => setLoginOpen(true)}
             onRegister={() => setRegisterOpen(true)}
-            onLogout={() => signOut()}
+            onLogout={signOut}
             user={user}
           />
 

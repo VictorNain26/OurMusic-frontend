@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { authClient } from '../lib/authClient';
+import { useAuth } from '../hooks/useAuth';
 
 const AuthGuard = ({ children }) => {
-  const { data: session, isLoading } = authClient.useSession();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -13,7 +13,7 @@ const AuthGuard = ({ children }) => {
     );
   }
 
-  if (!session?.user) {
+  if (!user) {
     return <Navigate to="/" replace />;
   }
 

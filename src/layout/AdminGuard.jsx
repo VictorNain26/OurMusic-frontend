@@ -1,10 +1,9 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { authClient } from '../lib/authClient';
+import { useAuth } from '../hooks/useAuth';
 
 const AdminGuard = ({ children }) => {
-  const { data: session, isLoading } = authClient.useSession();
-  const user = session?.user;
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (

@@ -2,11 +2,10 @@ import React from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
 import LikedTracksList from '../components/LikedTracksList';
 import PageWrapper from '../layout/PageWrapper';
-import { authClient } from '../lib/authClient';
+import { useAuth } from '../hooks/useAuth';
 
 const HomePage = () => {
-  const { data: session, isLoading } = authClient.useSession();
-  const user = session?.user;
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (

@@ -3,17 +3,17 @@ import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
 import { authClient } from '../lib/authClient';
+import { toast } from 'react-hot-toast';
 
 const LoginModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
-  const { signIn, isPending, error, clearError } = authClient;
+  const { signIn, isPending, error } = authClient;
 
   useEffect(() => {
     if (!isOpen) {
       setForm({ email: '', password: '' });
-      clearError();
     }
-  }, [isOpen, clearError]);
+  }, [isOpen]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -21,12 +21,15 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const res = await signIn.email({
       email: form.email,
       password: form.password
     });
 
-    if (!res.error) {
+    if (res.error) {
+      toast.error(res.error);
+    } else {
       onRequestClose();
     }
   };
