@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { toast } from 'react-hot-toast';
 
@@ -22,25 +22,34 @@ export const useSSE = () => {
   const [status, setStatus] = useState({ sync: false, scrape: false, single: false });
   const controllerRef = useRef(null);
 
-  const resetStatus = () =>
-    setStatus({ sync: false, scrape: false, single: false });
-
+  // Fonction de nettoyage pour stopper la connexion SSE active
   const stopSSE = () => {
-    controllerRef.current?.abort();
-    controllerRef.current = null;
-    resetStatus();
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+      controllerRef.current = null;
+    }
+    setStatus({ sync: false, scrape: false, single: false });
   };
 
-  const startSSE = (
-    url,
-    { isScraping = false, isSingle = false, filter = defaultFilter } = {}
-  ) => {
-    stopSSE();
-    setMessages([]);
+  // Nettoyer la connexion SSE lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      stopSSE();
+    };
+  }, []);
 
+  const startSSE = (url, { isScraping = false, isSingle = false, filter = defaultFilter } = {}) => {
+    // Si une connexion est déjà active, ne rien faire
+    if (controllerRef.current) {
+      return;
+    }
+
+    // Réinitialiser les messages et définir le statut
+    setMessages([]);
     const isSync = !isScraping && !isSingle;
     setStatus({ sync: isSync, scrape: isScraping, single: isSingle });
 
+    // Créer un nouveau contrôleur pour la connexion SSE
     const controller = new AbortController();
     controllerRef.current = controller;
 
