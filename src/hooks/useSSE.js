@@ -1,22 +1,21 @@
 import { useRef, useState } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getAccessToken } from '../utils/api';
-import { useAuthStore } from '../store/authStore';
 import { toast } from 'react-hot-toast';
 import { API_BASE_URL } from '../utils/config';
 
 const BASE_URL = `${API_BASE_URL}/api/live/spotify`;
 
 const DEFAULT_MESSAGES = [
-  "Début de la synchronisation",
-  "Synchronisation réussie",
-  "Toutes les playlists ont été synchronisées",
-  "Début du scrap",
-  "Scrap terminé",
-  "Traitement de la playlist",
-  "Playlist créée",
-  "Playlist existante",
-  "Morceaux ajoutés",
+  'Début de la synchronisation',
+  'Synchronisation réussie',
+  'Toutes les playlists ont été synchronisées',
+  'Début du scrap',
+  'Scrap terminé',
+  'Traitement de la playlist',
+  'Playlist créée',
+  'Playlist existante',
+  'Morceaux ajoutés',
 ];
 
 const defaultFilter = (msg = '') =>
@@ -26,7 +25,6 @@ export const useSSE = () => {
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState({ sync: false, scrape: false, single: false });
   const controllerRef = useRef(null);
-  const user = useAuthStore.getState().user;
 
   const resetStatus = () =>
     setStatus({ sync: false, scrape: false, single: false });
@@ -37,18 +35,15 @@ export const useSSE = () => {
     resetStatus();
   };
 
-  const startSSE = (url, { isScraping = false, isSingle = false, filter = defaultFilter } = {}) => {
+  const startSSE = (
+    url,
+    { isScraping = false, isSingle = false, filter = defaultFilter } = {}
+  ) => {
     stopSSE();
     setMessages([]);
 
     const isSync = !isScraping && !isSingle;
     setStatus({ sync: isSync, scrape: isScraping, single: isSingle });
-
-    if (!user) {
-      toast.error('Vous devez être connecté pour lancer cette action.');
-      resetStatus();
-      return;
-    }
 
     const token = getAccessToken();
     const controller = new AbortController();
