@@ -1,10 +1,6 @@
 import { useRef, useState } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { getAccessToken } from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { API_BASE_URL } from '../utils/config';
-
-const BASE_URL = `${API_BASE_URL}/api/live/spotify`;
 
 const DEFAULT_MESSAGES = [
   'Début de la synchronisation',
@@ -45,7 +41,6 @@ export const useSSE = () => {
     const isSync = !isScraping && !isSingle;
     setStatus({ sync: isSync, scrape: isScraping, single: isSingle });
 
-    const token = getAccessToken();
     const controller = new AbortController();
     controllerRef.current = controller;
 
@@ -54,7 +49,6 @@ export const useSSE = () => {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
 
       onopen(res) {
