@@ -31,7 +31,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
     });
 
     if (res.error) {
-      toast.error(res.error);
+      toast.error(res.error.message || 'Erreur à l’inscription');
     } else {
       setSuccessMsg("✅ Compte créé ! Vérifiez votre email.");
     }
@@ -45,7 +45,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
         <p className="text-green-600 mb-3 text-sm text-center">{successMsg}</p>
       )}
       {error && !successMsg && (
-        <p className="text-red-500 mb-3 text-sm text-center">{error}</p>
+        <p className="text-red-500 mb-3 text-sm text-center">{error.message}</p>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">

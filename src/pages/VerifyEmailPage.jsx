@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import PageWrapper from '../layout/PageWrapper';
-import { API_BASE_URL } from '../utils/config';
+import { authClient } from '../lib/authClient';
 
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('loading'); // 'loading' | 'success' | 'error'
+  const [status, setStatus] = useState('loading'); // loading | success | error
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -18,21 +18,13 @@ const VerifyEmailPage = () => {
       return;
     }
 
-    fetch(`${API_BASE_URL}/api/auth/email/verify`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok || !data?.success) {
-          throw new Error(data?.message || 'Échec de la vérification.');
-        }
-
+    authClient
+      .verifyEmail({ token })
+      .then(({ error }) => {
+        if (error) throw new Error(error.message);
         setStatus('success');
         toast.success('✅ Email vérifié avec succès !');
-        setTimeout(() => navigate('/'), 3000);
+        setTimeout(() => navigate('/'), 2500);
       })
       .catch((err) => {
         console.error('[VerifyEmail Error]', err);
@@ -41,15 +33,13 @@ const VerifyEmailPage = () => {
       });
   }, [searchParams, navigate]);
 
-  const renderContent = () => {
-    if (status === 'loading') return <p className="text-gray-600">Vérification en cours...</p>;
-    if (status === 'success') return <p className="text-green-600">Votre email a été vérifié ! Redirection…</p>;
-    return <p className="text-red-600">Échec de la vérification. Lien invalide ou expiré.</p>;
-  };
-
   return (
     <PageWrapper className="flex items-center justify-center min-h-screen bg-white">
-      <div className="text-center max-w-md p-4">{renderContent()}</div>
+      <div className="text-center max-w-md p-4">
+        {status === 'loading' && <p className="text-gray-600">Vérification en cours...</p>}
+        {status === 'success' && <p className="text-green-600">Votre email a été vérifié ! Redirection…</p>}
+        {status === 'error' && <p className="text-red-600">Échec de la vérification. Lien invalide ou expiré.</p>}
+      </div>
     </PageWrapper>
   );
 };

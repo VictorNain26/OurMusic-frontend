@@ -24,11 +24,11 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
 
     const res = await signIn.email({
       email: form.email,
-      password: form.password
+      password: form.password,
     });
 
     if (res.error) {
-      toast.error(res.error);
+      toast.error(res.error.message || 'Erreur de connexion');
     } else {
       onRequestClose();
     }
@@ -38,7 +38,7 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2 className="text-2xl font-semibold mb-4 text-center">Se connecter</h2>
 
-      {error && <p className="text-red-500 mb-3 text-sm text-center">{error}</p>}
+      {error && <p className="text-red-500 mb-3 text-sm text-center">{error.message}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

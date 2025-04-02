@@ -2,13 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import ChromecastButton from './ChromecastButton';
 import Button from './ui/Button';
+import { useAuth } from '../hooks/useAuth';
 
-const Header = ({ onLogin, onRegister, onLogout, user }) => {
+const Header = ({ onLogin, onRegister }) => {
+  const { user, signOut } = useAuth();
+
   const renderAuthButtons = () => {
     if (user) {
       return (
         <>
-          <span className="font-medium text-gray-700">{user.name || user.username || user.email}</span>
+          <span className="font-medium text-gray-700">
+            {user.name || user.username || user.email}
+          </span>
 
           {user.role === 'admin' && (
             <>
@@ -25,7 +30,7 @@ const Header = ({ onLogin, onRegister, onLogout, user }) => {
           )}
 
           <Button
-            onClick={onLogout}
+            onClick={signOut}
             className="bg-red-500 hover:bg-red-600 text-white text-sm"
           >
             Déconnexion

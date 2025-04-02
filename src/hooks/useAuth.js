@@ -1,8 +1,12 @@
 import { authClient } from '../lib/authClient';
 
 export const useAuth = () => {
-  const { data: session, isLoading, refetch } = authClient.useSession();
-  const { signOut, signIn, signUp } = authClient;
+  const {
+    data: session,
+    isPending,
+    error,
+    refetch,
+  } = authClient.useSession();
 
   const user = session?.user || null;
   const isAuthenticated = !!user;
@@ -10,10 +14,11 @@ export const useAuth = () => {
   return {
     user,
     isAuthenticated,
-    isLoading,
-    signIn,
-    signUp,
-    signOut,
+    isLoading: isPending,
+    error,
+    signIn: authClient.signIn,
+    signUp: authClient.signUp,
+    signOut: authClient.signOut,
     refetch,
   };
 };

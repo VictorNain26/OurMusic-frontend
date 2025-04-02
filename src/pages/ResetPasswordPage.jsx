@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import PageWrapper from '../layout/PageWrapper';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
-import { API_BASE_URL } from '../utils/config';
+import { authClient } from '../lib/authClient';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -18,36 +18,17 @@ const ResetPasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!token) {
-      toast.error('Token manquant');
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('Mot de passe trop court (min 6 caractères)');
-      return;
-    }
-
-    if (password !== confirm) {
-      toast.error('Les mots de passe ne correspondent pas');
-      return;
-    }
+    if (!token) return toast.error('Token manquant');
+    if (password.length < 6) return toast.error('Mot de passe trop court (min 6 caractères)');
+    if (password !== confirm) return toast.error('Les mots de passe ne correspondent pas');
 
     setLoading(true);
-
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/password/reset`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || 'Erreur inconnue');
+      const { error } = await authClient.resetPassword({ token, password });
+      if (error) throw new Error(error.message);
 
       toast.success('🔐 Mot de passe réinitialisé !');
-      setTimeout(() => navigate('/'), 3000);
+      setTimeout(() => navigate('/'), 2500);
     } catch (err) {
       console.error('[ResetPassword Error]', err);
       toast.error(err.message || 'Erreur de réinitialisation');
