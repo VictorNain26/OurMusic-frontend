@@ -1,7 +1,8 @@
 import { createAuthClient } from 'better-auth/react';
+import { API_BASE_URL } from '../utils/config';
 
 export const authClient = createAuthClient({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: API_BASE_URL,
   onError: (err) => {
     if (import.meta.env.DEV) {
       console.warn('[authClient Error]', err);

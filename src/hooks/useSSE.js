@@ -22,7 +22,6 @@ export const useSSE = () => {
   const [status, setStatus] = useState({ sync: false, scrape: false, single: false });
   const controllerRef = useRef(null);
 
-  // Fonction de nettoyage pour stopper la connexion SSE active
   const stopSSE = () => {
     if (controllerRef.current) {
       controllerRef.current.abort();
@@ -31,25 +30,24 @@ export const useSSE = () => {
     setStatus({ sync: false, scrape: false, single: false });
   };
 
-  // Nettoyer la connexion SSE lors du démontage du composant
-  useEffect(() => {
-    return () => {
-      stopSSE();
-    };
-  }, []);
+  useEffect(() => stopSSE, []);
 
-  const startSSE = (url, { isScraping = false, isSingle = false, filter = defaultFilter } = {}) => {
-    // Si une connexion est déjà active, ne rien faire
+  const startSSE = (
+    url,
+    { isScraping = false, isSingle = false, filter = defaultFilter } = {}
+  ) => {
     if (controllerRef.current) {
+      toast.error('Une action est déjà en cours.');
       return;
     }
 
-    // Réinitialiser les messages et définir le statut
     setMessages([]);
-    const isSync = !isScraping && !isSingle;
-    setStatus({ sync: isSync, scrape: isScraping, single: isSingle });
+    setStatus({
+      sync: !isScraping && !isSingle,
+      scrape: isScraping,
+      single: isSingle,
+    });
 
-    // Créer un nouveau contrôleur pour la connexion SSE
     const controller = new AbortController();
     controllerRef.current = controller;
 
@@ -60,22 +58,22 @@ export const useSSE = () => {
         'Content-Type': 'application/json',
       },
 
-      onopen(res) {
+      async onopen(res) {
         if (!res.ok) {
           toast.error(`Erreur SSE (${res.status})`);
           stopSSE();
-          throw new Error(`SSE non ouvert : ${res.status}`);
+          throw new Error(`Erreur ouverture SSE : ${res.status}`);
         }
       },
 
-      onmessage(evt) {
-        if (!evt.data || evt.data.trim() === '.') return;
+      onmessage(event) {
+        if (!event.data || event.data.trim() === '.') return;
 
         let parsed;
         try {
-          parsed = JSON.parse(evt.data);
+          parsed = JSON.parse(event.data);
         } catch {
-          parsed = { message: `⚠️ Erreur parsing : ${evt.data}` };
+          parsed = { message: `⚠️ Erreur de parsing : ${event.data}` };
         }
 
         const msg = parsed?.pub?.message || parsed?.message || '';

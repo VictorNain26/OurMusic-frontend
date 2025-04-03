@@ -10,7 +10,9 @@ export const useLikedTracks = () => {
 
   const fetchLikedTracks = async () => {
     if (!user) {
-      console.warn('[useLikedTracks] Pas d’utilisateur connecté. Skip API.');
+      if (import.meta.env.DEV) {
+        console.info('[useLikedTracks] Aucun utilisateur connecté, skip API.');
+      }
       return [];
     }
 
@@ -27,15 +29,16 @@ export const useLikedTracks = () => {
     queryKey: ['likedTracks'],
     queryFn: fetchLikedTracks,
     enabled: !!user,
+    staleTime: 1000 * 60, // 1 minute
     retry: 1,
     onError: (err) => {
-      console.error('[useLikedTracks → Query error]', err);
+      console.error('[useLikedTracks → Query]', err);
       toast.error(err.message || 'Erreur chargement morceaux likés');
     },
   });
 
   const likeTrack = useMutation({
-    mutationFn: async ({ title, artist, artwork, youtubeUrl }) => {
+    mutationFn: async ({ title, artist, artwork = '', youtubeUrl = '' }) => {
       if (!title || !artist) throw new Error('Titre ou artiste manquant');
       const res = await apiFetch('/api/track/like', {
         method: 'POST',
@@ -48,14 +51,14 @@ export const useLikedTracks = () => {
       toast.success('🎶 Morceau liké !');
     },
     onError: (err) => {
-      console.error('[likeTrack → Error]', err);
+      console.error('[likeTrack]', err);
       toast.error(err.message || 'Erreur lors du like');
     },
   });
 
   const deleteTrack = useMutation({
     mutationFn: async (id) => {
-      if (!id || isNaN(id)) throw new Error('ID de suppression invalide');
+      if (!id || isNaN(id)) throw new Error('ID invalide');
       await apiFetch(`/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
@@ -66,7 +69,7 @@ export const useLikedTracks = () => {
       toast.success('🗑️ Morceau supprimé');
     },
     onError: (err) => {
-      console.error('[deleteTrack → Error]', err);
+      console.error('[deleteTrack]', err);
       toast.error(err.message || 'Erreur lors de la suppression');
     },
   });
@@ -76,7 +79,6 @@ export const useLikedTracks = () => {
       toast.error('ID invalide');
       return;
     }
-
     try {
       await deleteTrack.mutateAsync(id);
     } catch (err) {
