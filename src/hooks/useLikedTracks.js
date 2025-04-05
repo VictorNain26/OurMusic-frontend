@@ -16,7 +16,7 @@ export const useLikedTracks = () => {
       return [];
     }
 
-    const data = await apiFetch('/api/track/like');
+    const data = await apiFetch('/track/like');
     return data?.likedTracks || [];
   };
 
@@ -40,14 +40,14 @@ export const useLikedTracks = () => {
   const likeTrack = useMutation({
     mutationFn: async ({ title, artist, artwork = '', youtubeUrl = '' }) => {
       if (!title || !artist) throw new Error('Titre ou artiste manquant');
-      const res = await apiFetch('/api/track/like', {
+      const res = await apiFetch('/track/like', {
         method: 'POST',
         body: JSON.stringify({ title, artist, artwork, youtubeUrl }),
       });
       return res?.likedTrack;
     },
     onSuccess: (newTrack) => {
-      queryClient.setQueryData(['likedTracks'], (prev = []) => [...prev, newTrack]);
+      queryClient.setQueryData(['likedTracks'], (prev = []) => [...(prev || []), newTrack]);
       toast.success('🎶 Morceau liké !');
     },
     onError: (err) => {
@@ -59,12 +59,12 @@ export const useLikedTracks = () => {
   const deleteTrack = useMutation({
     mutationFn: async (id) => {
       if (!id || isNaN(id)) throw new Error('ID invalide');
-      await apiFetch(`/api/track/like/${id}`, { method: 'DELETE' });
+      await apiFetch(`/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
     onSuccess: (deletedId) => {
       queryClient.setQueryData(['likedTracks'], (prev = []) =>
-        prev?.filter((track) => track.id !== deletedId)
+        (prev || []).filter((track) => track.id !== deletedId)
       );
       toast.success('🗑️ Morceau supprimé');
     },

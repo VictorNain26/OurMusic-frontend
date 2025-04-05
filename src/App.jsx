@@ -4,8 +4,6 @@ import { lazy, Suspense } from 'react';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
-const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 
 import Layout from './layout/Layout';
 import AdminGuard from './layout/AdminGuard';

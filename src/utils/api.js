@@ -1,50 +1,52 @@
+// src/utils/api.js
 import { API_BASE_URL } from './config';
 
-export async function apiFetch(url, options = {}) {
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-
-  const headers = {
-    ...(options.headers || {}),
-    ...(options.method !== 'DELETE' || options.body ? { 'Content-Type': 'application/json' } : {}),
-  };
+export async function apiFetch(endpoint, options = {}) {
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
   const fetchOptions = {
     ...options,
-    headers,
-    credentials: 'include',
-    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+    credentials: 'include', // ⚠️ Important pour que le cookie HttpOnly soit envoyé
+    mode: 'cors', // Assure le CORS pour frontend-backend séparés
   };
 
   if (import.meta.env.DEV) {
-    console.info('[apiFetch]', fullUrl, fetchOptions);
+    console.info('[apiFetch] Request:', url, fetchOptions);
   }
 
-  let res, text;
-  try {
-    res = await fetch(fullUrl, fetchOptions);
-    text = await res.text();
-  } catch (err) {
-    console.error('[apiFetch → Network error]', err);
-    throw new Error('Impossible de contacter le serveur');
-  }
-
-  if (!text || text.trim() === '') {
-    if (res.ok) return {};
-    throw new Error('Réponse vide du serveur.');
-  }
+  let response;
+  let responseBody;
 
   try {
-    const json = JSON.parse(text);
-    if (!res.ok) {
-      if (json?.error?.toLowerCase().includes('token')) {
-        console.warn('[apiFetch] ⚠️ Token expiré ou invalide');
-      }
-      throw new Error(json?.error || json?.message || 'Erreur inconnue');
+    response = await fetch(url, fetchOptions);
+
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+
+    responseBody = isJson ? await response.json() : await response.text();
+
+    if (!response.ok) {
+      const errorMessage = responseBody?.error || responseBody?.message || response.statusText;
+      throw new Error(errorMessage);
     }
-    return json;
-  } catch (err) {
-    if (!res.ok) throw new Error(text || res.statusText || 'Erreur serveur');
-    if (import.meta.env.DEV) console.warn('[apiFetch] Réponse non JSON :', text);
-    return text;
+
+    return responseBody;
+  } catch (error) {
+    console.error('[apiFetch Error]', error);
+
+    if (!response) {
+      throw new Error('Impossible de contacter le serveur.');
+    }
+
+    throw new Error(
+      responseBody?.error ||
+        responseBody?.message ||
+        response.statusText ||
+        'Erreur réseau inconnue.'
+    );
   }
 }

@@ -25,7 +25,7 @@ const TrackLikeButton = ({ track }) => {
 
   const handleLike = async () => {
     if (!isLoggedIn) {
-      toast.error("Veuillez vous connecter pour liker.");
+      toast.error('Veuillez vous connecter pour liker.');
       const loginBtn = document.querySelector('[data-login-button]');
       if (loginBtn) loginBtn.click();
       return;
@@ -46,11 +46,12 @@ const TrackLikeButton = ({ track }) => {
 
   const handleUnlike = async () => {
     if (!likedTrackId) return;
+
     try {
       await handleDelete(likedTrackId);
     } catch (err) {
       console.error('[TrackLikeButton → Unlike]', err);
-      toast.error('Erreur lors du unlike');
+      toast.error(err.message || 'Erreur lors du unlike');
     }
   };
 
