@@ -34,6 +34,42 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       toast.error(res.error.message || 'Erreur à l’inscription');
     } else {
       setSuccessMsg("✅ Compte créé ! Vérifiez votre email.");
+      onRequestClose(); // Ferme la modal après inscription
+
+      // ✅ Toast pour inviter à vérifier l’email
+      toast.error(
+        (t) => (
+          <span className="flex items-center">
+            ⚠️ Vérifiez votre email !
+            <Button
+              onClick={() => {
+                resendVerificationEmail(form.email);
+                toast.dismiss(t.id);
+              }}
+              className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
+            >
+              Renvoyer
+            </Button>
+          </span>
+        ),
+        { duration: 7000 }
+      );
+    }
+  };
+
+  const resendVerificationEmail = async (email) => {
+    try {
+      const { error } = await authClient.sendVerificationEmail({
+        email,
+        callbackURL: window.location.origin,
+      });
+
+      if (error) throw new Error(error.message);
+
+      toast.success('📨 Email de vérification renvoyé avec succès !');
+    } catch (err) {
+      console.error('[Resend Email Error]', err);
+      toast.error(err.message || 'Erreur lors de l’envoi');
     }
   };
 

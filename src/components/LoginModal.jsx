@@ -1,3 +1,4 @@
+// src/components/LoginModal.jsx
 import React, { useState, useEffect } from 'react';
 import Input from './ui/Input';
 import Button from './ui/Button';
@@ -7,16 +8,37 @@ import { toast } from 'react-hot-toast';
 
 const LoginModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
-  const { signIn, isPending, error } = authClient;
+  const [isResending, setIsResending] = useState(false);
+  const { signIn, isPending } = authClient;
 
   useEffect(() => {
     if (!isOpen) {
       setForm({ email: '', password: '' });
+      setIsResending(false);
     }
   }, [isOpen]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleResendEmail = async () => {
+    setIsResending(true);
+    try {
+      const { error } = await authClient.sendVerificationEmail({
+        email: form.email,
+        callbackURL: window.location.origin,
+      });
+
+      if (error) throw new Error(error.message);
+
+      toast.success('📨 Email de vérification renvoyé !');
+    } catch (err) {
+      console.error('[Resend Email Error]', err);
+      toast.error(err.message || 'Erreur lors de l’envoi');
+    } finally {
+      setIsResending(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -28,7 +50,28 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     });
 
     if (res.error) {
-      toast.error(res.error.message || 'Erreur de connexion');
+      if (res.error.status === 403) {
+        toast.error(
+          (t) => (
+            <span>
+              ⚠️ Email non vérifié.
+              <Button
+                onClick={() => {
+                  handleResendEmail();
+                  toast.dismiss(t.id);
+                }}
+                disabled={isResending}
+                className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
+              >
+                Renvoyer
+              </Button>
+            </span>
+          ),
+          { duration: 7000 }
+        );
+      } else {
+        toast.error(res.error.message || 'Erreur de connexion');
+      }
     } else {
       onRequestClose();
     }
@@ -37,8 +80,6 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
   return (
     <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2 className="text-2xl font-semibold mb-4 text-center">Se connecter</h2>
-
-      {error && <p className="text-red-500 mb-3 text-sm text-center">{error.message}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

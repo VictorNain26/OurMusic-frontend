@@ -46,13 +46,13 @@ const Header = ({ onLogin, onRegister }) => {
           className="bg-blue-600 hover:bg-blue-500 text-white text-sm"
           data-login-button
         >
-          Login
+          Connexion
         </Button>
         <Button
           onClick={onRegister}
           className="bg-green-600 hover:bg-green-500 text-white text-sm"
         >
-          Register
+          Inscription
         </Button>
       </>
     );

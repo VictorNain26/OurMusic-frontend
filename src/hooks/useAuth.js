@@ -19,6 +19,8 @@ export const useAuth = () => {
     signIn: authClient.signIn,
     signUp: authClient.signUp,
     signOut: authClient.signOut,
+    sendVerificationEmail: authClient.sendVerificationEmail,
+    resetPassword: authClient.resetPassword,
     refetch,
   };
 };
