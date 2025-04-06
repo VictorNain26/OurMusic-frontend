@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { authClient } from '../lib/authClient';
+import { authClient } from '../lib/authClient.jsx';
 
 const AdminGuard = ({ children }) => {
   const { data: session, isPending } = authClient.useSession();

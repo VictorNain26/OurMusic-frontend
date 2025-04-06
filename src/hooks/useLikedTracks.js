@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
-import { authClient } from '../lib/authClient';
+import { authClient } from '../lib/authClient.jsx';
 
 export const useLikedTracks = () => {
   const queryClient = useQueryClient();

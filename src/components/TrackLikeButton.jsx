@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 import { motion } from 'framer-motion';
-import { authClient } from '../lib/authClient';
+import { authClient } from '../lib/authClient.jsx';
 
 const TrackLikeButton = ({ track }) => {
   const { likedTracks, likeTrack, handleDelete } = useLikedTracks();

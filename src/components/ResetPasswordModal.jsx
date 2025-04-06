@@ -4,7 +4,7 @@ import Input from './ui/Input';
 import Button from './ui/Button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { authClient } from '../lib/authClient';
+import { authClient } from '../lib/authClient.jsx';
 
 const ResetPasswordModal = ({ isOpen, onRequestClose }) => {
   const navigate = useNavigate();

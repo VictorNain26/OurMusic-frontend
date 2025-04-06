@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
-import { authClient } from '../lib/authClient';
+import { authClient } from '../lib/authClient.jsx';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 

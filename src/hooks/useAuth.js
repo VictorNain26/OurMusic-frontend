@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { authClient } from '../lib/authClient';
+import { authClient } from '../lib/authClient.jsx';
 
 export const useAuth = () => {
   const {
