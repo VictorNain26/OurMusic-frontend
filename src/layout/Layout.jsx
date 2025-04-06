@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import Button from '../components/ui/Button';
+import { sendVerificationEmail } from '../lib/authClient';
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
@@ -14,8 +15,7 @@ const Layout = ({ children }) => {
   const [isRegisterOpen, setRegisterOpen] = useState(false);
   const [isResetPasswordOpen, setResetPasswordOpen] = useState(false);
 
-  const { user, isLoading, signOut, refetch } = useAuth();
-
+  const { user, isLoading, refetch } = useAuth();
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
@@ -30,47 +30,25 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     if (user && !user.emailVerified) {
-      const notifyEmailNotVerified = () => {
-        toast.error(
-          (t) => (
-            <span className="flex items-center">
-              ⚠️ Vérifiez votre email !
-              <Button
-                onClick={() => {
-                  handleResendEmail();
-                  toast.dismiss(t.id);
-                }}
-                className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
-                disabled={cooldown > 0}
-              >
-                {cooldown > 0 ? `Attendez ${cooldown}s` : 'Renvoyer'}
-              </Button>
-            </span>
-          ),
-          { duration: 7000 }
-        );
-      };
-
-      const handleResendEmail = async () => {
-        try {
-          const { error } = await import('../lib/authClient').then(({ authClient }) =>
-            authClient.sendVerificationEmail({
-              email: user.email,
-              callbackURL: window.location.origin,
-            })
-          );
-
-          if (error) throw new Error(error.message);
-
-          toast.success('📨 Email de vérification renvoyé !');
-          setCooldown(30); // Cooldown 30s
-        } catch (err) {
-          console.error('[Resend Email Error]', err);
-          toast.error(err.message || 'Erreur lors de l’envoi');
-        }
-      };
-
-      notifyEmailNotVerified();
+      toast.error(
+        (t) => (
+          <span className="flex items-center">
+            ⚠️ Vérifiez votre email !
+            <Button
+              onClick={async () => {
+                await sendVerificationEmail(user.email);
+                setCooldown(30);
+                toast.dismiss(t.id);
+              }}
+              className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
+              disabled={cooldown > 0}
+            >
+              {cooldown > 0 ? `Attendez ${cooldown}s` : 'Renvoyer'}
+            </Button>
+          </span>
+        ),
+        { duration: 7000 }
+      );
     }
   }, [user, cooldown]);
 
@@ -87,7 +65,7 @@ const Layout = ({ children }) => {
           <Header
             onLogin={() => setLoginOpen(true)}
             onRegister={() => setRegisterOpen(true)}
-            onLogout={signOut}
+            onLogout={refetch}
             user={user}
           />
 

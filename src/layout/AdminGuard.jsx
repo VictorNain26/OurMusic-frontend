@@ -1,11 +1,12 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { authClient } from '../lib/authClient';
 
 const AdminGuard = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-12 h-12 border-8 border-gray-300 border-t-blue-500 rounded-full animate-spin" />

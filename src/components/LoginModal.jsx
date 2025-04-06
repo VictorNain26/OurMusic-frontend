@@ -1,15 +1,16 @@
-// src/components/LoginModal.jsx
 import React, { useState, useEffect } from 'react';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
 import { authClient } from '../lib/authClient';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 
 const LoginModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [isResending, setIsResending] = useState(false);
-  const { signIn, isPending } = authClient;
+  const { signIn } = authClient;
+  const { refetch } = useAuth();
 
   useEffect(() => {
     if (!isOpen) {
@@ -22,25 +23,6 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleResendEmail = async () => {
-    setIsResending(true);
-    try {
-      const { error } = await authClient.sendVerificationEmail({
-        email: form.email,
-        callbackURL: window.location.origin,
-      });
-
-      if (error) throw new Error(error.message);
-
-      toast.success('📨 Email de vérification renvoyé !');
-    } catch (err) {
-      console.error('[Resend Email Error]', err);
-      toast.error(err.message || 'Erreur lors de l’envoi');
-    } finally {
-      setIsResending(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -50,30 +32,10 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     });
 
     if (res.error) {
-      if (res.error.status === 403) {
-        toast.error(
-          (t) => (
-            <span>
-              ⚠️ Email non vérifié.
-              <Button
-                onClick={() => {
-                  handleResendEmail();
-                  toast.dismiss(t.id);
-                }}
-                disabled={isResending}
-                className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
-              >
-                Renvoyer
-              </Button>
-            </span>
-          ),
-          { duration: 7000 }
-        );
-      } else {
-        toast.error(res.error.message || 'Erreur de connexion');
-      }
+      toast.error(res.error.message || 'Erreur de connexion');
     } else {
       onRequestClose();
+      await refetch();
     }
   };
 
@@ -108,10 +70,9 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
 
         <Button
           type="submit"
-          disabled={isPending}
           className="w-full bg-blue-600 hover:bg-blue-500 text-white"
         >
-          {isPending ? 'Connexion...' : 'Se connecter'}
+          Se connecter
         </Button>
       </form>
     </ModalWrapper>

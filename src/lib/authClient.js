@@ -17,16 +17,8 @@ export const authClient = createAuthClient({
           <Button
             className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded"
             onClick={() => {
-              authClient.sendVerificationEmail({
-                email: err.context.email,
-                callbackURL: window.location.origin,
-              }).then(() => {
-                toast.success('Email de vérification renvoyé !');
-                toast.dismiss(t.id);
-              }).catch((error) => {
-                console.error('[Global Resend Verification]', error);
-                toast.error('Erreur lors de l’envoi');
-              });
+              sendVerificationEmail(err.context.email);
+              toast.dismiss(t.id);
             }}
           >
             Renvoyer
@@ -34,5 +26,21 @@ export const authClient = createAuthClient({
         </span>
       ), { duration: 8000 });
     }
-  }
+  },
 });
+
+export const sendVerificationEmail = async (email) => {
+  try {
+    const { error } = await authClient.sendVerificationEmail({
+      email,
+      callbackURL: window.location.origin,
+    });
+
+    if (error) throw new Error(error.message);
+
+    toast.success('📨 Email de vérification renvoyé !');
+  } catch (err) {
+    console.error('[sendVerificationEmail]', err);
+    toast.error(err.message || 'Erreur lors de l’envoi');
+  }
+};
