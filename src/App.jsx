@@ -24,6 +24,7 @@ const App = () => {
             </Layout>
           }
         />
+
         <Route
           path="/admin/dashboard"
           element={
@@ -36,22 +37,7 @@ const App = () => {
             </AdminGuard>
           }
         />
-        <Route
-          path="/verify-email"
-          element={
-            <Suspense fallback={<div className="text-center py-10">Vérification de l’email...</div>}>
-              <VerifyEmailPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/reset-password"
-          element={
-            <Suspense fallback={<div className="text-center py-10">Chargement formulaire…</div>}>
-              <ResetPasswordPage />
-            </Suspense>
-          }
-        />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
