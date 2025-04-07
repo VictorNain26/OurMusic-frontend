@@ -3,35 +3,68 @@ name: Deploy
 on:
   push:
     branches: [ "master" ]
-  # Tu peux ajouter d'autres déclencheurs si besoin :
-  # pull_request:
-  #   branches: [ "main" ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Étape facultative : check out le code côté Actions
+      # Étape 1 : Checkout du code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Étape : se connecter en SSH et exécuter les commandes de déploiement
-      - name: SSH into server and deploy
+      # Étape 2 : Setup PNPM
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      # Étape 3 : Setup Node.js avec cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      # Étape 4 : Cache node_modules pour accélérer les prochaines builds
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Étape 5 : Installer les dépendances
+      - name: Install dependencies
+        run: pnpm install
+
+      # Étape 6 : Lancer les tests
+      - name: Run tests
+        run: pnpm test
+
+      # Étape 7 : Build project
+      - name: Build project
+        run: pnpm build
+
+      # Étape 8 : Deploy si les étapes précédentes sont OK
+      - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.8
         with:
-          host: ${{ secrets.SERVER_HOST }}       # IP ou domaine de ton VPS
-          username: ${{ secrets.SERVER_USER }}   # Utilisateur SSH (ex: ubuntu)
-          key: ${{ secrets.SERVER_SSH_KEY }}     # Clé privée SSH (secret GitHub)
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Se placer dans le dossier cloné sur ton VPS (assure-toi d'avoir cloné le dépôt une première fois)
+            echo "✅ Connexion SSH réussie."
             cd ~/Ourmusic/frontend
-            
-            # Mettre à jour le code depuis la branche master
+
+            echo "📦 Pulling latest code..."
             git pull origin master
 
-            # Reconstruire l'image Docker "frontend" sans cache
+            echo "🚀 Rebuilding Docker image..."
             docker compose build --no-cache frontend
 
-            # Relancer le container en arrière-plan
+            echo "🧩 Restarting container..."
             docker compose up -d frontend
+
+            echo "✅ Déploiement terminé avec succès."
