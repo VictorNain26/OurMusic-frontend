@@ -29,7 +29,7 @@ describe('Better Auth Client', () => {
   it('should send a verification email', async () => {
     const res = await authClient.sendVerificationEmail({
       email: testEmail,
-      callbackURL: window.location.origin,
+      callbackURL: 'http://localhost',
     });
 
     expect(res.error).toBeFalsy();
