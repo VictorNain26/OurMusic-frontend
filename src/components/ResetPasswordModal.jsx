@@ -7,10 +7,6 @@ import Button from '../components/ui/Button';
 import { sendVerificationEmail } from '../lib/authClient.jsx';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'; // 🆕
 
-const LoginModal = lazy(() => import('../components/LoginModal'));
-const RegisterModal = lazy(() => import('../components/RegisterModal'));
-const ResetPasswordModal = lazy(() => import('../components/ResetPasswordModal'));
-
 const Layout = ({ children }) => {
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isRegisterOpen, setRegisterOpen] = useState(false);
