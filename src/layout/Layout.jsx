@@ -1,10 +1,10 @@
 import React, { useState, lazy, Suspense, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import Header from '../components/Header';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
-import Button from '../components/ui/Button';
-import { sendVerificationEmail } from '../lib/authClient.jsx';
+import { API_BASE_URL } from '../utils/config';
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
@@ -16,41 +16,46 @@ const Layout = ({ children }) => {
   const [isResetPasswordOpen, setResetPasswordOpen] = useState(false);
 
   const { user, isLoading, refetch } = useAuth();
-  const [cooldown, setCooldown] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  // ✅ Vérification email automatique depuis URL
   useEffect(() => {
-    let timer;
-    if (cooldown > 0) {
-      timer = setInterval(() => {
-        setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [cooldown]);
+    const token = searchParams.get('token');
+    if (!token) return;
 
+    const verifyEmail = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/email/verify?token=${token}`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data?.error || 'Erreur de vérification');
+        }
+
+        toast.success('🎉 Email vérifié avec succès !');
+      } catch (err) {
+        console.error('[Layout → VerifyEmail]', err);
+        toast.error(err.message || 'Erreur de vérification');
+      } finally {
+        await refetch();
+        searchParams.delete('token');
+        setSearchParams(searchParams, { replace: true });
+      }
+    };
+
+    verifyEmail();
+  }, [searchParams, setSearchParams, refetch]);
+
+  // ✅ Reset password modal automatique (optionnel, pas obligatoire)
   useEffect(() => {
-    if (user && !user.emailVerified) {
-      toast.error(
-        (t) => (
-          <span className="flex items-center">
-            ⚠️ Vérifiez votre email !
-            <Button
-              onClick={async () => {
-                await sendVerificationEmail(user.email);
-                setCooldown(30);
-                toast.dismiss(t.id);
-              }}
-              className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
-              disabled={cooldown > 0}
-            >
-              {cooldown > 0 ? `Attendez ${cooldown}s` : 'Renvoyer'}
-            </Button>
-          </span>
-        ),
-        { duration: 7000 }
-      );
+    const resetToken = searchParams.get('resetToken');
+    if (resetToken) {
+      setResetPasswordOpen(true);
     }
-  }, [user, cooldown]);
+  }, [searchParams]);
 
   return (
     <>

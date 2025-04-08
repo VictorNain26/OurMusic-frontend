@@ -1,108 +1,127 @@
-import React, { useEffect, useState } from 'react';
-import ModalWrapper from './ui/ModalWrapper';
-import Input from './ui/Input';
-import Button from './ui/Button';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { authClient } from '../lib/authClient.jsx';
+import React, { useState, lazy, Suspense, useEffect } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
+import Header from '../components/Header';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useAuth } from '../hooks/useAuth';
+import Button from '../components/ui/Button';
+import { sendVerificationEmail } from '../lib/authClient.jsx';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'; // 🆕
 
-const ResetPasswordModal = ({ isOpen, onRequestClose }) => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+const LoginModal = lazy(() => import('../components/LoginModal'));
+const RegisterModal = lazy(() => import('../components/RegisterModal'));
+const ResetPasswordModal = lazy(() => import('../components/ResetPasswordModal'));
 
-  const [form, setForm] = useState({ password: '', confirm: '' });
-  const [loading, setLoading] = useState(false);
+const Layout = ({ children }) => {
+  const [isLoginOpen, setLoginOpen] = useState(false);
+  const [isRegisterOpen, setRegisterOpen] = useState(false);
+  const [isResetPasswordOpen, setResetPasswordOpen] = useState(false);
 
+  const { user, isLoading, refetch } = useAuth();
+  const [cooldown, setCooldown] = useState(0);
+
+  const [searchParams, setSearchParams] = useSearchParams(); // 🆕
+  const location = useLocation(); // 🆕
+  const navigate = useNavigate(); // 🆕
+
+  // ✅ Toast confirmation email vérifié
   useEffect(() => {
-    if (!token && isOpen) {
-      toast.error('Token manquant pour réinitialiser le mot de passe.');
-      onRequestClose();
+    const token = searchParams.get('token');
+    if (token) {
+      toast.success('✅ Email vérifié avec succès !');
     }
-  }, [token, isOpen, onRequestClose]);
+  }, [searchParams]);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  // ✅ Nettoyage global des query params après toast éventuel
+  useEffect(() => {
+    if (searchParams.size > 0) {
+      const paramsToKeep = ['resetToken']; // tu gardes que resetToken pour le modal reset
+      const cleanParams = new URLSearchParams();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (form.password.length < 6) {
-      toast.error('Le mot de passe doit faire au moins 6 caractères.');
-      return;
-    }
-
-    if (form.password !== form.confirm) {
-      toast.error('Les mots de passe ne correspondent pas.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { error } = await authClient.resetPassword({
-        token,
-        password: form.password,
-      });
-
-      if (error) {
-        throw new Error(error.message);
+      for (const [key, value] of searchParams.entries()) {
+        if (paramsToKeep.includes(key)) {
+          cleanParams.set(key, value);
+        }
       }
 
-      toast.success('🔐 Mot de passe réinitialisé avec succès !');
-
-      setTimeout(() => {
-        onRequestClose();
-        navigate('/');
-      }, 2000);
-    } catch (err) {
-      console.error('[ResetPasswordModal Error]', err);
-      toast.error(err.message || 'Erreur lors de la réinitialisation.');
-    } finally {
-      setLoading(false);
+      if (cleanParams.toString() !== searchParams.toString()) {
+        navigate(`${location.pathname}${cleanParams.toString() ? `?${cleanParams.toString()}` : ''}`, { replace: true });
+      }
     }
-  };
+  }, [location, searchParams, navigate]);
+
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  useEffect(() => {
+    if (user && !user.emailVerified) {
+      toast.error(
+        (t) => (
+          <span className="flex items-center">
+            ⚠️ Vérifiez votre email !
+            <Button
+              onClick={async () => {
+                await sendVerificationEmail(user.email);
+                setCooldown(30);
+                toast.dismiss(t.id);
+              }}
+              className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
+              disabled={cooldown > 0}
+            >
+              {cooldown > 0 ? `Attendez ${cooldown}s` : 'Renvoyer'}
+            </Button>
+          </span>
+        ),
+        { duration: 7000 }
+      );
+    }
+  }, [user, cooldown]);
 
   return (
-    <ModalWrapper isOpen={isOpen} onRequestClose={onRequestClose}>
-      <h2 className="text-2xl font-semibold mb-4 text-center">🔐 Réinitialiser le mot de passe</h2>
+    <>
+      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1 font-medium">Nouveau mot de passe</label>
-          <Input
-            name="password"
-            type="password"
-            placeholder="••••••••"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-screen bg-white">
+          <div className="w-12 h-12 border-8 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
         </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Confirmer le mot de passe</label>
-          <Input
-            name="confirm"
-            type="password"
-            placeholder="••••••••"
-            value={form.confirm}
-            onChange={handleChange}
-            required
+      ) : (
+        <>
+          <Header
+            onLogin={() => setLoginOpen(true)}
+            onRegister={() => setRegisterOpen(true)}
+            onLogout={refetch}
+            user={user}
           />
-        </div>
 
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white"
-        >
-          {loading ? 'Réinitialisation...' : 'Réinitialiser'}
-        </Button>
-      </form>
-    </ModalWrapper>
+          <AnimatePresence mode="wait">
+            <motion.main
+              key="layout-main"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+            >
+              {children}
+            </motion.main>
+          </AnimatePresence>
+
+          <Suspense fallback={null}>
+            <LoginModal isOpen={isLoginOpen} onRequestClose={() => setLoginOpen(false)} />
+            <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setRegisterOpen(false)} />
+            <ResetPasswordModal isOpen={isResetPasswordOpen} onRequestClose={() => setResetPasswordOpen(false)} />
+          </Suspense>
+        </>
+      )}
+    </>
   );
 };
 
-export default ResetPasswordModal;
+export default Layout;
