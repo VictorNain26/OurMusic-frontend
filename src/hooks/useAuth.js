@@ -8,7 +8,7 @@ export const useAuth = () => {
     error,
     refetch,
   } = authClient.useSession({
-    refetchOnWindowFocus: true, // On garde le focus pour l'UX instantané
+    refetchOnWindowFocus: true,
   });
 
   const user = session?.user || null;
@@ -20,14 +20,14 @@ export const useAuth = () => {
     const expiresAt = new Date(session.expires).getTime();
     const now = Date.now();
 
-    const refreshIn = Math.max(expiresAt - now - 60 * 1000, 10 * 1000); // minimum 10s pour éviter de spam
+    const refreshIn = Math.max(expiresAt - now - 60 * 1000, 10 * 1000);
 
     const timer = setTimeout(() => {
       refetch();
     }, refreshIn);
 
     if (import.meta.env.DEV) {
-      console.info(`[useAuth] Prochain refresh de session dans ${Math.round(refreshIn / 1000)}s`);
+      console.info(`[useAuth] Prochain refresh dans ${Math.round(refreshIn / 1000)}s`);
     }
 
     return () => clearTimeout(timer);
@@ -40,7 +40,14 @@ export const useAuth = () => {
     error,
     signIn: authClient.signIn,
     signUp: authClient.signUp,
-    signOut: authClient.signOut,
+    signOut: async () => {
+      try {
+        authClient.signOut();
+        refetch();
+      } catch (err) {
+        console.error('[useAuth → signOut]', err);
+      }
+    },
     sendVerificationEmail: authClient.sendVerificationEmail,
     resetPassword: authClient.resetPassword,
     refetch,

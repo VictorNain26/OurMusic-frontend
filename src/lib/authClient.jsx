@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 
 export const authClient = createAuthClient({
   baseURL: API_BASE_URL,
+
   onError: (err) => {
     if (import.meta.env.DEV) {
       console.warn('[authClient Error]', err);
@@ -26,6 +27,12 @@ export const authClient = createAuthClient({
         </span>
       ), { duration: 8000 });
     }
+  },
+
+  // ✅ Redirection propre après déconnexion
+  onSignOut: () => {
+    toast.success('Vous avez été déconnecté.');
+    window.location.href = window.location.origin;
   },
 });
 
