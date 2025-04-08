@@ -5,19 +5,18 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
-  const isDev = mode === 'development';
   const apiBaseUrl = env.VITE_API_BASE_URL;
 
   return {
     base: './',
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env': env
+      'process.env': env,
     },
     server: {
       host: '0.0.0.0',
       port: 5173,
-      proxy: isDev && apiBaseUrl
+      proxy: apiBaseUrl
         ? {
             '/api': {
               target: apiBaseUrl,
