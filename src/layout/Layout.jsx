@@ -4,7 +4,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import Header from '../components/Header';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
-import { API_BASE_URL } from '../utils/config';
+import { authClient } from '../lib/authClient.jsx'; // ✅ Import corrigé
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
@@ -25,14 +25,13 @@ const Layout = ({ children }) => {
 
     const verifyEmail = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/email/verify?token=${token}`, {
-          method: 'POST',
-          credentials: 'include',
+        const { error } = await authClient.verifyEmail({
+          token,
+          callbackURL: window.location.origin,
         });
 
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data?.error || 'Erreur de vérification');
+        if (error) {
+          throw new Error(error.message);
         }
 
         toast.success('🎉 Email vérifié avec succès !');
