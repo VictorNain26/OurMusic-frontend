@@ -29,10 +29,8 @@ export const authClient = createAuthClient({
     }
   },
 
-  // ✅ Redirection propre après déconnexion
   onSignOut: () => {
     toast.success('Vous avez été déconnecté.');
-    window.location.href = window.location.origin;
   },
 });
 

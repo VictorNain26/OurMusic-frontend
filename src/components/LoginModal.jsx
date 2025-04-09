@@ -34,6 +34,7 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     if (res.error) {
       toast.error(res.error.message || 'Erreur de connexion');
     } else {
+      toast.success('Bienvenue 🎉 Connexion réussie !');
       onRequestClose();
       await refetch();
     }

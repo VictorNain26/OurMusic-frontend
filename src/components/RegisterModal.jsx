@@ -36,6 +36,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       toast.error(res.error.message || 'Erreur à l’inscription');
     } else {
       setSuccessMsg("✅ Compte créé ! Vérifiez votre email.");
+      toast.success('🎉 Compte créé avec succès ! Vérifiez votre email.');
       onRequestClose();
       await refetch();
 

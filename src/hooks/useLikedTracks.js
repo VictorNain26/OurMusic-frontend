@@ -16,7 +16,7 @@ export const useLikedTracks = () => {
       return [];
     }
 
-    const data = await apiFetch('/track/like');
+    const data = await apiFetch('/api/track/like');
     return data?.likedTracks || [];
   };
 
@@ -40,7 +40,7 @@ export const useLikedTracks = () => {
   const likeTrack = useMutation({
     mutationFn: async ({ title, artist, artwork = '', youtubeUrl = '' }) => {
       if (!title || !artist) throw new Error('Titre ou artiste manquant');
-      const res = await apiFetch('/track/like', {
+      const res = await apiFetch('/api/track/like', {
         method: 'POST',
         body: JSON.stringify({ title, artist, artwork, youtubeUrl }),
       });
@@ -59,7 +59,7 @@ export const useLikedTracks = () => {
   const deleteTrack = useMutation({
     mutationFn: async (id) => {
       if (!id || isNaN(id)) throw new Error('ID invalide');
-      await apiFetch(`/track/like/${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
     onSuccess: (deletedId) => {
