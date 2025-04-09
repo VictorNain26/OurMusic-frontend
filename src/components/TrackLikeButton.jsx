@@ -1,3 +1,4 @@
+// src/components/TrackLikeButton.jsx
 import React from 'react';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
@@ -56,7 +57,7 @@ const TrackLikeButton = ({ track }) => {
   };
 
   const handleClick = () => {
-    if (likeTrack.isPending) return; // ✅ Ajout protection double clic
+    if (likeTrack.isPending) return;
     if (isLiked) return handleUnlike();
     return handleLike();
   };

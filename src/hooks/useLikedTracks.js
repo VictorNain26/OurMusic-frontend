@@ -1,3 +1,5 @@
+// src/hooks/useLikedTracks.js
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
@@ -9,13 +11,7 @@ export const useLikedTracks = () => {
   const user = session?.user;
 
   const fetchLikedTracks = async () => {
-    if (!user) {
-      if (import.meta.env.DEV) {
-        console.info('[useLikedTracks] Aucun utilisateur connecté, skip API.');
-      }
-      return [];
-    }
-
+    if (!user) return [];
     const data = await apiFetch('/api/track/like');
     return data?.likedTracks || [];
   };
@@ -31,12 +27,18 @@ export const useLikedTracks = () => {
     enabled: !!user,
     staleTime: 1000 * 60,
     retry: 1,
-    keepPreviousData: true, // ✅ Ajouté pour éviter le reset + double appel
+    keepPreviousData: true,
     onError: (err) => {
       console.error('[useLikedTracks → Query]', err);
       toast.error(err.message || 'Erreur chargement morceaux likés');
     },
   });
+
+  useEffect(() => {
+    if (user) {
+      refetch();
+    }
+  }, [user, refetch]);
 
   const likeTrack = useMutation({
     mutationFn: async ({ title, artist, artwork = '', youtubeUrl = '' }) => {
@@ -48,7 +50,7 @@ export const useLikedTracks = () => {
       return res?.likedTrack;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['likedTracks']); // ✅ Clean : invalidate
+      queryClient.invalidateQueries(['likedTracks']);
       toast.success('🎶 Morceau liké !');
     },
     onError: (err) => {
@@ -64,7 +66,7 @@ export const useLikedTracks = () => {
       return id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['likedTracks']); // ✅ Clean : invalidate
+      queryClient.invalidateQueries(['likedTracks']);
       toast.success('🗑️ Morceau supprimé');
     },
     onError: (err) => {
