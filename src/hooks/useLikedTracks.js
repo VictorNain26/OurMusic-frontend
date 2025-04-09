@@ -29,8 +29,9 @@ export const useLikedTracks = () => {
     queryKey: ['likedTracks'],
     queryFn: fetchLikedTracks,
     enabled: !!user,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60,
     retry: 1,
+    keepPreviousData: true, // ✅ Ajouté pour éviter le reset + double appel
     onError: (err) => {
       console.error('[useLikedTracks → Query]', err);
       toast.error(err.message || 'Erreur chargement morceaux likés');
@@ -46,8 +47,8 @@ export const useLikedTracks = () => {
       });
       return res?.likedTrack;
     },
-    onSuccess: (newTrack) => {
-      queryClient.setQueryData(['likedTracks'], (prev = []) => [...(prev || []), newTrack]);
+    onSuccess: () => {
+      queryClient.invalidateQueries(['likedTracks']); // ✅ Clean : invalidate
       toast.success('🎶 Morceau liké !');
     },
     onError: (err) => {
@@ -62,10 +63,8 @@ export const useLikedTracks = () => {
       await apiFetch(`/api/track/like/${id}`, { method: 'DELETE' });
       return id;
     },
-    onSuccess: (deletedId) => {
-      queryClient.setQueryData(['likedTracks'], (prev = []) =>
-        (prev || []).filter((track) => track.id !== deletedId)
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries(['likedTracks']); // ✅ Clean : invalidate
       toast.success('🗑️ Morceau supprimé');
     },
     onError: (err) => {

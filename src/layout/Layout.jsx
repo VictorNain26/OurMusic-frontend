@@ -4,7 +4,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import Header from '../components/Header';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
-import { authClient } from '../lib/authClient.jsx'; // ✅ Import corrigé
+import { authClient } from '../lib/authClient.jsx';
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
@@ -15,10 +15,10 @@ const Layout = ({ children }) => {
   const [isRegisterOpen, setRegisterOpen] = useState(false);
   const [isResetPasswordOpen, setResetPasswordOpen] = useState(false);
 
-  const { user, isLoading, refetch } = useAuth();
+  const { isLoading, refetch } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // ✅ Vérification email automatique depuis URL
+  // 🎉 Vérification email depuis URL
   useEffect(() => {
     const token = searchParams.get('token');
     if (!token) return;
@@ -30,9 +30,7 @@ const Layout = ({ children }) => {
           callbackURL: window.location.origin,
         });
 
-        if (error) {
-          throw new Error(error.message);
-        }
+        if (error) throw new Error(error.message);
 
         toast.success('🎉 Email vérifié avec succès !');
       } catch (err) {
@@ -48,12 +46,10 @@ const Layout = ({ children }) => {
     verifyEmail();
   }, [searchParams, setSearchParams, refetch]);
 
-  // ✅ Reset password modal automatique (optionnel, pas obligatoire)
+  // 🔒 Reset password modal automatique depuis URL
   useEffect(() => {
     const resetToken = searchParams.get('resetToken');
-    if (resetToken) {
-      setResetPasswordOpen(true);
-    }
+    if (resetToken) setResetPasswordOpen(true);
   }, [searchParams]);
 
   return (
@@ -70,7 +66,6 @@ const Layout = ({ children }) => {
             onLogin={() => setLoginOpen(true)}
             onRegister={() => setRegisterOpen(true)}
             onLogout={refetch}
-            user={user}
           />
 
           <AnimatePresence mode="wait">

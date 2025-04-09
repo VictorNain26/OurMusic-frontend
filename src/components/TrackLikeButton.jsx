@@ -14,14 +14,14 @@ const TrackLikeButton = ({ track }) => {
     track?.youtubeUrl ||
     `https://www.youtube.com/results?search_query=${encodeURIComponent(`${track.artist} ${track.title}`)}`;
 
-  const match = likedTracks.find(
+  const matchedTrack = likedTracks.find(
     (item) =>
       item.title?.toLowerCase() === track.title?.toLowerCase() &&
       item.artist?.toLowerCase() === track.artist?.toLowerCase()
   );
 
-  const isLiked = !!match;
-  const likedTrackId = match?.id;
+  const isLiked = !!matchedTrack;
+  const likedTrackId = matchedTrack?.id;
 
   const handleLike = async () => {
     if (!isLoggedIn) {
@@ -56,6 +56,7 @@ const TrackLikeButton = ({ track }) => {
   };
 
   const handleClick = () => {
+    if (likeTrack.isPending) return; // ✅ Ajout protection double clic
     if (isLiked) return handleUnlike();
     return handleLike();
   };

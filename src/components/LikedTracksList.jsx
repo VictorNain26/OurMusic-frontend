@@ -65,14 +65,16 @@ const LikedTracksList = () => {
       )}
       <div className="flex-1 w-full min-w-0">
         <p className="font-semibold break-words">{track.artist} - {track.title}</p>
-        <a
-          href={track.youtubeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 underline text-sm"
-        >
-          Voir sur YouTube
-        </a>
+        {track.youtubeUrl && (
+          <a
+            href={track.youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline text-sm"
+          >
+            Voir sur YouTube
+          </a>
+        )}
       </div>
       <Button
         onClick={() => handleDeleteClick(track.id)}
@@ -84,14 +86,17 @@ const LikedTracksList = () => {
   );
 
   const renderContent = () => {
-    if (isLoading)
+    if (isLoading) {
       return <p className="text-gray-500">Chargement des morceaux...</p>;
+    }
 
-    if (isError)
+    if (isError) {
       return <p className="text-red-500">Erreur lors du chargement des morceaux.</p>;
+    }
 
-    if (likedTracks.length === 0)
+    if (likedTracks.length === 0) {
       return <p className="text-gray-500">Aucun morceau liké pour le moment.</p>;
+    }
 
     return (
       <AnimatePresence>

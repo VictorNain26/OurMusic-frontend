@@ -7,9 +7,7 @@ export const useAuth = () => {
     isPending,
     error,
     refetch,
-  } = authClient.useSession({
-    refetchOnWindowFocus: true,
-  });
+  } = authClient.useSession(); // ✅ Simplifié : on retire refetchOnWindowFocus
 
   const user = session?.user || null;
   const isAuthenticated = !!user;
@@ -19,7 +17,6 @@ export const useAuth = () => {
 
     const expiresAt = new Date(session.expires).getTime();
     const now = Date.now();
-
     const refreshIn = Math.max(expiresAt - now - 60 * 1000, 10 * 1000);
 
     const timer = setTimeout(() => {
