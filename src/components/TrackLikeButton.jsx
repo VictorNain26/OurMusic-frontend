@@ -15,10 +15,12 @@ const TrackLikeButton = ({ track }) => {
     track?.youtubeUrl ||
     `https://www.youtube.com/results?search_query=${encodeURIComponent(`${track.artist} ${track.title}`)}`;
 
+  // Normalisation pour une comparaison plus fiable
+  const normalize = (str) => str?.trim().toLowerCase();
   const matchedTrack = likedTracks.find(
     (item) =>
-      item.title?.toLowerCase() === track.title?.toLowerCase() &&
-      item.artist?.toLowerCase() === track.artist?.toLowerCase()
+      normalize(item.title) === normalize(track.title) &&
+      normalize(item.artist) === normalize(track.artist)
   );
 
   const isLiked = !!matchedTrack;
@@ -47,7 +49,6 @@ const TrackLikeButton = ({ track }) => {
 
   const handleUnlike = async () => {
     if (!likedTrackId) return;
-
     try {
       await handleDelete(likedTrackId);
     } catch (err) {
@@ -57,8 +58,11 @@ const TrackLikeButton = ({ track }) => {
   };
 
   const handleClick = () => {
-    if (likeTrack.isPending) return;
-    if (isLiked) return handleUnlike();
+    // Si la mutation est en cours, on ne fait rien
+    if (likeTrack.isLoading || likeTrack.isMutating) return;
+    if (isLiked) {
+      return handleUnlike();
+    }
     return handleLike();
   };
 
@@ -70,14 +74,14 @@ const TrackLikeButton = ({ track }) => {
     >
       <Button
         onClick={handleClick}
-        disabled={likeTrack.isPending}
+        disabled={likeTrack.isLoading || likeTrack.isMutating}
         className={`w-full sm:w-auto ${
           isLiked
             ? 'bg-red-500 hover:bg-red-600 text-white'
             : 'bg-blue-500 hover:bg-blue-600 text-white'
         }`}
       >
-        {likeTrack.isPending
+        {likeTrack.isLoading || likeTrack.isMutating
           ? isLiked
             ? 'Retrait...'
             : 'Ajout...'

@@ -14,8 +14,16 @@ const LikedTracksList = () => {
   }, [inView, controls]);
 
   const handleDeleteClick = async (id) => {
-    if (!id || isNaN(id)) return;
-    await handleDelete(id);
+    if (!id) return;
+
+    const confirmation = window.confirm("Voulez-vous vraiment supprimer ce morceau ?");
+    if (!confirmation) return;
+
+    try {
+      await handleDelete(id);
+    } catch (err) {
+      console.error('[handleDeleteClick]', err);
+    }
   };
 
   const listVariants = {
