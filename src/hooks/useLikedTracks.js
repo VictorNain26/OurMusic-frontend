@@ -1,4 +1,3 @@
-// src/hooks/useLikedTracks.js
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../utils/api';
@@ -10,6 +9,7 @@ export const useLikedTracks = () => {
   const { data: session } = authClient.useSession();
   const user = session?.user;
 
+  // Récupérer les morceaux likés
   const fetchLikedTracks = async () => {
     if (!user) return [];
     const data = await apiFetch('/api/track/like');
@@ -24,22 +24,23 @@ export const useLikedTracks = () => {
   } = useQuery({
     queryKey: ['likedTracks'],
     queryFn: fetchLikedTracks,
-    enabled: !!user,
-    staleTime: 1000 * 60,
+    enabled: !!user, // Démarre la query seulement si un utilisateur est connecté
+    staleTime: 1000 * 60, // Temps pour garder les données en cache avant de les rafraîchir
     retry: 1,
-    keepPreviousData: true,
+    keepPreviousData: true, // Garde les anciennes données pendant le chargement
     onError: (err) => {
       console.error('[useLikedTracks → Query]', err);
-      toast.error(err.message || 'Erreur chargement morceaux likés');
+      toast.error(err.message || 'Erreur lors du chargement des morceaux likés');
     },
   });
 
   useEffect(() => {
     if (user) {
-      refetch();
+      refetch();  // Requête manuelle si l'utilisateur change
     }
   }, [user, refetch]);
 
+  // Mutation pour aimer un morceau
   const likeTrack = useMutation({
     mutationFn: async ({ title, artist, artwork = '', youtubeUrl = '' }) => {
       if (!title || !artist) throw new Error('Titre ou artiste manquant');
@@ -50,7 +51,7 @@ export const useLikedTracks = () => {
       return res?.likedTrack;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['likedTracks']);
+      queryClient.invalidateQueries(['likedTracks']); // Rafraîchir les données après un like
       toast.success('🎶 Morceau liké !');
     },
     onError: (err) => {
@@ -59,6 +60,7 @@ export const useLikedTracks = () => {
     },
   });
 
+  // Mutation pour supprimer un morceau liké
   const deleteTrack = useMutation({
     mutationFn: async (id) => {
       if (!id || isNaN(id)) throw new Error('ID invalide');
@@ -66,7 +68,7 @@ export const useLikedTracks = () => {
       return id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['likedTracks']);
+      queryClient.invalidateQueries(['likedTracks']); // Rafraîchir les données après une suppression
       toast.success('🗑️ Morceau supprimé');
     },
     onError: (err) => {
@@ -81,7 +83,7 @@ export const useLikedTracks = () => {
       return;
     }
     try {
-      await deleteTrack.mutateAsync(id);
+      await deleteTrack.mutateAsync(id);  // Suppression
     } catch (err) {
       console.error('[handleDelete]', err);
     }
