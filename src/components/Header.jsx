@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ChromecastButton from './ChromecastButton';
 import Button from './ui/Button';
 import { useAuth } from '../hooks/useAuth';
+import { capitalizeFirstLetter } from '../utils/format';
 
 const Header = ({ onLogin, onRegister }) => {
   const { user, signOut } = useAuth();
@@ -12,7 +13,7 @@ const Header = ({ onLogin, onRegister }) => {
       return (
         <>
           <span className="font-medium text-gray-700">
-            {user.name || user.username || user.email}
+            {capitalizeFirstLetter(user.name || user.username || user.email)}
           </span>
 
           {user.role === 'admin' && (

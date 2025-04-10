@@ -15,6 +15,7 @@ const AzuracastPlayer = () => {
   const setPlaying = usePlayerStore((s) => s.setPlaying);
   const volume = usePlayerStore((s) => s.volume);
   const setVolume = usePlayerStore((s) => s.setVolume);
+  const setAudioRef = usePlayerStore((s) => s.setAudioRef);
 
   const audioRef = useRef(null);
   const sseRef = useRef(null);
@@ -98,16 +99,35 @@ const AzuracastPlayer = () => {
   }, [elapsed, duration]);
 
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      setAudioRef(audioRef.current);
+    }
+  }, [volume, setAudioRef]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const audio = audioRef.current;
+    if (!audio.src && station.listen_url) {
+      audio.src = station.listen_url;
+    }
+  }, [station.listen_url]);
 
   const handlePlay = () => {
     if (!audioRef.current || !station.listen_url) return;
+
     if (!audioRef.current.src) {
       audioRef.current.src = station.listen_url || `${AZURACAST_URL}/radio/8000/radio.mp3`;
     }
+
     audioRef.current.load();
-    audioRef.current.play().then(() => setPlaying(true)).catch(console.error);
+    audioRef.current.play()
+      .then(() => setPlaying(true))
+      .catch((err) => {
+        console.error('[AzuracastPlayer] Play error:', err);
+        setPlaying(false);
+      });
   };
 
   const handleStop = () => {
@@ -152,7 +172,9 @@ const AzuracastPlayer = () => {
         </div>
       )}
 
-      {station.listen_url && <audio ref={audioRef} preload="auto" />}
+      {station.listen_url && (
+        <audio ref={audioRef} preload="auto" />
+      )}
 
       <div className="flex justify-center gap-4 mt-4 flex-wrap">
         <button

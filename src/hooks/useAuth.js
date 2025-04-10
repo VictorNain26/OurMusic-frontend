@@ -7,7 +7,7 @@ export const useAuth = () => {
     isPending,
     error,
     refetch,
-  } = authClient.useSession(); // ✅ Simplifié : on retire refetchOnWindowFocus
+  } = authClient.useSession();
 
   const user = session?.user || null;
   const isAuthenticated = !!user;
@@ -29,6 +29,26 @@ export const useAuth = () => {
 
     return () => clearTimeout(timer);
   }, [session?.expires, refetch]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetch();
+      }
+    };
+
+    const handleOnline = () => {
+      refetch();
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [refetch]);
 
   return {
     user,

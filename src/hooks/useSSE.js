@@ -60,7 +60,7 @@ export const useSSE = () => {
 
       async onopen(res) {
         if (!res.ok) {
-          toast.error(`Erreur SSE (${res.status})`);
+          console.error(`[SSE] Erreur ouverture : ${res.status}`);
           stopSSE();
           throw new Error(`Erreur ouverture SSE : ${res.status}`);
         }
@@ -84,14 +84,12 @@ export const useSSE = () => {
         }
 
         if (err) {
-          toast.error(err);
-          setMessages((prev) => [...prev, `❌ ${err}`]);
+          console.error('[SSE Error]', err);
         }
       },
 
       onerror(err) {
-        console.error('[SSE Error]', err);
-        toast.error('Erreur SSE. Vérifiez votre connexion ou vos droits.');
+        console.error('[SSE onerror]', err);
         stopSSE();
       },
 
