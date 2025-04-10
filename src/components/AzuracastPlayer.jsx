@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TrackLikeButton from './TrackLikeButton';
-import { usePlayerStore } from '../store/playerStore';
 import { motion } from 'framer-motion';
+import { PlayerService, usePlayerStore } from '../lib/playerService';
 import { AZURACAST_URL } from '../utils/config';
 
 const AzuracastPlayer = () => {
@@ -12,12 +12,8 @@ const AzuracastPlayer = () => {
   const [connected, setConnected] = useState(false);
 
   const isPlaying = usePlayerStore((s) => s.isPlaying);
-  const setPlaying = usePlayerStore((s) => s.setPlaying);
   const volume = usePlayerStore((s) => s.volume);
-  const setVolume = usePlayerStore((s) => s.setVolume);
-  const setAudioRef = usePlayerStore((s) => s.setAudioRef);
 
-  const audioRef = useRef(null);
   const sseRef = useRef(null);
   const reconnectTimeout = useRef(null);
 
@@ -33,6 +29,9 @@ const AzuracastPlayer = () => {
     const np = data?.now_playing;
     setElapsed(np?.elapsed || 0);
     setDuration(np?.duration || 0);
+    if (np?.duration) {
+      setDuration(np.duration);
+    }
   };
 
   const handleSSEPayload = (payload, useTime = true) => {
@@ -99,44 +98,17 @@ const AzuracastPlayer = () => {
   }, [elapsed, duration]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-      setAudioRef(audioRef.current);
-    }
-  }, [volume, setAudioRef]);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    const audio = audioRef.current;
-    if (!audio.src && station.listen_url) {
-      audio.src = station.listen_url;
-    }
-  }, [station.listen_url]);
+    PlayerService.setVolume(volume);
+  }, [volume]);
 
   const handlePlay = () => {
-    if (!audioRef.current || !station.listen_url) return;
-
-    if (!audioRef.current.src) {
-      audioRef.current.src = station.listen_url || `${AZURACAST_URL}/radio/8000/radio.mp3`;
-    }
-
-    audioRef.current.load();
-    audioRef.current.play()
-      .then(() => setPlaying(true))
-      .catch((err) => {
-        console.error('[AzuracastPlayer] Play error:', err);
-        setPlaying(false);
-      });
+    if (!station.listen_url) return;
+    PlayerService.setSource(station.listen_url);
+    PlayerService.play();
   };
 
   const handleStop = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.removeAttribute('src');
-      audioRef.current.load();
-      setPlaying(false);
-    }
+    PlayerService.stop();
   };
 
   if (!nowPlaying) {
@@ -172,10 +144,6 @@ const AzuracastPlayer = () => {
         </div>
       )}
 
-      {station.listen_url && (
-        <audio ref={audioRef} preload="auto" />
-      )}
-
       <div className="flex justify-center gap-4 mt-4 flex-wrap">
         <button
           onClick={isPlaying ? handleStop : handlePlay}
@@ -195,7 +163,7 @@ const AzuracastPlayer = () => {
             max="1"
             step="0.01"
             value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
+            onChange={(e) => PlayerService.setVolume(Number(e.target.value))}
             className="ml-2 align-middle"
           />
         </label>

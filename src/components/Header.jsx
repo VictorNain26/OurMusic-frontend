@@ -4,9 +4,11 @@ import ChromecastButton from './ChromecastButton';
 import Button from './ui/Button';
 import { useAuth } from '../hooks/useAuth';
 import { capitalizeFirstLetter } from '../utils/format';
+import { usePlayerStore } from '../lib/playerService';
 
 const Header = ({ onLogin, onRegister }) => {
   const { user, signOut } = useAuth();
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
 
   const renderAuthButtons = () => {
     if (user) {
@@ -62,10 +64,14 @@ const Header = ({ onLogin, onRegister }) => {
   return (
     <header className="w-full border-b p-4 flex flex-wrap justify-between items-center gap-4 bg-white shadow-sm z-10">
       <div className="text-xl font-bold text-gray-800">
-        <Link to="/">OurMusic</Link>
+        <Link to="/">OurMus</Link>
       </div>
 
       <div className="flex items-center flex-wrap gap-3">
+        <span className="text-sm text-gray-600">
+          {isPlaying ? '🎶 Radio en cours de lecture' : 'Radio arrêtée'}
+        </span>
+
         {renderAuthButtons()}
         <ChromecastButton />
       </div>
