@@ -1,5 +1,5 @@
 // src/components/TrackLikeButton.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Button from './ui/Button';
 import { useLikedTracks } from '../hooks/useLikedTracks';
@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { authClient } from '../lib/authClient.jsx';
 
 const TrackLikeButton = ({ track }) => {
-  const { likedTracks, likeTrack, handleDelete } = useLikedTracks();
+  const { likedTracks, likeTrack, handleDelete, isLoading } = useLikedTracks();
   const { data: session } = authClient.useSession();
   const isLoggedIn = !!session?.user;
 
@@ -15,16 +15,23 @@ const TrackLikeButton = ({ track }) => {
     track?.youtubeUrl ||
     `https://www.youtube.com/results?search_query=${encodeURIComponent(`${track.artist} ${track.title}`)}`;
 
-  // Normalisation pour une comparaison plus fiable
-  const normalize = (str) => str?.trim().toLowerCase();
-  const matchedTrack = likedTracks.find(
-    (item) =>
-      normalize(item.title) === normalize(track.title) &&
-      normalize(item.artist) === normalize(track.artist)
-  );
+  // 🧩 State local pour suivre l'état du bouton dynamiquement
+  const [isLiked, setIsLiked] = useState(false);
+  const [likedTrackId, setLikedTrackId] = useState(null);
 
-  const isLiked = !!matchedTrack;
-  const likedTrackId = matchedTrack?.id;
+  // 💡 Normalisation pour une comparaison fiable
+  const normalize = (str) => str?.trim().toLowerCase();
+
+  useEffect(() => {
+    const matchedTrack = likedTracks.find(
+      (item) =>
+        normalize(item.title) === normalize(track.title) &&
+        normalize(item.artist) === normalize(track.artist)
+    );
+
+    setIsLiked(!!matchedTrack);
+    setLikedTrackId(matchedTrack?.id || null);
+  }, [likedTracks, track]);
 
   const handleLike = async () => {
     if (!isLoggedIn) {
@@ -58,11 +65,12 @@ const TrackLikeButton = ({ track }) => {
   };
 
   const handleClick = () => {
-    // Si la mutation est en cours, on ne fait rien
-    if (likeTrack.isLoading || likeTrack.isMutating) return;
+    if (likeTrack.isLoading || likeTrack.isMutating || isLoading) return;
+
     if (isLiked) {
       return handleUnlike();
     }
+
     return handleLike();
   };
 
@@ -74,14 +82,14 @@ const TrackLikeButton = ({ track }) => {
     >
       <Button
         onClick={handleClick}
-        disabled={likeTrack.isLoading || likeTrack.isMutating}
+        disabled={likeTrack.isLoading || likeTrack.isMutating || isLoading}
         className={`w-full sm:w-auto ${
           isLiked
             ? 'bg-red-500 hover:bg-red-600 text-white'
             : 'bg-blue-500 hover:bg-blue-600 text-white'
         }`}
       >
-        {likeTrack.isLoading || likeTrack.isMutating
+        {likeTrack.isLoading || likeTrack.isMutating || isLoading
           ? isLiked
             ? 'Retrait...'
             : 'Ajout...'
