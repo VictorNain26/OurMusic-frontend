@@ -1,7 +1,7 @@
 import { createAuthClient } from 'better-auth/react';
 import { API_BASE_URL } from '../utils/config';
 import { toast } from 'react-hot-toast';
-import Button from '../components/ui/Button';
+import { SITE_BASE_URL } from '../utils/config';
 
 export const authClient = createAuthClient({
   baseURL: API_BASE_URL,
@@ -12,20 +12,7 @@ export const authClient = createAuthClient({
     }
 
     if (err?.status === 403 && err?.context?.email) {
-      toast((t) => (
-        <span>
-          Veuillez vérifier votre email.
-          <Button
-            className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded"
-            onClick={() => {
-              sendVerificationEmail(err.context.email);
-              toast.dismiss(t.id);
-            }}
-          >
-            Renvoyer
-          </Button>
-        </span>
-      ), { duration: 8000 });
+      toast.error('Veuillez vérifier votre email.');
     }
   },
 
@@ -36,13 +23,11 @@ export const authClient = createAuthClient({
 
 export const sendVerificationEmail = async (email) => {
   try {
-    const { error } = await authClient.sendVerificationEmail(email);
-
-    if (error) throw new Error(error.message);
-
-    toast.success('📨 Email de vérification renvoyé !');
+    await authClient.sendVerificationEmail({
+      email,
+      callbackURL: SITE_BASE_URL,
+    });
   } catch (err) {
     console.error('[sendVerificationEmail]', err);
-    toast.error(err.message || 'Erreur lors de l’envoi');
   }
 };

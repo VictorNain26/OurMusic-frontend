@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import ModalWrapper from './ui/ModalWrapper';
-import { authClient, sendVerificationEmail } from '../lib/authClient.jsx';
+import { authClient } from '../lib/authClient.jsx';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 
@@ -39,24 +39,6 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       toast.success('🎉 Compte créé avec succès ! Vérifiez votre email.');
       onRequestClose();
       await refetch();
-
-      toast.error(
-        (t) => (
-          <span className="flex items-center">
-            ⚠️ Vérifiez votre email !
-            <Button
-              onClick={async () => {
-                await sendVerificationEmail({email: form.email, callbackURL: "/"});
-                toast.dismiss(t.id);
-              }}
-              className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
-            >
-              Renvoyer
-            </Button>
-          </span>
-        ),
-        { duration: 7000 }
-      );
     }
   };
 
