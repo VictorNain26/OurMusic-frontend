@@ -25,7 +25,7 @@ export const sendVerificationEmail = async (email) => {
   try {
     await authClient.sendVerificationEmail({
       email,
-      callbackURL: SITE_BASE_URL,
+      callbackURL: "http://localhost:8080",
     });
   } catch (err) {
     console.error('[sendVerificationEmail]', err);
