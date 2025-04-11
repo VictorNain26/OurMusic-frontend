@@ -25,10 +25,7 @@ const Layout = ({ children }) => {
 
     const verifyEmail = async () => {
       try {
-        const { error } = await authClient.verifyEmail({
-          token,
-          callbackURL: window.location.origin,
-        });
+        const { error } = await authClient.verifyEmail(token);
 
         if (error) throw new Error(error.message);
 

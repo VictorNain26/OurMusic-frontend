@@ -36,10 +36,7 @@ export const authClient = createAuthClient({
 
 export const sendVerificationEmail = async (email) => {
   try {
-    const { error } = await authClient.sendVerificationEmail({
-      email,
-      callbackURL: window.location.origin,
-    });
+    const { error } = await authClient.sendVerificationEmail(email);
 
     if (error) throw new Error(error.message);
 

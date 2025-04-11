@@ -46,7 +46,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
             ⚠️ Vérifiez votre email !
             <Button
               onClick={async () => {
-                await sendVerificationEmail(form.email);
+                await sendVerificationEmail({email: form.email, callbackURL: "/"});
                 toast.dismiss(t.id);
               }}
               className="ml-2 bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1"
