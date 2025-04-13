@@ -1,7 +1,6 @@
 import { createAuthClient } from 'better-auth/react';
-import { API_BASE_URL } from '../utils/config';
+import { API_BASE_URL, SITE_BASE_URL } from '../utils/config';
 import { toast } from 'react-hot-toast';
-import { SITE_BASE_URL } from '../utils/config';
 
 export const authClient = createAuthClient({
   baseURL: API_BASE_URL,
@@ -25,9 +24,20 @@ export const sendVerificationEmail = async (email) => {
   try {
     await authClient.sendVerificationEmail({
       email,
-      callbackURL: "http://localhost:8080",
+      callbackURL: SITE_BASE_URL,
     });
   } catch (err) {
     console.error('[sendVerificationEmail]', err);
+  }
+};
+
+export const sendResetPasswordEmail = async (email) => {
+  try {
+    await authClient.sendResetPassword({
+      email,
+      callbackURL: SITE_BASE_URL, // ✅ dynamique aussi pour le reset password
+    });
+  } catch (err) {
+    console.error('[sendResetPasswordEmail]', err);
   }
 };
