@@ -1,5 +1,5 @@
 import { createAuthClient } from 'better-auth/react';
-import { API_BASE_URL, SITE_BASE_URL } from '../utils/config';
+import { API_BASE_URL } from '../utils/config';
 import { toast } from 'react-hot-toast';
 
 export const authClient = createAuthClient({
@@ -43,7 +43,6 @@ export const sendVerificationEmail = async (email) => {
   try {
     await authClient.sendVerificationEmail({
       email,
-      callbackURL: SITE_BASE_URL || 'https://ourmusic.fr',
     });
   } catch (err) {
     console.error('[sendVerificationEmail]', err);
@@ -54,7 +53,6 @@ export const sendResetPasswordEmail = async (email) => {
   try {
     await authClient.sendResetPassword({
       email,
-      callbackURL: SITE_BASE_URL || 'https://ourmusic.fr',
     });
   } catch (err) {
     console.error('[sendResetPasswordEmail]', err);
