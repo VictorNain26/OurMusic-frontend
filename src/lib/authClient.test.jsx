@@ -27,7 +27,19 @@ describe('Better Auth Client', () => {
   });
 
   it('should send a verification email', async () => {
-    const res = await authClient.sendVerificationEmail(testEmail);
+    const res = await authClient.sendVerificationEmail({
+      email: testEmail,
+      callbackURL: 'https://ourmusic.fr',
+    });
+
+    expect(res.error).toBeFalsy();
+  });
+
+  it('should send a reset password email', async () => {
+    const res = await authClient.sendResetPassword({
+      email: testEmail,
+      callbackURL: 'https://ourmusic.fr',
+    });
 
     expect(res.error).toBeFalsy();
   });

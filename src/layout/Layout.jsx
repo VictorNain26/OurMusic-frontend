@@ -18,14 +18,13 @@ const Layout = ({ children }) => {
   const { isLoading, refetch } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // ✅ Vérification email automatique depuis URL
   useEffect(() => {
     const token = searchParams.get('token');
     if (!token) return;
 
     const verifyEmail = async () => {
       try {
-        const { error } = await authClient.verifyEmail(token);
+        const { error } = await authClient.verifyEmail({ query: { token } });
         if (error) throw new Error(error.message);
 
         toast.success('🎉 Email vérifié avec succès !');
