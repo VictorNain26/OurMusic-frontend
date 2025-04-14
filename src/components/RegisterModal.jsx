@@ -5,6 +5,7 @@ import ModalWrapper from './ui/ModalWrapper';
 import { authClient } from '../lib/authClient.jsx';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { SITE_BASE_URL } from '../utils/config';
 
 const RegisterModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
@@ -30,6 +31,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       email: form.email,
       password: form.password,
       name: form.username,
+      callbackURL: SITE_BASE_URL || window.location.origin,
     });
 
     if (res.error) {

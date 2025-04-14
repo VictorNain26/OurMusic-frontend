@@ -24,7 +24,7 @@ export const sendVerificationEmail = async (email) => {
   try {
     await authClient.sendVerificationEmail({
       email,
-      callbackURL: SITE_BASE_URL,
+      callbackURL: SITE_BASE_URL || window.location.origin,
     });
   } catch (err) {
     console.error('[sendVerificationEmail]', err);
@@ -35,7 +35,7 @@ export const sendResetPasswordEmail = async (email) => {
   try {
     await authClient.sendResetPassword({
       email,
-      callbackURL: SITE_BASE_URL, // ✅ dynamique aussi pour le reset password
+      callbackURL: SITE_BASE_URL || window.location.origin,
     });
   } catch (err) {
     console.error('[sendResetPasswordEmail]', err);

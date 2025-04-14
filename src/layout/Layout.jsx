@@ -18,7 +18,7 @@ const Layout = ({ children }) => {
   const { isLoading, refetch } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // 🎉 Vérification email depuis URL
+  // ✅ Vérification email automatique depuis URL
   useEffect(() => {
     const token = searchParams.get('token');
     if (!token) return;
@@ -26,7 +26,6 @@ const Layout = ({ children }) => {
     const verifyEmail = async () => {
       try {
         const { error } = await authClient.verifyEmail(token);
-
         if (error) throw new Error(error.message);
 
         toast.success('🎉 Email vérifié avec succès !');
@@ -43,11 +42,27 @@ const Layout = ({ children }) => {
     verifyEmail();
   }, [searchParams, setSearchParams, refetch]);
 
-  // 🔒 Reset password modal automatique depuis URL
   useEffect(() => {
     const resetToken = searchParams.get('resetToken');
     if (resetToken) setResetPasswordOpen(true);
   }, [searchParams]);
+
+  useEffect(() => {
+    const emailVerified = searchParams.get('email_verified');
+    const passwordReset = searchParams.get('password_reset');
+
+    if (emailVerified === 'success') {
+      toast.success('🎉 Email vérifié avec succès !');
+      searchParams.delete('email_verified');
+      setSearchParams(searchParams, { replace: true });
+    }
+
+    if (passwordReset === 'success') {
+      toast.success('🔒 Mot de passe réinitialisé avec succès !');
+      searchParams.delete('password_reset');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   return (
     <>
