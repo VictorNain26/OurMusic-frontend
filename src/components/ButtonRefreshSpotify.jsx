@@ -3,8 +3,9 @@ import { useSSE } from '../hooks/useSSE';
 import Input from './ui/Input';
 import Button from './ui/Button';
 import { toast } from 'react-hot-toast';
+import { API_BASE_URL } from '../utils/config';
 
-const BASE_URL = 'https://ourmusic-api.ovh/api/live/spotify';
+const BASE_URL = `${API_BASE_URL}/api/live/spotify`;
 
 const getSSEUrl = (type, id = '') => {
   switch (type) {
