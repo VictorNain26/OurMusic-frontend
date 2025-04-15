@@ -36,7 +36,7 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     } else {
       toast.success('Bienvenue 🎉 Connexion réussie !');
       onRequestClose();
-      await refetch();
+      refetch();
     }
   };
 

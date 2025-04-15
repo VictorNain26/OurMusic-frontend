@@ -30,6 +30,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       email: form.email,
       password: form.password,
       name: form.username,
+      callbackURL: `${window.location.origin}?email_verified=success`,
     });
 
     if (res.error) {
@@ -38,7 +39,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       setSuccessMsg("✅ Compte créé ! Vérifiez votre email.");
       toast.success('🎉 Compte créé avec succès ! Vérifiez votre email.');
       onRequestClose();
-      await refetch();
+      refetch();
     }
   };
 
