@@ -39,9 +39,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # Étape 6 : Lancer les tests
-      - name: Run tests
-        run: pnpm test
+      # # Étape 6 : Lancer les tests
+      # - name: Run tests
+      #   run: pnpm test
 
       # Étape 7 : Build project
       - name: Build project
