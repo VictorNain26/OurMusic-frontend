@@ -56,7 +56,10 @@ const ButtonRefreshSpotify = () => {
       <Button
         onClick={() => handleAction('syncOne')}
         disabled={isBusy}
-        className="w-full bg-blue-600 hover:bg-blue-500 text-white mb-3"
+        fullWidth
+        variant="primary"
+        size="md"
+        className="mb-3"
       >
         {status.single ? 'Synchronisation en cours…' : 'Synchroniser une playlist'}
       </Button>
@@ -64,7 +67,10 @@ const ButtonRefreshSpotify = () => {
       <Button
         onClick={() => handleAction('syncAll')}
         disabled={isBusy}
-        className="w-full bg-slate-800 hover:bg-slate-600 text-white mb-3"
+        fullWidth
+        variant="secondary"
+        size="md"
+        className="mb-3"
       >
         {status.sync ? 'Synchronisation globale…' : 'Synchroniser toutes les playlists'}
       </Button>
@@ -72,7 +78,10 @@ const ButtonRefreshSpotify = () => {
       <Button
         onClick={() => handleAction('scrape')}
         disabled={isBusy}
-        className="w-full bg-purple-700 hover:bg-purple-600 text-white mb-3"
+        fullWidth
+        variant="success"
+        size="md"
+        className="mb-3"
       >
         {status.scrape ? 'Scraping en cours…' : 'Scraper les playlists'}
       </Button>

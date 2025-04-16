@@ -76,7 +76,6 @@ const Layout = ({ children }) => {
           <Header
             onLogin={() => setLoginOpen(true)}
             onRegister={() => setRegisterOpen(true)}
-            onLogout={refetch}
           />
 
           <AnimatePresence mode="wait">

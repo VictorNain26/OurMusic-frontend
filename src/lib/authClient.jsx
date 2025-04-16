@@ -16,45 +16,11 @@ export const authClient = createAuthClient({
     toast.success('Vous avez été déconnecté.');
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }, request) => {
-      await sendEmail({
-        to: user.email,
-        subject: 'Vérifiez votre adresse email',
-        text: `Cliquez sur le lien pour vérifier votre email: ${url}`
-      });
-    },
     autoSignInAfterVerification: true,
     sendOnSignUp: true,
   },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendResetPassword: async ({ user, url, token }, request) => {
-      await sendEmail({
-        to: user.email,
-        subject: 'Réinitialisez votre mot de passe',
-        text: `Cliquez sur le lien pour réinitialiser votre mot de passe: ${url}`
-      });
-    }
-  }
+  },
 });
-
-export const sendVerificationEmail = async (email) => {
-  try {
-    await authClient.sendVerificationEmail({
-      email,
-    });
-  } catch (err) {
-    console.error('[sendVerificationEmail]', err);
-  }
-};
-
-export const sendResetPasswordEmail = async (email) => {
-  try {
-    await authClient.sendResetPassword({
-      email,
-    });
-  } catch (err) {
-    console.error('[sendResetPasswordEmail]', err);
-  }
-};

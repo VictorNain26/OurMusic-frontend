@@ -23,19 +23,15 @@ const Header = ({ onLogin, onRegister }) => {
               <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full uppercase tracking-wide">
                 Admin
               </span>
-              <Link
-                to="/admin/dashboard"
-                className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded"
-              >
-                Dashboard
+              <Link to="/admin/dashboard">
+                <Button size="sm" variant="primary">
+                  Dashboard
+                </Button>
               </Link>
             </>
           )}
 
-          <Button
-            onClick={signOut}
-            className="bg-red-500 hover:bg-red-600 text-white text-sm"
-          >
+          <Button onClick={signOut} size="sm" variant="danger">
             Déconnexion
           </Button>
         </>
@@ -46,15 +42,13 @@ const Header = ({ onLogin, onRegister }) => {
       <>
         <Button
           onClick={onLogin}
-          className="bg-blue-600 hover:bg-blue-500 text-white text-sm"
+          size="sm"
+          variant="primary"
           data-login-button
         >
           Connexion
         </Button>
-        <Button
-          onClick={onRegister}
-          className="bg-green-600 hover:bg-green-500 text-white text-sm"
-        >
+        <Button onClick={onRegister} size="sm" variant="success">
           Inscription
         </Button>
       </>

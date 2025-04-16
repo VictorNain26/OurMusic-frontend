@@ -87,10 +87,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
           />
         </div>
 
-        <Button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white"
-        >
+        <Button type="submit" fullWidth variant="primary">
           S'inscrire
         </Button>
       </form>

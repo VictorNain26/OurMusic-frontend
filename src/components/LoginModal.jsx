@@ -8,14 +8,12 @@ import { useAuth } from '../hooks/useAuth';
 
 const LoginModal = ({ isOpen, onRequestClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
-  const [isResending, setIsResending] = useState(false);
   const { signIn } = authClient;
   const { refetch } = useAuth();
 
   useEffect(() => {
     if (!isOpen) {
       setForm({ email: '', password: '' });
-      setIsResending(false);
     }
   }, [isOpen]);
 
@@ -69,10 +67,7 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
           />
         </div>
 
-        <Button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white"
-        >
+        <Button type="submit" fullWidth variant="primary">
           Se connecter
         </Button>
       </form>

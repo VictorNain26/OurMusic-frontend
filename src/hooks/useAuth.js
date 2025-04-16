@@ -13,7 +13,7 @@ export const useAuth = () => {
   const isAuthenticated = !!user;
 
   useEffect(() => {
-    if (!session?.expires) return;
+    if (!session?.expires || !isAuthenticated) return;
 
     const expiresAt = new Date(session.expires).getTime();
     const now = Date.now();
@@ -28,7 +28,7 @@ export const useAuth = () => {
     }
 
     return () => clearTimeout(timer);
-  }, [session?.expires, refetch]);
+  }, [session?.expires, isAuthenticated, refetch]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {

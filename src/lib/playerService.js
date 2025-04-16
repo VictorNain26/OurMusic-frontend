@@ -12,7 +12,6 @@ export const usePlayerStore = create((set) => ({
   volume: savedVolume,
 
   setPlaying: (state) => set({ isPlaying: state }),
-
   setVolume: (value) => {
     audio.volume = value;
     localStorage.setItem('ourmusic_volume', value);
@@ -62,5 +61,3 @@ export const PlayerService = {
     audio.removeEventListener(event, callback);
   },
 };
-
-audio.addEventListener
