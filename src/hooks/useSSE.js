@@ -21,12 +21,14 @@ export const useSSE = () => {
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState({ sync: false, scrape: false, single: false });
   const controllerRef = useRef(null);
+  const isRunning = useRef(false);
 
   const stopSSE = () => {
     if (controllerRef.current) {
       controllerRef.current.abort();
       controllerRef.current = null;
     }
+    isRunning.current = false;
     setStatus({ sync: false, scrape: false, single: false });
   };
 
@@ -36,11 +38,12 @@ export const useSSE = () => {
     url,
     { isScraping = false, isSingle = false, filter = defaultFilter } = {}
   ) => {
-    if (controllerRef.current) {
-      toast.error('Une action est déjà en cours.');
+    if (controllerRef.current || isRunning.current) {
+      toast.error('⏳ Une action est déjà en cours.');
       return;
     }
 
+    isRunning.current = true;
     setMessages([]);
     setStatus({
       sync: !isScraping && !isSingle,
@@ -54,13 +57,10 @@ export const useSSE = () => {
     fetchEventSource(url, {
       signal: controller.signal,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
 
       async onopen(res) {
         if (!res.ok) {
-          console.error(`[SSE] Erreur ouverture : ${res.status}`);
           stopSSE();
           throw new Error(`Erreur ouverture SSE : ${res.status}`);
         }
@@ -68,23 +68,15 @@ export const useSSE = () => {
 
       onmessage(event) {
         if (!event.data || event.data.trim() === '.') return;
-
-        let parsed;
         try {
-          parsed = JSON.parse(event.data);
+          const json = JSON.parse(event.data);
+          const msg = json?.pub?.message || json?.message || '';
+          const err = json?.pub?.error || json?.error;
+
+          if (msg && filter(msg)) setMessages((prev) => [...prev, msg]);
+          if (err) console.error('[SSE Error]', err);
         } catch {
-          parsed = { message: `⚠️ Erreur de parsing : ${event.data}` };
-        }
-
-        const msg = parsed?.pub?.message || parsed?.message || '';
-        const err = parsed?.pub?.error || parsed?.error;
-
-        if (msg && filter(msg)) {
-          setMessages((prev) => [...prev, msg]);
-        }
-
-        if (err) {
-          console.error('[SSE Error]', err);
+          setMessages((prev) => [...prev, `⚠️ Erreur de parsing : ${event.data}`]);
         }
       },
 

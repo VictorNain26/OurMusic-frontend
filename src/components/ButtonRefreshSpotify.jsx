@@ -25,6 +25,11 @@ const ButtonRefreshSpotify = () => {
   const { messages, status, isBusy, startSSE } = useSSE();
 
   const handleAction = (type) => {
+    if (isBusy) {
+      toast.error('⏳ Une action est déjà en cours.');
+      return;
+    }
+
     if (type === 'syncOne') {
       const id = inputId.trim();
       if (!id) return toast.error('Veuillez entrer un ID de playlist');
@@ -50,12 +55,13 @@ const ButtonRefreshSpotify = () => {
           placeholder="Entrer l'ID de la playlist"
           value={inputId}
           onChange={(e) => setInputId(e.target.value)}
+          disabled={isBusy}
         />
       </div>
 
       <Button
         onClick={() => handleAction('syncOne')}
-        disabled={isBusy}
+        disabled={isBusy || !inputId.trim()}
         fullWidth
         variant="primary"
         size="md"

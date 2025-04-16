@@ -16,12 +16,13 @@ const AzuracastPlayer = () => {
 
   const sseRef = useRef(null);
   const reconnectTimeout = useRef(null);
+  const isConnecting = useRef(false);
 
-  const station = nowPlaying?.station || { name: "OurMusic", listen_url: null };
+  const station = nowPlaying?.station || { name: 'OurMusic', listen_url: null };
   const currentSong = nowPlaying?.now_playing?.song || null;
 
   const sseUri = `${AZURACAST_URL}/api/live/nowplaying/sse?${new URLSearchParams({
-    cf_connect: JSON.stringify({ subs: { "station:ourmusic": { recover: true } } })
+    cf_connect: JSON.stringify({ subs: { 'station:ourmusic': { recover: true } } }),
   })}`;
 
   const updateNowPlaying = (data) => {
@@ -29,9 +30,6 @@ const AzuracastPlayer = () => {
     const np = data?.now_playing;
     setElapsed(np?.elapsed || 0);
     setDuration(np?.duration || 0);
-    if (np?.duration) {
-      setDuration(np.duration);
-    }
   };
 
   const handleSSEPayload = (payload, useTime = true) => {
@@ -41,13 +39,16 @@ const AzuracastPlayer = () => {
   };
 
   const connectSSE = () => {
-    sseRef.current?.close();
-    const sse = new EventSource(sseUri);
+    if (isConnecting.current || sseRef.current) return;
+    isConnecting.current = true;
+
+    const sse = new EventSource(sseUri, { withCredentials: true });
     sseRef.current = sse;
 
     sse.onopen = () => {
       setConnected(true);
       setError('');
+      isConnecting.current = false;
     };
 
     sse.onmessage = (e) => {
@@ -70,12 +71,18 @@ const AzuracastPlayer = () => {
     };
 
     sse.onerror = () => {
-      setError("Erreur de connexion SSE. Reconnexion dans 5s...");
+      setError('Erreur de connexion SSE. Reconnexion dans 5s...');
       setConnected(false);
+      isConnecting.current = false;
       sse.close();
-      reconnectTimeout.current = setTimeout(() => {
-        if (navigator.onLine) connectSSE();
-      }, 5000);
+      sseRef.current = null;
+
+      if (!reconnectTimeout.current) {
+        reconnectTimeout.current = setTimeout(() => {
+          reconnectTimeout.current = null;
+          if (navigator.onLine) connectSSE();
+        }, 5000);
+      }
     };
   };
 
@@ -86,7 +93,9 @@ const AzuracastPlayer = () => {
     return () => {
       window.removeEventListener('online', connectSSE);
       sseRef.current?.close();
+      sseRef.current = null;
       clearTimeout(reconnectTimeout.current);
+      reconnectTimeout.current = null;
     };
   }, []);
 
@@ -114,7 +123,7 @@ const AzuracastPlayer = () => {
   if (!nowPlaying) {
     return (
       <div className="w-full flex items-center justify-center py-20">
-        <div className="w-12 h-12 border-8 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-8 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
       </div>
     );
   }
