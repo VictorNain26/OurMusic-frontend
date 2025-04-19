@@ -68,20 +68,32 @@ export const useSSE = () => {
 
       onmessage(event) {
         if (!event.data || event.data.trim() === '.') return;
+
         try {
           const json = JSON.parse(event.data);
           const msg = json?.pub?.message || json?.message || '';
           const err = json?.pub?.error || json?.error;
 
-          if (msg && filter(msg)) setMessages((prev) => [...prev, msg]);
-          if (err) console.error('[SSE Error]', err);
-        } catch {
-          setMessages((prev) => [...prev, `⚠️ Erreur de parsing : ${event.data}`]);
+          if (err) {
+            console.error('[SSE Error]', err);
+            toast.error(`❌ ${err}`);
+            stopSSE(); // stop le flux pour éviter reconnexion
+            return;
+          }
+
+          if (msg && filter(msg)) {
+            setMessages((prev) => [...prev, msg]);
+          }
+        } catch (err) {
+          console.error('[SSE Parsing Error]', event.data, err);
+          setMessages((prev) => [...prev, `⚠️ Erreur parsing : ${event.data}`]);
+          stopSSE();
         }
       },
 
       onerror(err) {
         console.error('[SSE onerror]', err);
+        toast.error('⚠️ Erreur réseau ou serveur SSE');
         stopSSE();
       },
 
