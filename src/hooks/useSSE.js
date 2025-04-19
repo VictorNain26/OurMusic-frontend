@@ -1,3 +1,4 @@
+// src/hooks/useSSE.js
 import { useRef, useState, useEffect } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { toast } from 'react-hot-toast';
@@ -22,6 +23,7 @@ export const useSSE = () => {
   const [status, setStatus] = useState({ sync: false, scrape: false, single: false });
   const controllerRef = useRef(null);
   const isRunning = useRef(false);
+  const messagesRef = useRef([]); // ✅ pour accès stable à la fin
 
   const stopSSE = () => {
     if (controllerRef.current) {
@@ -30,6 +32,7 @@ export const useSSE = () => {
     }
     isRunning.current = false;
     setStatus({ sync: false, scrape: false, single: false });
+    messagesRef.current = [];
   };
 
   useEffect(() => stopSSE, []);
@@ -38,13 +41,11 @@ export const useSSE = () => {
     url,
     { isScraping = false, isSingle = false, filter = defaultFilter } = {}
   ) => {
-    if (controllerRef.current || isRunning.current) {
-      toast.error('⏳ Une action est déjà en cours.');
-      return;
-    }
+    stopSSE(); // 🛑 Nettoyage à froid
 
     isRunning.current = true;
     setMessages([]);
+    messagesRef.current = [];
     setStatus({
       sync: !isScraping && !isSingle,
       scrape: isScraping,
@@ -77,11 +78,12 @@ export const useSSE = () => {
           if (err) {
             console.error('[SSE Error]', err);
             toast.error(`❌ ${err}`);
-            stopSSE(); // stop le flux pour éviter reconnexion
+            stopSSE();
             return;
           }
 
           if (msg && filter(msg)) {
+            messagesRef.current.push(msg);
             setMessages((prev) => [...prev, msg]);
           }
         } catch (err) {
@@ -98,6 +100,11 @@ export const useSSE = () => {
       },
 
       onclose() {
+        if (messagesRef.current.length > 0) {
+          toast.success('✅ Synchronisation terminée');
+        } else {
+          toast.error('❌ Synchronisation interrompue ou échouée');
+        }
         stopSSE();
       },
     });

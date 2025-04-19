@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSSE } from '../hooks/useSSE';
 import Input from './ui/Input';
 import Button from './ui/Button';
@@ -22,9 +22,14 @@ const getSSEUrl = (type, id = '') => {
 
 const ButtonRefreshSpotify = () => {
   const [inputId, setInputId] = useState('');
+  const lastClickRef = useRef(0);
   const { messages, status, isBusy, startSSE } = useSSE();
 
   const handleAction = (type) => {
+    const now = Date.now();
+    if (now - lastClickRef.current < 300) return; // 🧯 anti double clic (300ms)
+    lastClickRef.current = now;
+
     if (isBusy) {
       toast.error('⏳ Une action est déjà en cours.');
       return;
@@ -32,7 +37,10 @@ const ButtonRefreshSpotify = () => {
 
     if (type === 'syncOne') {
       const id = inputId.trim();
-      if (!id) return toast.error('Veuillez entrer un ID de playlist');
+      if (!id) {
+        toast.error('Veuillez entrer un ID de playlist');
+        return;
+      }
       startSSE(getSSEUrl(type, id), { isSingle: true });
       return;
     }
