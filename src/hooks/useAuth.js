@@ -12,6 +12,7 @@ export const useAuth = () => {
   const user = session?.user || null;
   const isAuthenticated = !!user;
 
+  // 🔁 Refresh automatique avant expiration du token
   useEffect(() => {
     if (!session?.expires || !isAuthenticated) return;
 
@@ -30,6 +31,7 @@ export const useAuth = () => {
     return () => clearTimeout(timer);
   }, [session?.expires, isAuthenticated, refetch]);
 
+  // 🔁 Refresh quand l’onglet revient en focus ou que l’utilisateur est de retour en ligne
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {

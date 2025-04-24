@@ -185,7 +185,7 @@ const AzuracastPlayer = () => {
 
       {nowPlaying?.song_history?.length > 0 && (
         <div className="mt-6 text-left">
-          <h3 className="text-xl font-semibold mb-2">Historique des 5 derniers morceaux :</h3>
+          <h3 className="text-xl font-semibold mb-2"> derniers morceaux :</h3>
           <ul className="list-disc list-inside text-sm space-y-1">
             {nowPlaying.song_history.slice(0, 5).map((item) => (
               <li key={item.sh_id}>

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../utils/api';
 import { toast } from 'react-hot-toast';
 import { authClient } from '../lib/authClient.jsx';
+import { useEffect } from 'react';
 
 export const useLikedTracks = () => {
   const queryClient = useQueryClient();
@@ -30,12 +31,18 @@ export const useLikedTracks = () => {
     enabled: !!user,
     staleTime: 1000 * 60,
     retry: 1,
-    keepPreviousData: true,
+    keepPreviousData: false,
     onError: (err) => {
       console.error('[useLikedTracks → Query]', err);
       toast.error(err.message || 'Erreur lors du chargement des morceaux likés');
     },
   });
+
+  useEffect(() => {
+    if (user?.id) {
+      refetch();
+    }
+  }, [user?.id]);
 
   const likeTrack = useMutation({
     mutationFn: async ({ title, artist, artwork = '', youtubeUrl = '' }) => {
