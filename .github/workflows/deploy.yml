@@ -5,45 +5,15 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Étape 1 : Checkout du code
-      - name: Checkout code
+      # 🔁 1. Récupération du code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Étape 2 : Setup PNPM
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      # Étape 3 : Setup Node.js avec cache
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      # Étape 4 : Cache node_modules pour accélérer les prochaines builds
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      # Étape 5 : Installer les dépendances
-      - name: Install dependencies
-        run: pnpm install
-
-      # Étape 6 : Build project
-      - name: Build project
-        run: pnpm build
-
-      # Étape 8 : Déploiement conditionnel
+      # 🟢 2. Déploiement conditionnel via SSH
       - name: Deploy to server via SSH
         if: ${{ secrets.DEPLOY_ENABLED == 'true' }}
         uses: appleboy/ssh-action@v0.1.8
@@ -53,15 +23,15 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "✅ Connexion SSH réussie."
-            cd ~/Ourmusic/frontend
+            cd ~/Ourmusic/frontend || { echo '❌ Dossier introuvable'; exit 1; }
 
-            echo "📦 Pulling latest code..."
-            git pull origin master
+            echo "📦 Pulling latest changes from master..."
+            git fetch origin master && git reset --hard origin/master
 
-            echo "🚀 Rebuilding Docker image..."
+            echo "🐳 Rebuilding Docker image..."
             docker compose build --no-cache frontend
 
-            echo "🧩 Restarting container..."
+            echo "🔁 Restarting frontend container..."
             docker compose up -d frontend
 
             echo "✅ Déploiement terminé avec succès."
