@@ -43,13 +43,9 @@ jobs:
       - name: Build project
         run: pnpm build
 
-      # Étape 7 : Vérifier si le déploiement est activé
-      - name: Check deploy status
-        run: echo "🔁 Deploy enabled? ${{ secrets.DEPLOY_ENABLED }}"
-
-      # Étape 8 : Déploiement conditionnel
+      # Étape 7 : Déploiement conditionnel
       - name: Deploy to server via SSH
-        if: ${{ secrets.DEPLOY_ENABLED == 'true' }}
+        if: ${{ secrets.DEPLOY_ENABLED && secrets.DEPLOY_ENABLED == 'true' }}
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOST }}
