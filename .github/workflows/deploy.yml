@@ -39,16 +39,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # # Étape 6 : Lancer les tests
-      # - name: Run tests
-      #   run: pnpm test
-
-      # Étape 7 : Build project
+      # Étape 6 : Build project
       - name: Build project
         run: pnpm build
 
-      # Étape 8 : Deploy si les étapes précédentes sont OK
+      # Étape 7 : Vérifier si le déploiement est activé
+      - name: Check deploy status
+        run: echo "🔁 Deploy enabled? ${{ secrets.DEPLOY_ENABLED }}"
+
+      # Étape 8 : Déploiement conditionnel
       - name: Deploy to server via SSH
+        if: ${{ secrets.DEPLOY_ENABLED == 'true' }}
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOST }}
