@@ -6,16 +6,14 @@ on:
 
 jobs:
   deploy:
+    if: ${{ secrets.DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
-      # 🔁 1. Récupération du code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 🟢 2. Déploiement conditionnel via SSH
       - name: Deploy to server via SSH
-        if: ${{ secrets.DEPLOY_ENABLED == 'true' }}
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOST }}
