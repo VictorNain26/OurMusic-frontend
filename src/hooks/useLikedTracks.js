@@ -42,6 +42,10 @@ export const useLikedTracks = () => {
     if (user?.id) {
       refetch();
     }
+
+    if (!user) {
+        queryClient.setQueryData(['likedTracks'], []);
+      }
   }, [user?.id]);
 
   const likeTrack = useMutation({

@@ -33,6 +33,13 @@ const TrackLikeButton = ({ track }) => {
     setLikedTrackId(matchedTrack?.id || null);
   }, [likedTracks, track]);
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsLiked(false);
+      setLikedTrackId(null);
+    }
+  }, [isLoggedIn]);
+
   const handleLike = async () => {
     if (!isLoggedIn) {
       toast.error('Veuillez vous connecter pour liker.');
