@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Button from './ui/Button';
-import { usePlayerStore } from '../lib/playerService'; // on utilise déjà ton store pour récupérer nowPlaying
-import { AZURACAST_URL } from '../utils/config';
 
 const ChromecastButton = () => {
   const [castAvailable, setCastAvailable] = useState(false);
   const [isCasting, setIsCasting] = useState(false);
   const [error, setError] = useState(null);
 
-  const currentSong = usePlayerStore((s) => s.nowPlaying?.now_playing?.song || null); // 🔥 Récupération du morceau actuel
-  const station = usePlayerStore((s) => s.nowPlaying?.station || { name: 'OurMusic' });
-
-  const RECEIVER_APP_ID = '4A922B9B';
+  const RECEIVER_APP_ID = '4A922B9B'; // Default Media Receiver
   const STREAM_URL = 'https://ourmusic-azuracast.ovh/listen/ourmusic/radio';
 
   useEffect(() => {
@@ -26,14 +21,19 @@ const ChromecastButton = () => {
 
       setCastAvailable(true);
 
-      context.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, (event) => {
-        if (event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
-            event.sessionState === cast.framework.SessionState.SESSION_RESUMED) {
-          setIsCasting(true);
-        } else {
-          setIsCasting(false);
+      context.addEventListener(
+        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        (event) => {
+          if (
+            event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+            event.sessionState === cast.framework.SessionState.SESSION_RESUMED
+          ) {
+            setIsCasting(true);
+          } else {
+            setIsCasting(false);
+          }
         }
-      });
+      );
     };
 
     const loadCastScript = () => {
@@ -66,21 +66,13 @@ const ChromecastButton = () => {
 
     try {
       const session = await context.requestSession();
-      console.info('[Chromecast] Session démarrée avec succès 🎯');
+      if (!session) {
+        console.warn('[Chromecast] Session annulée.');
+        return;
+      }
 
       const mediaInfo = new chrome.cast.media.MediaInfo(STREAM_URL, 'audio/mpeg');
-
-      const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
-      metadata.title = currentSong?.title || 'OurMusic Radio';
-      metadata.artist = currentSong?.artist || 'OurMusic';
-      metadata.albumName = station.name || 'OurMusic Radio';
-      metadata.images = [
-        {
-          url: currentSong?.art || `${AZURACAST_URL}/uploads/default-cover.jpg`
-        }
-      ];
-
-      mediaInfo.metadata = metadata;
+      mediaInfo.streamType = chrome.cast.media.StreamType.LIVE; // ✅ Indiquer que c'est un flux radio live
 
       const request = new chrome.cast.media.LoadRequest(mediaInfo);
       request.autoplay = true;
