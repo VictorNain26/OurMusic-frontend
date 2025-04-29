@@ -3,7 +3,7 @@ import Button from './ui/Button';
 
 const ChromecastButton = () => {
   const [castAvailable, setCastAvailable] = useState(false);
-  const [isCasting, setIsCasting] = useState(false);
+  const [deviceName, setDeviceName] = useState(null);
   const [error, setError] = useState(null);
 
   const RECEIVER_APP_ID = '4A922B9B'; // Default Media Receiver
@@ -24,13 +24,15 @@ const ChromecastButton = () => {
       context.addEventListener(
         cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
         (event) => {
+          const session = context.getCurrentSession();
           if (
             event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
             event.sessionState === cast.framework.SessionState.SESSION_RESUMED
           ) {
-            setIsCasting(true);
+            const device = session?.getCastDevice()?.friendlyName || 'Chromecast';
+            setDeviceName(device);
           } else {
-            setIsCasting(false);
+            setDeviceName(null);
           }
         }
       );
@@ -79,6 +81,10 @@ const ChromecastButton = () => {
 
       await session.loadMedia(request);
 
+      // 🔥 Récupérer proprement le nom du device
+      const device = session?.getCastDevice()?.friendlyName || 'Chromecast';
+      setDeviceName(device);
+
     } catch (err) {
       console.error('[Chromecast] Erreur session:', err);
       setError('Erreur lors de la connexion Chromecast.');
@@ -91,12 +97,12 @@ const ChromecastButton = () => {
         onClick={handleCastClick}
         disabled={!castAvailable}
         className={`text-white ${
-          isCasting
+          deviceName
             ? 'bg-green-600 hover:bg-green-700'
             : 'bg-purple-600 hover:bg-purple-700'
         }`}
       >
-        {isCasting ? '🎶 En cours de diffusion' : '📡 Caster'}
+        {deviceName ? `📡 Cast sur "${deviceName}"` : '📡 Caster'}
       </Button>
       {error && <span className="text-sm text-red-500">{error}</span>}
     </div>
