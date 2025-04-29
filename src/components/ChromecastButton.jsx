@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import Button from './ui/Button';
+import { usePlayerStore } from '../lib/playerService'; // on utilise déjà ton store pour récupérer nowPlaying
+import { AZURACAST_URL } from '../utils/config';
 
 const ChromecastButton = () => {
   const [castAvailable, setCastAvailable] = useState(false);
+  const [isCasting, setIsCasting] = useState(false);
   const [error, setError] = useState(null);
 
-  // Ton ID officiel de Web Receiver App (pas besoin d'en créer un perso si tu utilises l'app par défaut)
-  const RECEIVER_APP_ID = '4A922B9B';
+  const currentSong = usePlayerStore((s) => s.nowPlaying?.now_playing?.song || null); // 🔥 Récupération du morceau actuel
+  const station = usePlayerStore((s) => s.nowPlaying?.station || { name: 'OurMusic' });
 
-  // URL de ton stream AzuraCast
+  const RECEIVER_APP_ID = '4A922B9B';
   const STREAM_URL = 'https://ourmusic-azuracast.ovh/listen/ourmusic/radio';
 
   useEffect(() => {
@@ -22,6 +25,15 @@ const ChromecastButton = () => {
       });
 
       setCastAvailable(true);
+
+      context.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, (event) => {
+        if (event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+            event.sessionState === cast.framework.SessionState.SESSION_RESUMED) {
+          setIsCasting(true);
+        } else {
+          setIsCasting(false);
+        }
+      });
     };
 
     const loadCastScript = () => {
@@ -57,20 +69,23 @@ const ChromecastButton = () => {
       console.info('[Chromecast] Session démarrée avec succès 🎯');
 
       const mediaInfo = new chrome.cast.media.MediaInfo(STREAM_URL, 'audio/mpeg');
-      mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
-      mediaInfo.metadata.title = 'OurMusic Radio';
-      mediaInfo.metadata.artist = 'OurMusic';
+
+      const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+      metadata.title = currentSong?.title || 'OurMusic Radio';
+      metadata.artist = currentSong?.artist || 'OurMusic';
+      metadata.albumName = station.name || 'OurMusic Radio';
+      metadata.images = [
+        {
+          url: currentSong?.art || `${AZURACAST_URL}/uploads/default-cover.jpg`
+        }
+      ];
+
+      mediaInfo.metadata = metadata;
 
       const request = new chrome.cast.media.LoadRequest(mediaInfo);
       request.autoplay = true;
 
-      session.loadMedia(request).then(
-        () => console.info('[Chromecast] Stream envoyé avec succès 🚀'),
-        (errorCode) => {
-          console.error('[Chromecast] Erreur loadMedia', errorCode);
-          setError('Erreur lors de l’envoi du flux.');
-        }
-      );
+      await session.loadMedia(request);
 
     } catch (err) {
       console.error('[Chromecast] Erreur session:', err);
@@ -82,9 +97,14 @@ const ChromecastButton = () => {
     <div className="flex items-center gap-2">
       <Button
         onClick={handleCastClick}
-        className="bg-purple-600 hover:bg-purple-700 text-white"
+        disabled={!castAvailable}
+        className={`text-white ${
+          isCasting
+            ? 'bg-green-600 hover:bg-green-700'
+            : 'bg-purple-600 hover:bg-purple-700'
+        }`}
       >
-        Caster
+        {isCasting ? '🎶 En cours de diffusion' : '📡 Caster'}
       </Button>
       {error && <span className="text-sm text-red-500">{error}</span>}
     </div>
