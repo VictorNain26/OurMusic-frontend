@@ -21,6 +21,12 @@ const ChromecastButton = () => {
 
       setCastAvailable(true);
 
+      const session = context.getCurrentSession();
+      if (session && session.getSessionId()) {
+        const device = session.getCastDevice()?.friendlyName || 'Chromecast';
+        setDeviceName(device);
+      }
+
       context.addEventListener(
         cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
         (event) => {
@@ -71,8 +77,14 @@ const ChromecastButton = () => {
       sessionState === cast.framework.SessionState.SESSION_STARTED ||
       sessionState === cast.framework.SessionState.SESSION_RESUMED
     ) {
-      console.info('[Chromecast] Session déjà active, pas besoin de relancer.');
-      return; // ✅ Session déjà active → ne rien faire
+      // ✅ Déconnexion Chromecast
+      const session = context.getCurrentSession();
+      if (session) {
+        session.endSession(true);
+        setDeviceName(null);
+        toast.success('Déconnecté du Chromecast.');
+      }
+      return;
     }
 
     try {
@@ -106,11 +118,11 @@ const ChromecastButton = () => {
         disabled={!castAvailable}
         className={`text-white ${
           deviceName
-            ? 'bg-green-600 hover:bg-green-700'
+            ? 'bg-red-600 hover:bg-red-700'
             : 'bg-purple-600 hover:bg-purple-700'
         }`}
       >
-        {deviceName ? `📡 Cast sur "${deviceName}"` : '📡 Caster'}
+        {deviceName ? `✖️ Déconnexion de "${deviceName}"` : '📡 Caster'}
       </Button>
     </div>
   );
