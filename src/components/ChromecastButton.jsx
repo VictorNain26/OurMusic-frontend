@@ -5,27 +5,18 @@ const ChromecastButton = () => {
   const [castAvailable, setCastAvailable] = useState(false);
   const [error, setError] = useState(null);
 
+  // 👇 Ton Web Receiver Application ID Google Cast
+  const RECEIVER_APP_ID = '4A922B9B';
+
   useEffect(() => {
     const initCastApi = () => {
       if (!window.cast || !window.cast.framework) return;
 
       const context = cast.framework.CastContext.getInstance();
       context.setOptions({
-        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        receiverApplicationId: RECEIVER_APP_ID,
         autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
       });
-
-      context.addEventListener(
-        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-        (event) => {
-          if (event.sessionState === cast.framework.SessionState.NO_SESSION) {
-            console.info('[Chromecast] Aucune session active, tentative de reconnexion...');
-            context.requestSession().catch((err) =>
-              console.error('[Chromecast] Reconnexion échouée:', err)
-            );
-          }
-        }
-      );
 
       setCastAvailable(true);
     };
@@ -50,21 +41,21 @@ const ChromecastButton = () => {
     loadCastScript();
   }, []);
 
-  const handleCastClick = () => {
+  const handleCastClick = async () => {
     if (!castAvailable) {
       alert('Chromecast non disponible.');
       return;
     }
 
     const context = cast.framework.CastContext.getInstance();
-    context.requestSession()
-      .then(() => {
-        console.info('[Chromecast] Session démarrée avec succès.');
-      })
-      .catch((err) => {
-        console.error('[Chromecast] Erreur lors du cast :', err);
-        alert('Impossible de lancer le cast.');
-      });
+
+    try {
+      await context.requestSession();
+      console.info('[Chromecast] Session démarrée avec succès 🎯');
+    } catch (err) {
+      console.error('[Chromecast] Erreur session:', err);
+      alert('Erreur lors de la connexion Chromecast.');
+    }
   };
 
   return (
