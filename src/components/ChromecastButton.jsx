@@ -65,6 +65,12 @@ const ChromecastButton = () => {
     }
 
     const context = cast.framework.CastContext.getInstance();
+    const existingSession = context.getCurrentSession();
+
+    if (existingSession && existingSession.getSessionId()) {
+      console.info('[Chromecast] Déjà connecté à', existingSession.getCastDevice()?.friendlyName);
+      return; // ✅ Session déjà active, ne rien faire, pas de requestSession
+    }
 
     try {
       const session = await context.requestSession();
@@ -81,7 +87,6 @@ const ChromecastButton = () => {
 
       await session.loadMedia(request);
 
-      // 🔥 Récupérer proprement le nom du device
       const device = session?.getCastDevice()?.friendlyName || 'Chromecast';
       setDeviceName(device);
 
