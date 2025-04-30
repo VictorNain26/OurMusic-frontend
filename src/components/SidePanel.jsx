@@ -2,7 +2,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLikedTracks } from '../hooks/useLikedTracks';
-import { usePlayerStore } from '../lib/playerService';
 import TrackLikeButton from './TrackLikeButton';
 import Button from './ui/Button';
 
@@ -21,8 +20,9 @@ const SidePanel = ({ isOpen, onClose, nowPlaying }) => {
             transition={{ type: 'tween', duration: 0.4 }}
             className="fixed top-[64px] right-0 w-full sm:w-[400px] h-full bg-white shadow-xl z-40 overflow-y-auto p-6"
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Dernier morceau joué</h2>
+            {/* Titre sur une ligne */}
+            <h2 className="text-xl font-bold mb-2">Dernier morceau joué</h2>
+            <div className="mb-4">
               <Button variant="danger" size="sm" onClick={onClose}>
                 Fermer
               </Button>
@@ -92,11 +92,11 @@ const SidePanel = ({ isOpen, onClose, nowPlaying }) => {
             )}
           </motion.div>
 
-          {/* Fond semi-transparent cliquable */}
+          {/* Fond semi-transparent, mais sans griser le header */}
           <motion.div
             onClick={onClose}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.4 }}
+            animate={{ opacity: 0.3 }}
             exit={{ opacity: 0 }}
             className="fixed top-[64px] left-0 right-0 bottom-0 bg-black z-30"
           />

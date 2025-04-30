@@ -81,17 +81,6 @@ const Layout = ({ children }) => {
             onRegister={() => setRegisterOpen(true)}
           />
 
-          <div className="bg-gray-100 py-2 px-4 shadow-sm border-b text-right">
-            <button
-              onClick={() => setPanelOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition"
-            >
-              Ouvrir le panneau radio
-            </button>
-          </div>
-
-          <SidePanel isOpen={isPanelOpen} onClose={() => setPanelOpen(false)} nowPlaying={nowPlaying} />
-
           <AnimatePresence mode="wait">
             <motion.main
               key="layout-main"
