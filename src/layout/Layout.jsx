@@ -3,7 +3,6 @@ import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import Header from '../components/Header';
-import SidePanel from '../components/SidePanel';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/authClient.jsx';

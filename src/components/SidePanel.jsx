@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLikedTracks } from '../hooks/useLikedTracks';
 import TrackLikeButton from './TrackLikeButton';
 import Button from './ui/Button';
-import { authClient } from '../lib/authClient.jsx';
+import { useAuth } from '../hooks/useAuth';
+import { usePlayerStore } from '../lib/playerService';
 
-const SidePanel = ({ isOpen, onClose, nowPlaying }) => {
+const SidePanel = ({ isOpen, onClose }) => {
   const { likedTracks, isLoading, isError, handleDelete } = useLikedTracks();
-  const { data: session } = authClient.useSession();
+  const { user } = useAuth();
+  const nowPlaying = usePlayerStore((s) => s.nowPlaying);
   const lastPlayed = nowPlaying?.song_history?.[0]?.song;
 
   return (
@@ -19,7 +21,7 @@ const SidePanel = ({ isOpen, onClose, nowPlaying }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.4 }}
-            className="fixed top-[64px] right-0 w-full sm:w-[400px] h-[calc(100vh-64px)] bg-white shadow-xl z-40 overflow-y-auto p-6"
+            className="fixed top-[64px] right-0 w-full sm:w-[400px] h-[calc(100%-64px)] bg-white shadow-xl z-40 overflow-y-auto p-6"
           >
             <div className="flex justify-end mb-6">
               <Button variant="danger" size="sm" onClick={onClose}>
@@ -27,8 +29,9 @@ const SidePanel = ({ isOpen, onClose, nowPlaying }) => {
               </Button>
             </div>
 
-            <h2 className="text-xl font-bold mb-2">Dernier morceau écouté</h2>
-            {lastPlayed ? (
+            <h2 className="text-xl font-bold mb-4">Dernier morceau joué</h2>
+
+            {lastPlayed && (
               <div className="mb-6">
                 <p className="font-medium">{lastPlayed.artist} – {lastPlayed.title}</p>
                 {lastPlayed.art && (
@@ -40,11 +43,9 @@ const SidePanel = ({ isOpen, onClose, nowPlaying }) => {
                 )}
                 <TrackLikeButton track={lastPlayed} />
               </div>
-            ) : (
-              <p className="text-gray-500 mb-6">Aucun morceau trouvé récemment.</p>
             )}
 
-            {session?.user && (
+            {user && (
               <>
                 <hr className="my-6 border-t border-gray-300" />
                 <h3 className="text-lg font-semibold mb-3">Morceaux aimés</h3>
@@ -95,13 +96,13 @@ const SidePanel = ({ isOpen, onClose, nowPlaying }) => {
             )}
           </motion.div>
 
+          {/* Overlay semi-transparent cliquable */}
           <motion.div
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
             exit={{ opacity: 0 }}
-            className="fixed top-[64px] left-0 right-0 bg-black z-30"
-            style={{ height: 'calc(100vh - 64px)' }}
+            className="fixed top-[64px] left-0 right-0 bottom-0 bg-black z-30"
           />
         </>
       )}

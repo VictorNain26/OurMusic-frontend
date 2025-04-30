@@ -10,6 +10,7 @@ audio.volume = savedVolume;
 export const usePlayerStore = create((set) => ({
   isPlaying: false,
   volume: savedVolume,
+  nowPlaying: null,
 
   setPlaying: (state) => set({ isPlaying: state }),
   setVolume: (value) => {
@@ -17,6 +18,7 @@ export const usePlayerStore = create((set) => ({
     localStorage.setItem('ourmusic_volume', value);
     set({ volume: value });
   },
+  setNowPlaying: (nowPlaying) => set({ nowPlaying }),
 }));
 
 export const PlayerService = {

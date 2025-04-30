@@ -28,6 +28,7 @@ const AzuracastPlayer = () => {
 
   const updateNowPlaying = (data) => {
     setNowPlaying(data);
+    usePlayerStore.getState().setNowPlaying(data);
     const np = data?.now_playing;
     setElapsed(np?.elapsed || 0);
     setDuration(np?.duration || 0);

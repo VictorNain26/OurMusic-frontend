@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
 import { useAuth } from '../hooks/useAuth';
 import { usePlayerStore } from '../lib/playerService';
-import { motion } from 'framer-motion';
 import SidePanel from '../components/SidePanel';
 import PageWrapper from '../layout/PageWrapper';
 
@@ -35,7 +34,6 @@ const HomePage = () => {
       <SidePanel
         isOpen={isPanelOpen}
         onClose={() => setPanelOpen(false)}
-        nowPlaying={nowPlaying}
       />
     </PageWrapper>
   );
