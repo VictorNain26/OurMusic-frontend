@@ -1,10 +1,13 @@
+// src/layout/Layout.jsx
 import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import Header from '../components/Header';
+import SidePanel from '../components/SidePanel'; // ✅ AJOUTÉ
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/authClient.jsx';
+import { usePlayerStore } from '../lib/playerService'; // ✅ AJOUTÉ
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
@@ -14,9 +17,11 @@ const Layout = ({ children }) => {
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isRegisterOpen, setRegisterOpen] = useState(false);
   const [isResetPasswordOpen, setResetPasswordOpen] = useState(false);
+  const [isPanelOpen, setPanelOpen] = useState(false);
 
   const { isLoading, refetch } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { nowPlaying } = usePlayerStore.getState();
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -26,11 +31,9 @@ const Layout = ({ children }) => {
       try {
         const { error } = await authClient.verifyEmail({ query: { token } });
         if (error) throw new Error(error.message);
-
-        toast.success('🎉 Email vérifié avec succès !');
+        toast.success('Adresse email vérifiée avec succès.');
       } catch (err) {
-        console.error('[Layout → VerifyEmail]', err);
-        toast.error(err.message || 'Erreur de vérification');
+        toast.error(err.message || 'Erreur de vérification.');
       } finally {
         await refetch();
         searchParams.delete('token');
@@ -51,13 +54,13 @@ const Layout = ({ children }) => {
     const passwordReset = searchParams.get('password_reset');
 
     if (emailVerified === 'success') {
-      toast.success('🎉 Email vérifié avec succès !');
+      toast.success('Adresse email vérifiée.');
       searchParams.delete('email_verified');
       setSearchParams(searchParams, { replace: true });
     }
 
     if (passwordReset === 'success') {
-      toast.success('🔒 Mot de passe réinitialisé avec succès !');
+      toast.success('Mot de passe réinitialisé.');
       searchParams.delete('password_reset');
       setSearchParams(searchParams, { replace: true });
     }
@@ -78,6 +81,17 @@ const Layout = ({ children }) => {
             onRegister={() => setRegisterOpen(true)}
           />
 
+          <div className="bg-gray-100 py-2 px-4 shadow-sm border-b text-right">
+            <button
+              onClick={() => setPanelOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition"
+            >
+              Ouvrir le panneau radio
+            </button>
+          </div>
+
+          <SidePanel isOpen={isPanelOpen} onClose={() => setPanelOpen(false)} nowPlaying={nowPlaying} />
+
           <AnimatePresence mode="wait">
             <motion.main
               key="layout-main"
@@ -85,7 +99,7 @@ const Layout = ({ children }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+              className="relative z-0 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
             >
               {children}
             </motion.main>

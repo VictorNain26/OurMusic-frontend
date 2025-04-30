@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AzuracastPlayer from '../components/AzuracastPlayer';
-import LikedTracksList from '../components/LikedTracksList';
-import PageWrapper from '../layout/PageWrapper';
 import { useAuth } from '../hooks/useAuth';
+import { usePlayerStore } from '../lib/playerService';
+import { motion } from 'framer-motion';
+import SidePanel from '../components/SidePanel';
+import PageWrapper from '../layout/PageWrapper';
 
 const HomePage = () => {
   const { user, isLoading } = useAuth();
+  const [isPanelOpen, setPanelOpen] = useState(false);
+  const nowPlaying = usePlayerStore((s) => s.nowPlaying);
 
   if (isLoading) {
     return (
@@ -17,8 +21,28 @@ const HomePage = () => {
 
   return (
     <PageWrapper className="bg-white">
+      {/* ✅ BOUTON EN HAUT À GAUCHE */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full text-left mt-2 mb-4"
+      >
+        <button
+          onClick={() => setPanelOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded transition"
+        >
+          Voir les morceaux aimés
+        </button>
+      </motion.div>
+
       <AzuracastPlayer />
-      {user && <LikedTracksList />}
+
+      <SidePanel
+        isOpen={isPanelOpen}
+        onClose={() => setPanelOpen(false)}
+        nowPlaying={nowPlaying}
+      />
     </PageWrapper>
   );
 };

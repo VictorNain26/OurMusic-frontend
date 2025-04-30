@@ -3,6 +3,7 @@ import TrackLikeButton from './TrackLikeButton';
 import { motion } from 'framer-motion';
 import { PlayerService, usePlayerStore } from '../lib/playerService';
 import { AZURACAST_URL } from '../utils/config';
+import { toast } from 'react-hot-toast';
 
 const AzuracastPlayer = () => {
   const [nowPlaying, setNowPlaying] = useState(null);
@@ -71,7 +72,7 @@ const AzuracastPlayer = () => {
     };
 
     sse.onerror = () => {
-      toast.error('🔌 Perte de connexion à la radio. Nouvelle tentative dans quelques secondes...');
+      toast.error("Perte de connexion à la radio. Nouvelle tentative dans quelques secondes...");
       setConnected(false);
       isConnecting.current = false;
       sse.close();
@@ -135,12 +136,10 @@ const AzuracastPlayer = () => {
       transition={{ duration: 0.6, ease: 'easeOut' }}
       className="mx-auto my-6 max-w-3xl px-4 text-center"
     >
-      <h2 className="text-2xl font-bold mb-4">{station.name}</h2>
-
       {currentSong && (
         <div className="mb-4">
           <p className="text-lg font-semibold break-words">
-            🎵 {currentSong.artist} - {currentSong.title}
+            {currentSong.artist} - {currentSong.title}
           </p>
           {currentSong.art && (
             <img
@@ -161,11 +160,11 @@ const AzuracastPlayer = () => {
             isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
           }`}
         >
-          {isPlaying ? 'Stop' : 'Play'}
+          {isPlaying ? 'Arrêter' : 'Écouter'}
         </button>
 
         <label className="text-lg font-medium">
-          Volume:
+          Volume :
           <input
             type="range"
             min="0"
@@ -182,34 +181,6 @@ const AzuracastPlayer = () => {
         {Math.floor(elapsed / 60)}:{('0' + (elapsed % 60)).slice(-2)} /{' '}
         {Math.floor(duration / 60)}:{('0' + (duration % 60)).slice(-2)}
       </div>
-
-      {nowPlaying?.song_history?.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="mt-6 text-center"
-        >
-          <h3 className="text-xl font-semibold mb-4">Dernier morceau joué</h3>
-          <div className="bg-gray-100 rounded-lg shadow p-4 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4">
-            {nowPlaying.song_history[0].song.art && (
-              <img
-                src={nowPlaying.song_history[0].song.art}
-                alt={`${nowPlaying.song_history[0].song.artist} - ${nowPlaying.song_history[0].song.title}`}
-                className="w-24 h-24 object-cover rounded shadow"
-              />
-            )}
-
-            <div className="flex-1 text-left">
-              <p className="font-semibold text-lg mb-2 break-words">
-                {nowPlaying.song_history[0].song.artist} - {nowPlaying.song_history[0].song.title}
-              </p>
-              <TrackLikeButton track={nowPlaying.song_history[0].song} />
-            </div>
-          </div>
-        </motion.div>
-      )}
-
     </motion.div>
   );
 };
