@@ -8,7 +8,6 @@ import PageWrapper from '../layout/PageWrapper';
 const HomePage = () => {
   const { isLoading } = useAuth();
   const [isPanelOpen, setPanelOpen] = useState(false);
-  const nowPlaying = usePlayerStore((s) => s.nowPlaying);
 
   if (isLoading) {
     return (
@@ -19,22 +18,24 @@ const HomePage = () => {
   }
 
   return (
-    <PageWrapper className="bg-white">
-      <div className="w-full flex justify-end mt-2 mb-4">
+    <PageWrapper className="flex flex-col items-center justify-center h-full px-4 bg-white relative overflow-hidden">
+      {/* Bouton SidePanel fixe en haut à droite */}
+      <div className="absolute top-4 right-4 z-20">
         <button
           onClick={() => setPanelOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded transition"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition"
         >
           Détails d'écoute
         </button>
       </div>
 
-      <AzuracastPlayer />
+      {/* Player centré verticalement */}
+      <div className="w-full max-w-4xl flex-grow flex items-center justify-center">
+        <AzuracastPlayer />
+      </div>
 
-      <SidePanel
-        isOpen={isPanelOpen}
-        onClose={() => setPanelOpen(false)}
-      />
+      {/* Side Panel avec dernier morceau + likés */}
+      <SidePanel isOpen={isPanelOpen} onClose={() => setPanelOpen(false)} />
     </PageWrapper>
   );
 };
