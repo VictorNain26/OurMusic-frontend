@@ -77,7 +77,6 @@ const ChromecastButton = () => {
       sessionState === cast.framework.SessionState.SESSION_STARTED ||
       sessionState === cast.framework.SessionState.SESSION_RESUMED
     ) {
-      // ✅ Déconnexion Chromecast
       const session = context.getCurrentSession();
       if (session) {
         session.endSession(true);
@@ -95,7 +94,7 @@ const ChromecastButton = () => {
       }
 
       const mediaInfo = new chrome.cast.media.MediaInfo(STREAM_URL, 'audio/mpeg');
-      mediaInfo.streamType = chrome.cast.media.StreamType.LIVE; // Flux radio continu
+      mediaInfo.streamType = chrome.cast.media.StreamType.LIVE;
 
       const request = new chrome.cast.media.LoadRequest(mediaInfo);
       request.autoplay = true;
