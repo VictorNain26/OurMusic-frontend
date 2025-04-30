@@ -3,11 +3,11 @@ import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import Header from '../components/Header';
-import SidePanel from '../components/SidePanel'; // ✅ AJOUTÉ
+import SidePanel from '../components/SidePanel';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/authClient.jsx';
-import { usePlayerStore } from '../lib/playerService'; // ✅ AJOUTÉ
+import { usePlayerStore } from '../lib/playerService';
 
 const LoginModal = lazy(() => import('../components/LoginModal'));
 const RegisterModal = lazy(() => import('../components/RegisterModal'));
@@ -17,7 +17,6 @@ const Layout = ({ children }) => {
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isRegisterOpen, setRegisterOpen] = useState(false);
   const [isResetPasswordOpen, setResetPasswordOpen] = useState(false);
-  const [isPanelOpen, setPanelOpen] = useState(false);
 
   const { isLoading, refetch } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -71,11 +70,11 @@ const Layout = ({ children }) => {
       <Toaster position="bottom-right" toastOptions={{ duration: 4000 }} />
 
       {isLoading ? (
-        <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="flex items-center justify-center h-screen bg-white">
           <div className="w-12 h-12 border-8 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
         </div>
       ) : (
-        <>
+        <div className="flex flex-col h-screen">
           <Header
             onLogin={() => setLoginOpen(true)}
             onRegister={() => setRegisterOpen(true)}
@@ -88,7 +87,7 @@ const Layout = ({ children }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="relative z-0 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+              className="flex-grow overflow-hidden"
             >
               {children}
             </motion.main>
@@ -99,7 +98,7 @@ const Layout = ({ children }) => {
             <RegisterModal isOpen={isRegisterOpen} onRequestClose={() => setRegisterOpen(false)} />
             <ResetPasswordModal isOpen={isResetPasswordOpen} onRequestClose={() => setResetPasswordOpen(false)} />
           </Suspense>
-        </>
+        </div>
       )}
     </>
   );

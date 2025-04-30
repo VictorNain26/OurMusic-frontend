@@ -8,7 +8,7 @@ const PageWrapper = ({ children, className = '' }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 30 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className={`min-h-screen ${className}`}
+      className={`${className}`}
     >
       {children}
     </motion.div>

@@ -26,7 +26,7 @@ const HomePage = () => {
           onClick={() => setPanelOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded transition"
         >
-          🎵 Voir les morceaux aimés
+          Détails d'écoute
         </button>
       </div>
 

@@ -2,8 +2,9 @@
 
 /* Custom global styles */
 html,
-body {
-  @apply bg-white text-gray-800 min-h-screen antialiased;
+body,
+#root {
+  @apply bg-white text-gray-800 h-screen w-screen overflow-hidden antialiased;
 }
 
 a {
