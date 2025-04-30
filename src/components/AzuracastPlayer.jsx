@@ -184,16 +184,30 @@ const AzuracastPlayer = () => {
       </div>
 
       {nowPlaying?.song_history?.length > 0 && (
-        <div className="mt-6 text-left">
-          <h3 className="text-xl font-semibold mb-2"> derniers morceaux :</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {nowPlaying.song_history.slice(0, 5).map((item) => (
-              <li key={item.sh_id}>
-                {item.song.artist} - {item.song.title}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="mt-6 text-center"
+        >
+          <h3 className="text-xl font-semibold mb-4">Dernier morceau joué</h3>
+          <div className="bg-gray-100 rounded-lg shadow p-4 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+            {nowPlaying.song_history[0].song.art && (
+              <img
+                src={nowPlaying.song_history[0].song.art}
+                alt={`${nowPlaying.song_history[0].song.artist} - ${nowPlaying.song_history[0].song.title}`}
+                className="w-24 h-24 object-cover rounded shadow"
+              />
+            )}
+
+            <div className="flex-1 text-left">
+              <p className="font-semibold text-lg mb-2 break-words">
+                {nowPlaying.song_history[0].song.artist} - {nowPlaying.song_history[0].song.title}
+              </p>
+              <TrackLikeButton track={nowPlaying.song_history[0].song} />
+            </div>
+          </div>
+        </motion.div>
       )}
 
       {error && <div className="mt-4 text-red-500">{error}</div>}
