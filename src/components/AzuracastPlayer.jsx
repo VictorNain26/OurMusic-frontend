@@ -71,7 +71,7 @@ const AzuracastPlayer = () => {
     };
 
     sse.onerror = () => {
-      setError('Erreur de connexion SSE. Reconnexion dans 5s...');
+      toast.error('🔌 Perte de connexion à la radio. Nouvelle tentative dans quelques secondes...');
       setConnected(false);
       isConnecting.current = false;
       sse.close();
@@ -210,7 +210,6 @@ const AzuracastPlayer = () => {
         </motion.div>
       )}
 
-      {error && <div className="mt-4 text-red-500">{error}</div>}
     </motion.div>
   );
 };

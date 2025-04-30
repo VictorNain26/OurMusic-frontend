@@ -44,24 +44,13 @@ const ChromecastButton = () => {
       );
     };
 
-    const loadCastScript = () => {
-      if (window.cast && window.cast.framework) {
-        initCastApi();
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
-      script.async = true;
-      script.onload = initCastApi;
-      script.onerror = () => {
-        console.error('[Chromecast] Erreur chargement script Cast');
-        toast.error('Erreur de chargement Chromecast.');
+    if (window.cast && window.cast.framework) {
+      initCastApi();
+    } else {
+      window.__onGCastApiAvailable = function (isAvailable) {
+        if (isAvailable) initCastApi();
       };
-      document.body.appendChild(script);
-    };
-
-    loadCastScript();
+    }
   }, []);
 
   const handleCastClick = async () => {
@@ -103,7 +92,6 @@ const ChromecastButton = () => {
 
       const device = session?.getCastDevice()?.friendlyName || 'Chromecast';
       setDeviceName(device);
-
     } catch (err) {
       console.error('[Chromecast] Erreur session:', err);
       toast.error('Erreur de connexion à Chromecast.');
