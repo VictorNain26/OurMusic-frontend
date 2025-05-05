@@ -5,12 +5,43 @@ import TrackLikeButton from './TrackLikeButton';
 import Button from './ui/Button';
 import { useAuth } from '../hooks/useAuth';
 import { usePlayerStore } from '../lib/playerService';
+import { toast } from 'react-hot-toast';
+import { apiFetch } from '../utils/api';
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { likedTracks, isLoading, isError, handleDelete } = useLikedTracks();
-  const { user } = useAuth();
+  const { user, refetch } = useAuth();
   const nowPlaying = usePlayerStore((s) => s.nowPlaying);
   const lastPlayed = nowPlaying?.song_history?.[0]?.song;
+
+  const isSpotifyLinked = Array.isArray(user?.accounts)
+    ? user.accounts.some((acc) => acc.provider === 'spotify')
+    : false;
+
+  const handleLinkSpotify = async () => {
+    try {
+      const res = await apiFetch('/api/spotify/authorize');
+      if (res?.url) {
+        window.location.href = res.url;
+      } else {
+        toast.error("Impossible de récupérer l’URL d’authentification Spotify.");
+      }
+    } catch (err) {
+      console.error('[SidePanel → handleLinkSpotify]', err);
+      toast.error(err.message || "Erreur lors de la liaison Spotify.");
+    }
+  };
+
+
+  const handleSyncSpotify = async () => {
+    try {
+      const res = await apiFetch('/api/streaming/spotify/sync-liked', { method: 'POST' });
+      toast.success(res.message || 'Morceaux synchronisés avec Spotify 🎵');
+    } catch (err) {
+      console.error('[SidePanel → handleSyncSpotify]', err);
+      toast.error(err.message || 'Erreur lors de la synchronisation');
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -49,6 +80,18 @@ const SidePanel = ({ isOpen, onClose }) => {
               <>
                 <hr className="my-6 border-t border-gray-300" />
                 <h3 className="text-lg font-semibold mb-3">Morceaux aimés</h3>
+
+                <div className="mb-4">
+                  {isSpotifyLinked ? (
+                    <Button onClick={handleSyncSpotify} fullWidth variant="success">
+                      🔄 Synchroniser avec Spotify
+                    </Button>
+                  ) : (
+                    <Button onClick={handleLinkSpotify} fullWidth variant="primary">
+                      🔗 Lier Spotify
+                    </Button>
+                  )}
+                </div>
 
                 {isLoading ? (
                   <p className="text-gray-500">Chargement en cours...</p>
@@ -96,7 +139,6 @@ const SidePanel = ({ isOpen, onClose }) => {
             )}
           </motion.div>
 
-          {/* Overlay semi-transparent cliquable */}
           <motion.div
             onClick={onClose}
             initial={{ opacity: 0 }}

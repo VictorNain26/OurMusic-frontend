@@ -50,6 +50,7 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const emailVerified = searchParams.get('email_verified');
     const passwordReset = searchParams.get('password_reset');
+    const spotifyLinked = searchParams.get('spotify_linked');
 
     if (emailVerified === 'success') {
       toast.success('Adresse email vérifiée.');
@@ -60,6 +61,12 @@ const Layout = ({ children }) => {
     if (passwordReset === 'success') {
       toast.success('Mot de passe réinitialisé.');
       searchParams.delete('password_reset');
+      setSearchParams(searchParams, { replace: true });
+    }
+
+    if (spotifyLinked === 'success') {
+      toast.success('Compte Spotify lié avec succès 🎧');
+      searchParams.delete('spotify_linked');
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
