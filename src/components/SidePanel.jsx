@@ -62,6 +62,11 @@ const SidePanel = ({ isOpen, onClose }) => {
 
             <h2 className="text-xl font-bold mb-4">Dernier morceau joué</h2>
 
+            <pre className="text-xs bg-gray-100 p-2 rounded">
+  {JSON.stringify(user, null, 2)}
+</pre>
+
+
             {lastPlayed && (
               <div className="mb-6">
                 <p className="font-medium">{lastPlayed.artist} – {lastPlayed.title}</p>
