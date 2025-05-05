@@ -35,7 +35,7 @@ const SidePanel = ({ isOpen, onClose }) => {
 
   const handleSyncSpotify = async () => {
     try {
-      const res = await apiFetch('/api/streaming/spotify/sync-liked', { method: 'POST' });
+      const res = await apiFetch('/api/spotify/sync-liked', { method: 'POST' });
       toast.success(res.message || 'Morceaux synchronisés avec Spotify 🎵');
     } catch (err) {
       console.error('[SidePanel → handleSyncSpotify]', err);
