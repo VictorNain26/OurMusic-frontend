@@ -7,10 +7,11 @@ import { useAuth } from '../hooks/useAuth';
 import { usePlayerStore } from '../lib/playerService';
 import { toast } from 'react-hot-toast';
 import { apiFetch } from '../utils/api';
+import { authClient } from '../lib/authClient';
 
 const SidePanel = ({ isOpen, onClose }) => {
   const { likedTracks, isLoading, isError, handleDelete } = useLikedTracks();
-  const { user, refetch } = useAuth();
+  const { user } = useAuth();
   const nowPlaying = usePlayerStore((s) => s.nowPlaying);
   const lastPlayed = nowPlaying?.song_history?.[0]?.song;
 
@@ -20,18 +21,15 @@ const SidePanel = ({ isOpen, onClose }) => {
 
   const handleLinkSpotify = async () => {
     try {
-      const res = await apiFetch('/api/spotify/authorize');
-      if (res?.url) {
-        window.location.href = res.url;
-      } else {
-        toast.error("Impossible de récupérer l’URL d’authentification Spotify.");
-      }
+      await authClient.linkSocial({
+        provider: 'spotify',
+        callbackURL: `${window.location.origin}?spotify_linked=success`,
+      });
     } catch (err) {
       console.error('[SidePanel → handleLinkSpotify]', err);
-      toast.error(err.message || "Erreur lors de la liaison Spotify.");
+      toast.error(err.message || 'Erreur lors de la liaison Spotify.');
     }
   };
-
 
   const handleSyncSpotify = async () => {
     try {
@@ -61,11 +59,6 @@ const SidePanel = ({ isOpen, onClose }) => {
             </div>
 
             <h2 className="text-xl font-bold mb-4">Dernier morceau joué</h2>
-
-            <pre className="text-xs bg-gray-100 p-2 rounded">
-  {JSON.stringify(user, null, 2)}
-</pre>
-
 
             {lastPlayed && (
               <div className="mb-6">
