@@ -66,6 +66,7 @@ const Layout = ({ children }) => {
 
     if (spotifyLinked === 'success') {
       toast.success('Compte Spotify lié avec succès 🎧');
+      refetch();
       searchParams.delete('spotify_linked');
       setSearchParams(searchParams, { replace: true });
     }
