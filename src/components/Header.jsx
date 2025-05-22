@@ -18,19 +18,6 @@ const Header = ({ onLogin, onRegister }) => {
             {capitalizeFirstLetter(user.name || user.username || user.email)}
           </span>
 
-          {user.role === 'admin' && (
-            <>
-              <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full uppercase tracking-wide">
-                Admin
-              </span>
-              <Link to="/admin/dashboard">
-                <Button size="sm" variant="primary">
-                  Dashboard
-                </Button>
-              </Link>
-            </>
-          )}
-
           <Button onClick={signOut} size="sm" variant="danger">
             Déconnexion
           </Button>
