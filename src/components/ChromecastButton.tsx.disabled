@@ -1,0 +1,186 @@
+import React, { useEffect, useState } from 'react';
+import { Button } from './ui/button';
+import { toast } from 'react-hot-toast';
+
+// Types pour l'API Chromecast
+declare global {
+  interface Window {
+    cast?: typeof cast;
+    chrome?: typeof chrome;
+    __onGCastApiAvailable?: (isAvailable: boolean) => void;
+  }
+}
+
+// Types pour les objets Chromecast
+interface CastDevice {
+  friendlyName: string;
+}
+
+interface CastSession {
+  getSessionId(): string;
+  getCastDevice(): CastDevice;
+  endSession(stopCasting: boolean): void;
+  loadMedia(request: chrome.cast.media.LoadRequest): Promise<void>;
+}
+
+interface CastContext {
+  setOptions(options: chrome.cast.ApiConfig): void;
+  getCurrentSession(): CastSession | null;
+  getSessionState(): chrome.cast.SessionState;
+  requestSession(): Promise<CastSession>;
+  addEventListener(
+    eventType: cast.framework.CastContextEventType,
+    listener: (event: cast.framework.CastStateEvent) => void
+  ): void;
+}
+
+interface CastFramework {
+  CastContext: {
+    getInstance(): CastContext;
+  };
+  CastContextEventType: {
+    SESSION_STATE_CHANGED: cast.framework.CastContextEventType;
+  };
+  SessionState: {
+    SESSION_STARTED: cast.framework.SessionState;
+    SESSION_RESUMED: cast.framework.SessionState;
+  };
+}
+
+declare const cast: {
+  framework: CastFramework;
+};
+
+declare const chrome: {
+  cast: {
+    AutoJoinPolicy: {
+      ORIGIN_SCOPED: chrome.cast.AutoJoinPolicy;
+    };
+    SessionState: {
+      SESSION_STARTED: chrome.cast.SessionState;
+      SESSION_RESUMED: chrome.cast.SessionState;
+    };
+    media: {
+      MediaInfo: new (contentId: string, contentType: string) => chrome.cast.media.MediaInfo;
+      LoadRequest: new (mediaInfo: chrome.cast.media.MediaInfo) => chrome.cast.media.LoadRequest;
+      StreamType: {
+        LIVE: chrome.cast.media.StreamType;
+      };
+    };
+  };
+};
+
+const ChromecastButton: React.FC = () => {
+  const [castAvailable, setCastAvailable] = useState<boolean>(false);
+  const [deviceName, setDeviceName] = useState<string | null>(null);
+
+  const RECEIVER_APP_ID = '4A922B9B'; // Default Media Receiver
+  const STREAM_URL = 'https://ourmusic-azuracast.ovh/listen/ourmusic/radio';
+
+  useEffect(() => {
+    const initCastApi = (): void => {
+      if (!window.cast || !window.cast.framework) return;
+
+      const context = cast.framework.CastContext.getInstance();
+      context.setOptions({
+        receiverApplicationId: RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+      });
+
+      setCastAvailable(true);
+
+      const session = context.getCurrentSession();
+      if (session && session.getSessionId()) {
+        const device = session.getCastDevice()?.friendlyName || 'Chromecast';
+        setDeviceName(device);
+      }
+
+      context.addEventListener(
+        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        (event) => {
+          const session = context.getCurrentSession();
+          if (
+            event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+            event.sessionState === cast.framework.SessionState.SESSION_RESUMED
+          ) {
+            const device = session?.getCastDevice()?.friendlyName || 'Chromecast';
+            setDeviceName(device);
+          } else {
+            setDeviceName(null);
+          }
+        }
+      );
+    };
+
+    if (window.cast && window.cast.framework) {
+      initCastApi();
+    } else {
+      window.__onGCastApiAvailable = function (isAvailable: boolean) {
+        if (isAvailable) initCastApi();
+      };
+    }
+  }, []);
+
+  const handleCastClick = async (): Promise<void> => {
+    if (!castAvailable) {
+      toast.error('Chromecast non disponible.');
+      return;
+    }
+
+    const context = cast.framework.CastContext.getInstance();
+    const sessionState = context.getSessionState();
+
+    if (
+      sessionState === cast.framework.SessionState.SESSION_STARTED ||
+      sessionState === cast.framework.SessionState.SESSION_RESUMED
+    ) {
+      const session = context.getCurrentSession();
+      if (session) {
+        session.endSession(true);
+        setDeviceName(null);
+        toast.success('Déconnecté du Chromecast.');
+      }
+      return;
+    }
+
+    try {
+      const session = await context.requestSession();
+      if (!session) {
+        console.warn('[Chromecast] Session annulee par l utilisateur.');
+        return;
+      }
+
+      const mediaInfo = new chrome.cast.media.MediaInfo(STREAM_URL, 'audio/mpeg');
+      mediaInfo.streamType = chrome.cast.media.StreamType.LIVE;
+
+      const request = new chrome.cast.media.LoadRequest(mediaInfo);
+      request.autoplay = true;
+
+      await session.loadMedia(request);
+
+      const device = session?.getCastDevice()?.friendlyName || 'Chromecast';
+      setDeviceName(device);
+    } catch (err: unknown) {
+      console.error('[Chromecast] Erreur session:', err);
+      toast.error('Erreur de connexion à Chromecast.');
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        onClick={handleCastClick}
+        disabled={!castAvailable}
+        className={`text-white ${
+          deviceName
+            ? 'bg-red-600 hover:bg-red-700'
+            : 'bg-purple-600 hover:bg-purple-700'
+        }`}
+      >
+        {deviceName ? `✖️ Déconnexion de "${deviceName}"` : '📡 Caster'}
+      </Button>
+    </div>
+  );
+};
+
+export default ChromecastButton;
