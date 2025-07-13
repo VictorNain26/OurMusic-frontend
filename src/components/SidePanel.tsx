@@ -67,8 +67,9 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
         if (response.error) {
           throw new Error(response.error.message);
         }
-        setLinkedAccounts(response.data || []);
+        setLinkedAccounts(response.data ?? []);
       } catch (err: unknown) {
+        // eslint-disable-next-line no-console
         console.error('[SidePanel] listAccounts', err);
       }
     })();
@@ -106,7 +107,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
   const handleSyncSpotify = async (): Promise<void> => {
     try {
       const res = await apiFetch<ApiResponse>('/api/spotify/sync-liked', { method: 'POST' });
-      toast.success(res.message || 'Morceaux synchronisés sur Spotify 🎵');
+      toast.success(res.message ?? 'Morceaux synchronisés sur Spotify 🎵');
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur de synchronisation';
       toast.error(errorMessage);
@@ -117,6 +118,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
     try {
       await handleDelete(id);
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[SidePanel] handleTrackDelete', err);
     }
   };
@@ -132,7 +134,10 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.4 }}
-            className="fixed top-[64px] right-0 w-full sm:w-[400px] h-[calc(100%-64px)] bg-white shadow-xl z-40 overflow-y-auto p-6"
+            className={
+              'fixed top-[64px] right-0 w-full sm:w-[400px] h-[calc(100%-64px)] ' +
+              'bg-white shadow-xl z-40 overflow-y-auto p-6'
+            }
           >
             {/* bouton fermer */}
             <div className="flex justify-end mb-6">

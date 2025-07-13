@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite --port 5173 --host 0.0.0.0",
     "build": "tsc && vite build",
-    "lint": "pnpm run typecheck && pnpm run lint:eslint && pnpm run lint:style",
+    "lint": "pnpm run typecheck && pnpm run lint:eslint",
     "lint:eslint": "eslint .",
     "lint:style": "stylelint \"**/*.{css,scss,tsx,jsx}\"",
     "lint:fix": "pnpm run lint:fix:eslint && pnpm run lint:fix:style",

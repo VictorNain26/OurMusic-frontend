@@ -37,7 +37,7 @@ export interface UseLikedTracksReturn {
   refetch: () => void;
   likeTrack: UseMutationResult<LikedTrack | undefined, Error, NewTrack, MutationContext>;
   deleteTrack: UseMutationResult<string, Error, string, MutationContext>;
-  handleDelete: (id: string) => Promise<void>;
+  handleDelete: (_id: string) => Promise<void>;
 }
 
 export const useLikedTracks = (): UseLikedTracksReturn => {
@@ -54,6 +54,7 @@ export const useLikedTracks = (): UseLikedTracksReturn => {
       return data || [];
     } catch (err: unknown) {
       if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
         console.error('[fetchLikedTracks]', err);
       }
       return [];
@@ -82,7 +83,7 @@ export const useLikedTracks = (): UseLikedTracksReturn => {
     if (!user) {
       queryClient.setQueryData(['likedTracks'], []);
     }
-  }, [user?.id, refetch, queryClient]);
+  }, [user?.id, refetch, queryClient, user]);
 
   const likeTrack = useMutation<LikedTrack | undefined, Error, NewTrack, MutationContext>({
     mutationFn: async ({ title, artist, artwork = '', youtubeUrl = '' }: NewTrack): Promise<LikedTrack | undefined> => {
@@ -97,7 +98,7 @@ export const useLikedTracks = (): UseLikedTracksReturn => {
     },
     onMutate: async (newTrack: NewTrack): Promise<MutationContext> => {
       await queryClient.cancelQueries({ queryKey: ['likedTracks'] });
-      const previousTracks = queryClient.getQueryData<LikedTrack[]>(['likedTracks']) || [];
+      const previousTracks = queryClient.getQueryData<LikedTrack[]>(['likedTracks']) ?? [];
       const optimisticTrack: OptimisticTrack = { ...newTrack, id: `optimistic-${  Date.now()}` };
       queryClient.setQueryData(['likedTracks'], (old: LikedTrack[] = []) => [...old, optimisticTrack]);
       return { previousTracks };
@@ -106,7 +107,7 @@ export const useLikedTracks = (): UseLikedTracksReturn => {
       if (context) {
         queryClient.setQueryData(['likedTracks'], context.previousTracks);
       }
-      toast.error(err.message || 'Erreur lors du like');
+      toast.error(err.message ?? 'Erreur lors du like');
     },
     onSuccess: (): void => {
       queryClient.invalidateQueries({ queryKey: ['likedTracks'] });
@@ -124,7 +125,7 @@ export const useLikedTracks = (): UseLikedTracksReturn => {
     },
     onMutate: async (id: string): Promise<MutationContext> => {
       await queryClient.cancelQueries({ queryKey: ['likedTracks'] });
-      const previousTracks = queryClient.getQueryData<LikedTrack[]>(['likedTracks']) || [];
+      const previousTracks = queryClient.getQueryData<LikedTrack[]>(['likedTracks']) ?? [];
       queryClient.setQueryData(['likedTracks'], (old: LikedTrack[] = []) =>
         old.filter(track => track.id !== id),
       );
@@ -134,7 +135,7 @@ export const useLikedTracks = (): UseLikedTracksReturn => {
       if (context) {
         queryClient.setQueryData(['likedTracks'], context.previousTracks);
       }
-      toast.error(err.message || 'Erreur lors de la suppression');
+      toast.error(err.message ?? 'Erreur lors de la suppression');
     },
     onSuccess: (): void => {
       queryClient.invalidateQueries({ queryKey: ['likedTracks'] });
@@ -150,6 +151,7 @@ export const useLikedTracks = (): UseLikedTracksReturn => {
     try {
       await deleteTrack.mutateAsync(id);
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[handleDelete]', err);
     }
   };

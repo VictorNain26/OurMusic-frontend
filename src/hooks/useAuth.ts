@@ -69,10 +69,11 @@ export const useAuth = (): UseAuthReturn => {
     }, refreshIn);
 
     if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
       console.info(`[useAuth] Prochain refresh dans ${Math.round(refreshIn / 1000)}s`);
     }
 
-    return () => clearTimeout(timer);
+    return (): void => clearTimeout(timer);
   }, [session?.session.expiresAt, isAuthenticated, refetch]);
 
   // 🔁 Refresh quand l'onglet revient en focus ou que l'utilisateur est de retour en ligne
@@ -90,7 +91,7 @@ export const useAuth = (): UseAuthReturn => {
     window.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('online', handleOnline);
 
-    return () => {
+    return (): void => {
       window.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
     };
@@ -108,6 +109,7 @@ export const useAuth = (): UseAuthReturn => {
         authClient.signOut();
         refetch();
       } catch (err: unknown) {
+        // eslint-disable-next-line no-console
         console.error('[useAuth → signOut]', err);
       }
     },

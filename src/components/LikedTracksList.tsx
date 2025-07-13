@@ -20,6 +20,7 @@ const LikedTracksList: React.FC = () => {
       return;
     }
 
+    // eslint-disable-next-line no-alert
     const confirmation = window.confirm('Voulez-vous vraiment supprimer ce morceau ?');
     if (!confirmation) {
       return;

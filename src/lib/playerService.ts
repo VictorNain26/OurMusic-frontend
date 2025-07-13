@@ -17,12 +17,12 @@ interface PlayerStore {
   isPlaying: boolean;
   volume: number;
   nowPlaying: NowPlaying | null;
-  setPlaying: (state: boolean) => void;
-  setVolume: (value: number) => void;
-  setNowPlaying: (nowPlaying: NowPlaying | null) => void;
+  setPlaying: (_state: boolean) => void;
+  setVolume: (_value: number) => void;
+  setNowPlaying: (_nowPlaying: NowPlaying | null) => void;
 }
 
-const savedVolume = parseFloat(localStorage.getItem('ourmusic_volume') || '1') || 1;
+const savedVolume = parseFloat(localStorage.getItem('ourmusic_volume') ?? '1') ?? 1;
 
 const audio = new Audio();
 audio.preload = 'auto';
@@ -34,13 +34,13 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
   volume: savedVolume,
   nowPlaying: null,
 
-  setPlaying: (state: boolean) => set({ isPlaying: state }),
-  setVolume: (value: number) => {
+  setPlaying: (state: boolean): void => set({ isPlaying: state }),
+  setVolume: (value: number): void => {
     audio.volume = value;
     localStorage.setItem('ourmusic_volume', value.toString());
     set({ volume: value });
   },
-  setNowPlaying: (nowPlaying: NowPlaying | null) => set({ nowPlaying }),
+  setNowPlaying: (nowPlaying: NowPlaying | null): void => set({ nowPlaying }),
 }));
 
 export const PlayerService = {
@@ -55,6 +55,7 @@ export const PlayerService = {
       await audio.play();
       usePlayerStore.getState().setPlaying(true);
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[PlayerService → play]', err);
       usePlayerStore.getState().setPlaying(false);
     }

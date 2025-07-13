@@ -20,7 +20,10 @@ const StatsCard: React.FC<{
     className="glass rounded-2xl p-6 hover:neon-glow transition-all duration-300 cursor-pointer group"
   >
     <div className="flex items-center gap-4">
-      <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+      <div className={
+        'w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center ' +
+        'group-hover:scale-110 transition-transform'
+      }>
         <Icon className="w-6 h-6 text-white" />
       </div>
       <div>
@@ -103,13 +106,13 @@ const ModernHomePage: React.FC = () => {
       icon: Radio,
       title: 'Radio Live',
       description: 'Écouter en direct',
-      onClick: () => {},
+      onClick: (): void => {},
     },
     {
       icon: TrendingUp,
       title: 'Découvrir',
       description: 'Nouveautés et tendances',
-      onClick: () => {},
+      onClick: (): void => {},
     },
   ];
 
@@ -130,11 +133,14 @@ const ModernHomePage: React.FC = () => {
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
               {isAuthenticated ? (
                 <>
-                  Salut {user?.name?.split(' ')[0] || 'Mélomane'} 👋
+                  Salut {user?.name?.split(' ')[0] ?? 'Mélomane'} 👋
                 </>
               ) : (
                 <>
-                  Bienvenue sur <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">OurMusic</span>
+                  Bienvenue sur{' '}
+                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    OurMusic
+                  </span>
                 </>
               )}
             </h1>

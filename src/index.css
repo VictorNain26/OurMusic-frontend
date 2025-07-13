@@ -64,7 +64,8 @@
   }
   
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
@@ -74,15 +75,16 @@
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    background-color: hsl(var(--muted));
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary rounded-full;
+    background-color: hsl(var(--primary));
+    border-radius: 9999px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary/80;
+    background-color: hsl(var(--primary) / 0.8);
   }
 }
 
@@ -95,22 +97,37 @@ input[type="range"] {
 }
 
 input[type="range"]::-webkit-slider-track {
-  @apply bg-progress-bg h-2 rounded-full;
+  background-color: hsl(var(--progress-bg));
+  height: 0.5rem;
+  border-radius: 9999px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  @apply h-4 w-4 rounded-full bg-primary border-0 shadow-lg;
+  height: 1rem;
+  width: 1rem;
+  border-radius: 9999px;
+  background-color: hsl(var(--primary));
+  border: 0;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   margin-top: -4px;
 }
 
 input[type="range"]::-moz-range-track {
-  @apply bg-progress-bg h-2 rounded-full border-0;
+  background-color: hsl(var(--progress-bg));
+  height: 0.5rem;
+  border-radius: 9999px;
+  border: 0;
 }
 
 input[type="range"]::-moz-range-thumb {
-  @apply h-4 w-4 rounded-full bg-primary border-0 shadow-lg;
+  height: 1rem;
+  width: 1rem;
+  border-radius: 9999px;
+  background-color: hsl(var(--primary));
+  border: 0;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   margin-top: -6px;
 }
 

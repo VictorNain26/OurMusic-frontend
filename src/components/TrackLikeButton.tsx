@@ -24,7 +24,7 @@ const TrackLikeButton: React.FC<TrackLikeButtonProps> = ({ track }) => {
   const isLoggedIn = !!(session as Session)?.user;
 
   const youtubeUrl =
-    track?.youtubeUrl ||
+    track?.youtubeUrl ??
     `https://www.youtube.com/results?search_query=${encodeURIComponent(`${track.artist} ${track.title}`)}`;
 
   // 🧩 State local pour suivre l'état du bouton dynamiquement
@@ -32,7 +32,7 @@ const TrackLikeButton: React.FC<TrackLikeButtonProps> = ({ track }) => {
   const [likedTrackId, setLikedTrackId] = useState<string | null>(null);
 
   // 💡 Normalisation pour une comparaison fiable
-  const normalize = (str?: string): string => str?.trim().toLowerCase() || '';
+  const normalize = (str?: string): string => str?.trim().toLowerCase() ?? '';
 
   useEffect(() => {
     const matchedTrack = likedTracks.find(
@@ -42,7 +42,7 @@ const TrackLikeButton: React.FC<TrackLikeButtonProps> = ({ track }) => {
     );
 
     setIsLiked(!!matchedTrack);
-    setLikedTrackId(matchedTrack?.id || null);
+    setLikedTrackId(matchedTrack?.id ?? null);
   }, [likedTracks, track]);
 
   useEffect(() => {
@@ -66,10 +66,11 @@ const TrackLikeButton: React.FC<TrackLikeButtonProps> = ({ track }) => {
       await likeTrack.mutateAsync({
         title: track.title,
         artist: track.artist,
-        artwork: track.art || '',
+        artwork: track.art ?? '',
         youtubeUrl,
       });
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[TrackLikeButton → Like]', err);
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors du like';
       toast.error(errorMessage);
@@ -83,6 +84,7 @@ const TrackLikeButton: React.FC<TrackLikeButtonProps> = ({ track }) => {
     try {
       await handleDelete(likedTrackId);
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[TrackLikeButton → Unlike]', err);
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors du unlike';
       toast.error(errorMessage);

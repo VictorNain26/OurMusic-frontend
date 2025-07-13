@@ -13,6 +13,7 @@ export const authClient = createAuthClient({
   baseURL: API_BASE_URL,
   onError: (err: AuthError) => {
     if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
       console.warn('[authClient Error]', err);
     }
     if (err?.status === 403 && err?.context?.email) {

@@ -20,13 +20,14 @@ export async function apiFetch<T = unknown>(
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...(options.headers ?? {}),
     },
     credentials: 'include', // ⚠️ Important pour que le cookie HttpOnly soit envoyé
     mode: 'cors', // Assure le CORS pour frontend-backend séparés
   };
 
   if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
     console.info('[apiFetch] Request:', url, fetchOptions);
   }
 
@@ -36,30 +37,31 @@ export async function apiFetch<T = unknown>(
   try {
     response = await fetch(url, fetchOptions);
 
-    const contentType = response.headers.get('content-type') || '';
+    const contentType = response.headers.get('content-type') ?? '';
     const isJson = contentType.includes('application/json');
 
     responseBody = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
       const errorResponse = responseBody as ApiErrorResponse;
-      const errorMessage = errorResponse?.error || errorResponse?.message || response.statusText;
+      const errorMessage = errorResponse?.error ?? errorResponse?.message ?? response.statusText;
       throw new Error(errorMessage);
     }
 
     return responseBody as T;
   } catch (error: unknown) {
+    // eslint-disable-next-line no-console
     console.error('[apiFetch Error]', error);
 
-    if (!response) {
+    if (response === undefined) {
       throw new Error('Impossible de contacter le serveur.');
     }
 
     const errorResponse = responseBody as ApiErrorResponse;
     throw new Error(
-      errorResponse?.error ||
-        errorResponse?.message ||
-        response.statusText ||
+      errorResponse?.error ??
+        errorResponse?.message ??
+        response.statusText ??
         'Erreur réseau inconnue.',
     );
   }

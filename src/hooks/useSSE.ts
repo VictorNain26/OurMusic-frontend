@@ -27,7 +27,7 @@ export interface SSEStatus {
 export interface SSEOptions {
   isScraping?: boolean;
   isSingle?: boolean;
-  filter?: (msg: string) => boolean;
+  filter?: (_msg: string) => boolean;
 }
 
 export interface SSEMessage {
@@ -43,7 +43,7 @@ export interface UseSSEReturn {
   messages: string[];
   status: SSEStatus;
   isBusy: boolean;
-  startSSE: (url: string, options?: SSEOptions) => void;
+  startSSE: (_url: string, _options?: SSEOptions) => void;
   stopSSE: () => void;
 }
 
@@ -103,10 +103,11 @@ export const useSSE = (): UseSSEReturn => {
 
         try {
           const json: SSEMessage = JSON.parse(event.data);
-          const msg = json?.pub?.message || json?.message || '';
-          const err = json?.pub?.error || json?.error;
+          const msg = json?.pub?.message ?? json?.message ?? '';
+          const err = json?.pub?.error ?? json?.error;
 
           if (err) {
+            // eslint-disable-next-line no-console
             console.error('[SSE Error]', err);
             toast.error(`❌ ${err}`);
             stopSSE();
@@ -118,6 +119,7 @@ export const useSSE = (): UseSSEReturn => {
             setMessages((prev) => [...prev, msg]);
           }
         } catch (err: unknown) {
+          // eslint-disable-next-line no-console
           console.error('[SSE Parsing Error]', event.data, err);
           setMessages((prev) => [...prev, `⚠️ Erreur parsing : ${event.data}`]);
           stopSSE();
@@ -125,6 +127,7 @@ export const useSSE = (): UseSSEReturn => {
       },
 
       onerror(err: unknown): void {
+        // eslint-disable-next-line no-console
         console.error('[SSE onerror]', err);
         toast.error('⚠️ Erreur réseau ou serveur SSE');
         stopSSE();

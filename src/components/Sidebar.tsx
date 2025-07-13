@@ -131,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                   className="overflow-hidden flex-1 text-left"
                 >
                   <div className="text-sm font-medium text-white">
-                    {user?.name || user?.email}
+                    {user?.name ?? user?.email}
                   </div>
                   <div className="text-xs text-white/50">
                     Membre Premium
@@ -193,7 +193,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         initial={false}
         animate={{ width: isExpanded ? 280 : 80 }}
         className={cn(
-          'hidden lg:flex flex-col h-full bg-gradient-to-b from-background to-background/95 border-r border-white/10 backdrop-blur-xl',
+          'hidden lg:flex flex-col h-full bg-gradient-to-b from-background to-background/95 ' +
+          'border-r border-white/10 backdrop-blur-xl',
           className,
         )}
       >
@@ -208,7 +209,10 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             animate={{ x: 0 }}
             exit={{ x: -280 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-background to-background/95 backdrop-blur-xl border-r border-white/10 z-50 lg:hidden"
+            className={
+              'fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-background to-background/95 ' +
+              'backdrop-blur-xl border-r border-white/10 z-50 lg:hidden'
+            }
           >
             <SidebarContent />
           </motion.aside>

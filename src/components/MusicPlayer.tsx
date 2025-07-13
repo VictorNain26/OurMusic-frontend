@@ -159,7 +159,7 @@ const MusicPlayer: React.FC = () => {
 
     connectToSSE();
 
-    return () => {
+    return (): void => {
       eventSourceRef.current?.close();
     };
   }, []);
@@ -178,7 +178,7 @@ const MusicPlayer: React.FC = () => {
       intervalRef.current = null;
     }
 
-    return () => {
+    return (): void => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
@@ -186,7 +186,7 @@ const MusicPlayer: React.FC = () => {
   }, [isPlaying, duration]);
 
   const currentSong = nowPlaying?.now_playing?.song;
-  const stationName = nowPlaying?.station?.name || 'OurMusic Radio';
+  const stationName = nowPlaying?.station?.name ?? 'OurMusic Radio';
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -194,7 +194,10 @@ const MusicPlayer: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-player-bg to-player-card border border-white/10 shadow-2xl"
+        className={
+          'relative overflow-hidden rounded-3xl bg-gradient-to-br from-player-bg to-player-card ' +
+          'border border-white/10 shadow-2xl'
+        }
       >
         {/* Background Art with Blur */}
         <AnimatePresence mode="wait">
@@ -241,7 +244,10 @@ const MusicPlayer: React.FC = () => {
                     />
                   ) : (
                     <motion.div
-                      className="w-full h-full bg-gradient-to-br from-primary/50 to-accent/50 flex items-center justify-center"
+                      className={
+                        'w-full h-full bg-gradient-to-br from-primary/50 to-accent/50 ' +
+                        'flex items-center justify-center'
+                      }
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
@@ -258,7 +264,10 @@ const MusicPlayer: React.FC = () => {
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0 }}
-                    className="absolute -top-2 -right-2 bg-gradient-to-r from-primary to-accent rounded-full p-2 shadow-lg neon-glow"
+                    className={
+                      'absolute -top-2 -right-2 bg-gradient-to-r from-primary to-accent ' +
+                      'rounded-full p-2 shadow-lg neon-glow'
+                    }
                   >
                     <Radio className="w-4 h-4 text-white pulse-live" />
                   </motion.div>
@@ -289,10 +298,10 @@ const MusicPlayer: React.FC = () => {
                 className="space-y-2"
               >
                 <h1 className="text-2xl lg:text-4xl font-bold text-white leading-tight">
-                  {currentSong?.title || 'En attente...'}
+                  {currentSong?.title ?? 'En attente...'}
                 </h1>
                 <p className="text-lg lg:text-xl text-white/70">
-                  {currentSong?.artist || 'Aucun artiste'}
+                  {currentSong?.artist ?? 'Aucun artiste'}
                 </p>
                 {currentSong?.album && (
                   <p className="text-sm text-white/50">
